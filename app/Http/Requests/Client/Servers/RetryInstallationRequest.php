@@ -16,8 +16,10 @@ class RetryInstallationRequest extends BaseApiRequest
         $server = $this->parameter('server', Server::class);
 
         // Exempt from AuthenticateServerAccess (a failed install is by definition not ready),
-        // so suspension is only enforced here.
-        return ! $server->isSuspended() && $server->lifecycle === ServerLifecycle::INSTALL_FAILED;
+        // so both the permission and the suspension check happen here or not at all.
+        return $this->user()->can('reinstall', $server)
+            && ! $server->isSuspended()
+            && $server->lifecycle === ServerLifecycle::INSTALL_FAILED;
     }
 
     /**

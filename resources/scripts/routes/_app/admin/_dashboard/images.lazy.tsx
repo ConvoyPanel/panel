@@ -4,9 +4,12 @@ import DeleteImageGroupModal from '@/features/images/components/DeleteImageGroup
 import EditImageGroupModal from '@/features/images/components/EditImageGroupModal.tsx'
 import ImageGroupCard from '@/features/images/components/ImageGroupCard.tsx'
 import ImageGroupSidebar from '@/features/images/components/ImageGroupSidebar.tsx'
-import { IconDisc } from '@tabler/icons-react'
+import ImageCatalogSheet from '@/features/images/registry/ImageCatalogSheet.tsx'
+import { IconDisc, IconLibrary } from '@tabler/icons-react'
 import { createLazyFileRoute } from '@tanstack/react-router'
+import { useState } from 'react'
 
+import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import {
     CollectionErrorState,
@@ -17,23 +20,34 @@ import { PageToolbar } from '@/components/ui/PageToolbar'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 import { Heading } from '@/components/ui/Typography'
 
-export const Route = createLazyFileRoute('/_app/admin/_dashboard/images')({
-    component: ImagesIndex,
-})
-
-function ImagesIndex() {
+const ImagesIndex = () => {
     const { data: groups, isLoading, isError, refetch } = useImageGroups({})
+    const [browsing, setBrowsing] = useState(false)
+
+    const browse = (
+        <Button variant={'secondary'} onClick={() => setBrowsing(true)}>
+            <IconLibrary className={'size-4'} /> Browse catalogue
+        </Button>
+    )
 
     return (
         <>
             <Heading>Images</Heading>
             {Boolean(groups?.length) && (
-                <PageToolbar actions={<CreateImageGroupModal />} />
+                <PageToolbar
+                    actions={
+                        <>
+                            {browse}
+                            <CreateImageGroupModal />
+                        </>
+                    }
+                />
             )}
 
             <EditImageGroupModal />
             <DeleteImageGroupModal />
             <ImageGroupSidebar />
+            <ImageCatalogSheet open={browsing} onOpenChange={setBrowsing} />
 
             {isError && !groups ? (
                 <Card className={'py-6'}>
@@ -51,9 +65,14 @@ function ImagesIndex() {
                         icon={IconDisc}
                         title={'No image groups'}
                         description={
-                            'Create an image group to organise the operating systems servers can be built from.'
+                            'Import from the catalogue, or create a group of your own.'
                         }
-                        action={<CreateImageGroupModal />}
+                        action={
+                            <>
+                                {browse}
+                                <CreateImageGroupModal />
+                            </>
+                        }
                     />
                 </Card>
             ) : (
@@ -66,3 +85,9 @@ function ImagesIndex() {
         </>
     )
 }
+
+export const Route = createLazyFileRoute('/_app/admin/_dashboard/images')({
+    component: ImagesIndex,
+})
+
+export default ImagesIndex

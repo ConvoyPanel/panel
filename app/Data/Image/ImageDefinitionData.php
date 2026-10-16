@@ -17,6 +17,8 @@ class ImageDefinitionData extends Data
         public string $uuid,
         public string $imageGroupUuid,
         public string $name,
+        /** The catalogue entry this was imported from, if it was. */
+        public ?string $registrySlug,
         public ?string $description,
         public bool $isAdminOnly,
         public string $ostype,
@@ -49,6 +51,7 @@ class ImageDefinitionData extends Data
             uuid: $definition->uuid,
             imageGroupUuid: $definition->group->uuid,
             name: $definition->name,
+            registrySlug: $definition->registry_slug,
             description: $definition->description,
             isAdminOnly: (bool) $definition->is_admin_only,
             ostype: $definition->ostype,

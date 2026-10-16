@@ -18,6 +18,10 @@ export enum AddressStateReason {
     System = 'system',
     /** Reserved by an operator to hold it out of the pool. */
     Admin = 'admin',
+    /** Held as the destination of a migration that has not finished. */
+    Migration = 'migration',
+    /** An adopted guest was found using an address another server already holds. */
+    Conflict = 'conflict',
 }
 
 export interface Address {

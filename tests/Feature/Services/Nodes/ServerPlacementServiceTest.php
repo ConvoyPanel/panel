@@ -2,6 +2,9 @@
 
 use App\Data\Cluster\ServerResourceData;
 use App\Enums\Audit\AuditEvent;
+use App\Models\Address;
+use App\Models\AddressBlock;
+use App\Models\AddressBlockGroup;
 use App\Models\AuditLog;
 use App\Models\Cluster;
 use App\Models\Location;
@@ -224,4 +227,123 @@ it('scopes vmid uniqueness to the cluster for clustered nodes', function () {
         ->create(['name' => 'solo', 'cluster_id' => $standalone->id]);
 
     expect(Server::isUniqueVmId($lone, 150))->toBeTrue();
+});
+
+/*
+|--------------------------------------------------------------------------
+| Address reachability on re-home
+|--------------------------------------------------------------------------
+|
+| A bridge name match is what PVE requires; it is not what makes an address
+| routable. Reachability is the pool-to-bridge pivot, so re-home re-checks it.
+|
+*/
+
+/** A server holding one address out of a pool attached to $bridge. */
+function serverOnPool(Node $node, NetworkInterface $bridge, AddressBlockGroup $pool, int $vmid = 150): Server
+{
+    $bridge->addressBlockGroups()->syncWithoutDetaching([$pool->id]);
+
+    $server = Server::factory()->create([
+        'node_id' => $node->id,
+        'network_interface_id' => $bridge->id,
+        'vmid' => $vmid,
+    ]);
+
+    Address::factory()
+        ->for(AddressBlock::factory()->for($pool, 'addressBlockGroup'))
+        ->create(['server_id' => $server->id]);
+
+    return $server;
+}
+
+it('keeps the re-home clean when the destination bridge carries the same pool', function () {
+    $pool = AddressBlockGroup::factory()->create(['name' => 'Public /24']);
+    $bridgeA = NetworkInterface::factory()->create(['node_id' => $this->nodeA->id, 'name' => 'vmbr0']);
+    $bridgeB = NetworkInterface::factory()->create(['node_id' => $this->nodeB->id, 'name' => 'vmbr0']);
+    $bridgeB->addressBlockGroups()->attach($pool->id);
+
+    $server = serverOnPool($this->nodeA, $bridgeA, $pool);
+
+    $this->service->reconcile($this->cluster, collect([placementGuest(150, 'pve2')]));
+
+    expect($server->fresh())
+        ->node_id->toBe($this->nodeB->id)
+        ->network_interface_id->toBe($bridgeB->id)
+        ->flagged_at->toBeNull();
+});
+
+it('flags a re-home onto a same-named bridge that carries a different pool', function () {
+    $pool = AddressBlockGroup::factory()->create(['name' => 'Public /24']);
+    $otherPool = AddressBlockGroup::factory()->create(['name' => 'Rack B /24']);
+
+    $bridgeA = NetworkInterface::factory()->create(['node_id' => $this->nodeA->id, 'name' => 'vmbr0']);
+    // The bug in one line: vmbr0 exists on pve2 too, and matching on the name
+    // alone accepted it even though it fronts a different subnet entirely.
+    $bridgeB = NetworkInterface::factory()->create(['node_id' => $this->nodeB->id, 'name' => 'vmbr0']);
+    $bridgeB->addressBlockGroups()->attach($otherPool->id);
+
+    $server = serverOnPool($this->nodeA, $bridgeA, $pool);
+
+    $this->service->reconcile($this->cluster, collect([placementGuest(150, 'pve2')]));
+
+    expect($server->fresh())
+        ->node_id->toBe($this->nodeB->id)
+        ->network_interface_id->toBe($bridgeB->id)
+        ->flagged_at->not->toBeNull()
+        ->flag_reason->toContain('Public /24')
+        ->flag_reason->toContain('vmbr0');
+});
+
+it('flags a re-home onto a same-named bridge with no pools attached at all', function () {
+    $pool = AddressBlockGroup::factory()->create(['name' => 'Public /24']);
+    $bridgeA = NetworkInterface::factory()->create(['node_id' => $this->nodeA->id, 'name' => 'vmbr0']);
+    NetworkInterface::factory()->create(['node_id' => $this->nodeB->id, 'name' => 'vmbr0']);
+
+    $server = serverOnPool($this->nodeA, $bridgeA, $pool);
+
+    $this->service->reconcile($this->cluster, collect([placementGuest(150, 'pve2')]));
+
+    expect($server->fresh())->flagged_at->not->toBeNull()->flag_reason->toContain('Public /24');
+});
+
+it('names every stranded pool when the server holds addresses from more than one', function () {
+    $public = AddressBlockGroup::factory()->create(['name' => 'Public /24']);
+    $private = AddressBlockGroup::factory()->create(['name' => 'Private /16']);
+
+    $bridgeA = NetworkInterface::factory()->create(['node_id' => $this->nodeA->id, 'name' => 'vmbr0']);
+    $bridgeB = NetworkInterface::factory()->create(['node_id' => $this->nodeB->id, 'name' => 'vmbr0']);
+    // Only one of the two pools follows.
+    $bridgeB->addressBlockGroups()->attach($public->id);
+
+    $server = serverOnPool($this->nodeA, $bridgeA, $public);
+    $bridgeA->addressBlockGroups()->attach($private->id);
+    Address::factory()
+        ->for(AddressBlock::factory()->for($private, 'addressBlockGroup'))
+        ->create(['server_id' => $server->id]);
+
+    $this->service->reconcile($this->cluster, collect([placementGuest(150, 'pve2')]));
+
+    expect($server->fresh())
+        ->flagged_at->not->toBeNull()
+        ->flag_reason->toContain('Private /16')
+        ->flag_reason->not->toContain('Public /24');
+});
+
+it('re-homes an addressless server onto a bare bridge without flagging', function () {
+    $bridgeA = NetworkInterface::factory()->create(['node_id' => $this->nodeA->id, 'name' => 'vmbr0']);
+    $bridgeB = NetworkInterface::factory()->create(['node_id' => $this->nodeB->id, 'name' => 'vmbr0']);
+
+    $server = Server::factory()->create([
+        'node_id' => $this->nodeA->id,
+        'network_interface_id' => $bridgeA->id,
+        'vmid' => 150,
+    ]);
+
+    $this->service->reconcile($this->cluster, collect([placementGuest(150, 'pve2')]));
+
+    expect($server->fresh())
+        ->node_id->toBe($this->nodeB->id)
+        ->network_interface_id->toBe($bridgeB->id)
+        ->flagged_at->toBeNull();
 });

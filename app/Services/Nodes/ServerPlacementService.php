@@ -6,11 +6,13 @@ use App\Data\Cluster\ServerResourceData;
 use App\Enums\Audit\AuditEvent;
 use App\Enums\Server\ProxmoxLock;
 use App\Exceptions\Proxmox\RequestException as ConvoyRequestException;
+use App\Models\AddressBlockGroup;
 use App\Models\Cluster;
 use App\Models\NetworkInterface;
 use App\Models\Node;
 use App\Models\Server;
 use App\Models\SystemActor;
+use App\Services\Addresses\AddressReachabilityService;
 use App\Services\Audit\AuditLogger;
 use App\Services\Proxmox\Server\ProxmoxConfigClient;
 use GuzzleHttp\Exception\RequestException as GuzzleRequestException;
@@ -47,6 +49,12 @@ use Illuminate\Support\Str;
  * of PVE's behaviour, it *is* PVE's behaviour. A guest recovered onto a node
  * with no same-named bridge could not have been started by PVE either; that
  * case clears the link and flags rather than guessing.
+ *
+ * The name match is where PVE's model stops and Convoy's begins. PVE has no
+ * opinion about which subnets live on a bridge; Convoy does, in
+ * `address_block_group_to_network_interface`. So re-homing also re-checks
+ * {@see AddressReachabilityService} against the bridge it matched, and flags
+ * when the server's addresses are not routable from it.
  */
 class ServerPlacementService
 {
@@ -54,6 +62,7 @@ class ServerPlacementService
         private ProxmoxConfigClient $configClient,
         private AuditLogger $audit,
         private ConnectionInterface $connection,
+        private AddressReachabilityService $reachability,
     ) {}
 
     /**
@@ -200,6 +209,15 @@ class ServerPlacementService
      * with it by bridge name -- or is cleared and the server flagged when the
      * target has no such bridge, because a network sync through a bridge the
      * node doesn't have is how a survived failover turns into an outage.
+     *
+     * A bridge of the right name is necessary and not sufficient. `vmbr0`
+     * exists on nearly every node and nothing makes two of them the same
+     * network as far as Convoy is concerned: reachability is the pool-to-bridge
+     * pivot, and a name match against a bridge carrying a different pool leaves
+     * the server holding addresses its new node cannot route, which
+     * ServerNetworkService then bakes into a fresh cloud-init drive. So the
+     * address invariant is re-checked here against the matched bridge, and a
+     * mismatch flags rather than resolving the anomaly.
      */
     private function rehome(Server $server, Node $target): void
     {
@@ -210,6 +228,10 @@ class ServerPlacementService
             ->where('node_id', $target->id)
             ->where('name', $bridge)
             ->first();
+
+        $stranded = $interface === null
+            ? new Collection
+            : $this->reachability->unreachableGroupsFor($server, $interface);
 
         $this->connection->transaction(function () use ($server, $target, $previous, $interface) {
             $server->forceFill([
@@ -235,6 +257,18 @@ class ServerPlacementService
                 'Re-homed to "%s", but it has no bridge named "%s"; the interface link was cleared and network sync is blocked until an operator resolves it.',
                 $target->name,
                 $bridge,
+            ));
+
+            return;
+        }
+
+        if ($stranded->isNotEmpty()) {
+            $this->flag($server, sprintf(
+                'Re-homed to "%s", but its bridge "%s" there is not attached to %s. This server\'s addresses are not routable from "%s"; attach the pool to that bridge or move the server back. Network sync is blocked until then.',
+                $target->name,
+                $bridge,
+                $stranded->map(fn (AddressBlockGroup $group) => '"'.$group->name.'"')->join(', ', ' and '),
+                $target->name,
             ));
         }
     }

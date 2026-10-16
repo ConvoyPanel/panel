@@ -4,6 +4,7 @@ use App\Console\Commands\Anchor\PollAnchorLivenessCommand;
 use App\Console\Commands\Maintenance\CheckForUpdatesCommand;
 use App\Console\Commands\Maintenance\PruneAuditLogsCommand;
 use App\Console\Commands\Maintenance\PruneDeploymentsCommand;
+use App\Console\Commands\Maintenance\PruneImageUploadsCommand;
 use App\Console\Commands\Maintenance\PruneOrphanedBackupsCommand;
 use App\Console\Commands\Maintenance\PruneUsersCommand;
 use App\Console\Commands\Node\PollNodeStatusesCommand;
@@ -38,6 +39,11 @@ if (config('backups.prune_age')) {
 
 // Audit log retention. Not Laravel's generic PruneCommand: events the AuditEvent catalog marks
 // as retained forever are exempt, which a `prunable()` scope cannot express per-event.
+// An upload that was started and never finished is several gigabytes of a disk
+// that nothing references and no screen lists, so nobody would ever find it by
+// looking. Hourly, because the bytes are the cost, not the row.
+Schedule::command(PruneImageUploadsCommand::class)->hourly();
+
 if (config('audit.prune_days')) {
     Schedule::command(PruneAuditLogsCommand::class)->daily();
 }

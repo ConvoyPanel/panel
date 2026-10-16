@@ -5,6 +5,7 @@ namespace App\Http\Requests\Client\Servers;
 use App\Enums\Server\StatisticConsolidatorFunction;
 use App\Enums\Server\StatisticTimeRange;
 use App\Http\Requests\BaseApiRequest;
+use App\Models\Server;
 use Illuminate\Validation\Rule;
 
 class GetStatisticRequest extends BaseApiRequest
@@ -19,6 +20,6 @@ class GetStatisticRequest extends BaseApiRequest
 
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('viewStatistics', $this->parameter('server', Server::class));
     }
 }

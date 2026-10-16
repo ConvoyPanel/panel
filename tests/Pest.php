@@ -1,15 +1,22 @@
 <?php
 
+use App\Enums\Admin\AdminPermission;
+use App\Enums\Server\ServerPermission;
+use App\Models\AdminRole;
 use App\Models\Location;
 use App\Models\Node;
 use App\Models\Passkey;
 use App\Models\Server;
+use App\Models\ServerSubuser;
 use App\Models\User;
 use App\Services\Servers\ServerCreationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Str;
+use Illuminate\Testing\TestResponse;
 use Spatie\LaravelPasskeys\Support\CredentialRecordConverter;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Uid\Uuid;
 use Tests\TestCase;
 use Webauthn\CredentialRecord;
@@ -71,6 +78,57 @@ uses(
 function admin(): User
 {
     return User::factory()->create(['root_admin' => true]);
+}
+
+/**
+ * Assert a request got past the gate.
+ *
+ * Authorization suites care that the caller was let through, not that the hypervisor fixture
+ * behind the endpoint happened to satisfy the controller. Asserting a 2xx ties the two together
+ * and makes a permission test fail for reasons that have nothing to do with permissions.
+ */
+function assertReached(TestResponse $response): void
+{
+    expect($response->status())
+        ->not->toBe(Response::HTTP_FORBIDDEN)
+        ->not->toBe(Response::HTTP_NOT_FOUND);
+}
+
+/**
+ * An operator holding exactly the given admin permissions, under a role of its own.
+ *
+ * Deliberately not a system role: a test that asserted against Support's list would start failing
+ * the day somebody widened Support, which is a product decision rather than a regression.
+ *
+ * @param  list<AdminPermission>  $permissions
+ */
+function operator(array $permissions): User
+{
+    $role = AdminRole::create([
+        'name' => 'Role '.Str::random(8),
+        'description' => null,
+        'permissions' => array_map(fn (AdminPermission $p) => $p->value, $permissions),
+    ]);
+
+    return User::factory()->create(['admin_role_id' => $role->id]);
+}
+
+/**
+ * Share a server with a new account holding exactly the given permissions.
+ *
+ * @param  list<ServerPermission>  $permissions
+ */
+function subuser(Server $server, array $permissions, ?User $user = null): User
+{
+    $user ??= User::factory()->create();
+
+    ServerSubuser::create([
+        'server_id' => $server->id,
+        'user_id' => $user->id,
+        'permissions' => array_map(fn (ServerPermission $p) => $p->value, $permissions),
+    ]);
+
+    return $user;
 }
 
 /**
@@ -203,4 +261,36 @@ function taskStatusFixture(array $extra = []): array
         'status' => 'stopped',
         'exitstatus' => 'OK',
     ], $extra)];
+}
+
+/**
+ * `GET /nodes/{node}/qemu/{vmid}/migrate` as PVE answers it, permissive by
+ * default: the guest is stopped, both members are allowed, nothing is local.
+ * Override a key to say otherwise.
+ *
+ * @param  array<string, mixed>  $extra
+ * @return array<string, mixed>
+ */
+function migratePreconditions(array $extra = []): array
+{
+    return ['data' => array_merge([
+        'running' => false,
+        'allowed_nodes' => ['pve1', 'pve2'],
+        'not_allowed_nodes' => [],
+        'local_disks' => [],
+        'local_resources' => [],
+    ], $extra)];
+}
+
+/**
+ * Fake the migration preflight and answer everything else with a task upid.
+ *
+ * @param  array<string, mixed>  $data  merged into the preflight response
+ */
+function fakeMigrationPreflight(array $data = []): void
+{
+    Http::fake([
+        '*/qemu/*/migrate*' => Http::response(migratePreconditions($data), 200),
+        '*' => Http::response(['data' => 'dummy-upid'], 200),
+    ]);
 }

@@ -27,7 +27,7 @@ class AuditLogController
             ->defaultSort('-created_at')
             ->allowedSorts(['created_at']);
 
-        if (! $request->user()?->root_admin) {
+        if (! $request->user()?->isAdmin()) {
             $query->clientVisible();
         }
 

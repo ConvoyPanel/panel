@@ -5,7 +5,9 @@ export const rawDataToAdminUser = (data: any): AdminUser => ({
     name: data.name,
     email: data.email,
     avatarUrl: data.avatarUrl ?? null,
+    type: data.type ?? 'standard',
     rootAdmin: data.rootAdmin,
+    adminRole: data.adminRole ?? null,
     serversCount: data.serversCount,
     createdAt: data.createdAt ?? null,
 })

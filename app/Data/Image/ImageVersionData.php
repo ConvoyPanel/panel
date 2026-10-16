@@ -2,6 +2,7 @@
 
 namespace App\Data\Image;
 
+use App\Enums\Image\ImageSource;
 use App\Models\ImageVersion;
 use Spatie\LaravelData\Attributes\MapInputName;
 use Spatie\LaravelData\Data;
@@ -20,7 +21,15 @@ class ImageVersionData extends Data
         public int $size,
         /** The provisioned size of the system disk: the smallest plan that fits. */
         public int $minimumDisk,
+        /** Where the disks came from, and so whether a newer build can exist. */
+        public ImageSource $source,
         public bool $isActive,
+        /**
+         * When the publisher built this, for an image that came from a
+         * catalogue. The build number beside it is the panel's own count, so
+         * this is the only date that means anything to the operator.
+         */
+        public ?string $builtAt,
     ) {}
 
     public static function fromModel(ImageVersion $version): self
@@ -31,7 +40,9 @@ class ImageVersionData extends Data
             disks: ImageDiskData::collect($version->diskSet()->all(), DataCollection::class),
             size: (int) $version->size,
             minimumDisk: $version->minimumDiskSize(),
+            source: $version->source ?? ImageSource::MANUAL,
             isActive: (bool) $version->is_active,
+            builtAt: $version->built_at?->toIso8601String(),
         );
     }
 }

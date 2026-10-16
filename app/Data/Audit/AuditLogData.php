@@ -37,7 +37,7 @@ class AuditLogData extends Data
 
         /** @var User|null $viewer */
         $viewer = $request->user() instanceof User ? $request->user() : null;
-        $viewerIsAdmin = (bool) $viewer?->root_admin;
+        $viewerIsAdmin = (bool) $viewer?->isAdmin();
 
         // An address is personal data about whoever acted. Admins investigating need it; everyone
         // else only ever sees their own.

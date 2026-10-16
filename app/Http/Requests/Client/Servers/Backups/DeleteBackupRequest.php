@@ -11,6 +11,6 @@ class DeleteBackupRequest extends BaseApiRequest
     {
         $server = $this->parameter('server', Server::class);
 
-        return $this->user()->can('delete', $server);
+        return $this->user()->can('deleteBackup', $server);
     }
 }

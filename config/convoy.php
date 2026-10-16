@@ -31,6 +31,46 @@ return [
     'artifacts' => [
         'disk' => env('ARTIFACTS_DISK', 'artifacts'),
         'url_ttl_minutes' => env('ARTIFACTS_URL_TTL_MINUTES', 120),
+
+        /*
+        | How much of a disk image travels in one request.
+        |
+        | 16 MiB rather than something larger because the ceiling is not PHP's:
+        | Cloudflare rejects a request body over 100 MB on most plans, and a
+        | panel behind it would fail on every image worth uploading. A chunk
+        | this size also caps what a dropped connection costs to re-send.
+        |
+        | Whatever sits in front of the panel has to accept a body this large:
+        | `client_max_body_size 20m;` on nginx, and the equivalent elsewhere.
+        */
+        'upload_chunk_bytes' => env('ARTIFACTS_UPLOAD_CHUNK_BYTES', 16 * 1024 * 1024),
+
+        /*
+        | Where a half-arrived upload is assembled. Local even when `disk` is
+        | remote: chunks are appended, and an object store has no append. The
+        | finished file is streamed onto `disk` once, at the end.
+        */
+        'upload_disk' => env('ARTIFACTS_UPLOAD_DISK', 'local'),
+
+        /*
+        | How long an unfinished upload keeps its bytes before it is swept.
+        | Long enough to survive a laptop closing overnight, short enough that
+        | an abandoned 10 GB image does not live on the disk forever.
+        */
+        'upload_ttl_hours' => env('ARTIFACTS_UPLOAD_TTL_HOURS', 24),
+    ],
+
+    /*
+    | The image catalogue the admin area can import from.
+    |
+    | A registry is a catalogue, not a concept: the panel reads this URL, shows
+    | what it lists, and copies an entry into an image definition on request.
+    | Nothing is subscribed to and nothing syncs on a schedule. Point it at your
+    | own published registry.json to replace the default catalogue.
+    */
+    'registry' => [
+        'url' => env('IMAGE_REGISTRY_URL', 'https://cofoundry.cdn.convoypanel.com/registry.json'),
+        'cache_minutes' => env('IMAGE_REGISTRY_CACHE_MINUTES', 30),
     ],
 
     /*

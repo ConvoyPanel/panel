@@ -27,9 +27,9 @@ class ValidHardwareProfile implements ValidationRule
      * Slots and identity the build owns. Written by the create call from the
      * server's own plan, so an overlay naming them is always a mistake.
      */
-    private const COMPUTED_PATTERN = '/^(?:scsi|ide|sata|virtio|net|efidisk|tpmstate|unused|ipconfig)\d+$/';
+    public const COMPUTED_PATTERN = '/^(?:scsi|ide|sata|virtio|net|efidisk|tpmstate|unused|ipconfig)\d+$/';
 
-    private const COMPUTED_KEYS = [
+    public const COMPUTED_KEYS = [
         'vmid', 'cores', 'memory', 'sockets', 'name', 'ostype',
         'citype', 'ciuser', 'cipassword', 'cicustom', 'sshkeys',
         'nameserver', 'searchdomain', 'archive', 'start',
@@ -58,6 +58,14 @@ class ValidHardwareProfile implements ValidationRule
                 continue;
             }
 
+            // Not a slot and not a Proxmox parameter: a TPM version, which the
+            // create call turns into a freshly allocated `tpmstate0` volume.
+            if (in_array($key, OsProfiles::SYNTHESIZED_KEYS, true)) {
+                $this->checkTpmVersion($key, $setting, $fail);
+
+                continue;
+            }
+
             if (in_array($key, self::COMPUTED_KEYS, true) || preg_match(self::COMPUTED_PATTERN, (string) $key)) {
                 $fail("The panel sets `{$key}` itself when the server is built; it cannot be part of the profile.");
 
@@ -82,6 +90,17 @@ class ValidHardwareProfile implements ValidationRule
     {
         if (! is_string($value) || ! preg_match('/^(?:scsi|ide|sata|virtio)\d+$/', $value)) {
             $fail("`{$key}` must name a disk slot, such as `scsi0` or `ide2`.");
+        }
+    }
+
+    /**
+     * The versions Proxmox's `tpmstate0` accepts. Not read from the schema,
+     * because the schema has no `tpm` key to read it from.
+     */
+    private function checkTpmVersion(string $key, mixed $value, Closure $fail): void
+    {
+        if (! is_string($value) || ! in_array($value, ['v1.2', 'v2.0'], true)) {
+            $fail("`{$key}` must be `v1.2` or `v2.0`.");
         }
     }
 

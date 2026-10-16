@@ -26,8 +26,11 @@ class AccountPolicyResolver
          * An admin is never bound by these. They govern the self-service screen, and an admin who
          * hit a wall there would simply edit the same row from /admin/users — so enforcing it
          * against them restricts nothing and reads as a security boundary that isn't one.
+         *
+         * Any admin role, not only an unrestricted one: a support account editing its own display
+         * name is the same non-boundary as a superadmin doing it.
          */
-        if ($user->root_admin) {
+        if ($user->isAdmin()) {
             return AccountCapabilitiesData::unrestricted();
         }
 

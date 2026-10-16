@@ -11,13 +11,24 @@ export type PaginatedApiKeys = PaginatedResponse<ApiKey>
  */
 export const TOKEN_RESOURCES = [
     'overview',
+    'version',
+    'audit-logs',
     'locations',
     'nodes',
+    'clusters',
+    'storages',
     'servers',
+    'server-presets',
+    'backups',
     'address-block-groups',
-    'template-groups',
+    'images',
+    'image-groups',
+    'isos',
     'users',
+    'admin-roles',
     'anchors',
+    'relays',
+    'settings',
 ] as const
 
 export type TokenResource = (typeof TOKEN_RESOURCES)[number]
@@ -28,13 +39,24 @@ export type ResourceAccess = 'none' | 'read' | 'write'
 /** Human labels for each resource, for the ability picker. */
 export const resourceLabels: Record<TokenResource, string> = {
     'overview': 'Overview',
+    'version': 'Updates',
+    'audit-logs': 'Audit log',
     'locations': 'Locations',
     'nodes': 'Nodes',
+    'clusters': 'Clusters',
+    'storages': 'Storage',
     'servers': 'Servers',
+    'server-presets': 'Server presets',
+    'backups': 'Backups',
     'address-block-groups': 'IP address blocks',
-    'template-groups': 'Templates',
+    'images': 'Image uploads',
+    'image-groups': 'Images',
+    'isos': 'ISOs',
     'users': 'Users',
+    'admin-roles': 'Admin roles',
     'anchors': 'Anchors',
+    'relays': 'Relays',
+    'settings': 'Settings',
 }
 
 /**

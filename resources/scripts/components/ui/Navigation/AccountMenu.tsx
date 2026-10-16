@@ -77,7 +77,7 @@ const AccountMenu = () => {
                 <DropdownMenuItem asChild>
                     <Link to='/account'>Account settings</Link>
                 </DropdownMenuItem>
-                {user?.rootAdmin ? (
+                {(user?.adminPermissions?.length ?? 0) > 0 ? (
                     <>
                         <DropdownMenuSeparator />
                         <DropdownMenuGroup>

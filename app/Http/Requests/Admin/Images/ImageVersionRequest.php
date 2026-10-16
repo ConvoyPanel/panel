@@ -28,6 +28,12 @@ class ImageVersionRequest extends BaseApiRequest
             'disks.*.size' => 'required|integer|min:1',
             'disks.*.virtual_size' => 'required|integer|min:1',
             'disks.*.format' => 'sometimes|string|in:qcow2,raw',
+
+            // Settings that describe the image itself, e.g. `discard` on a
+            // system disk or `pre-enrolled-keys` on a varstore. Not the node's
+            // tuning, which the panel composes when the server is built.
+            'disks.*.options' => 'sometimes|array',
+            'disks.*.options.*' => 'sometimes|nullable',
         ];
     }
 
