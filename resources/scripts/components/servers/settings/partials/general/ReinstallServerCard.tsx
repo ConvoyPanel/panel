@@ -19,7 +19,13 @@ import TextInputForm from '@/components/elements/forms/TextInputForm'
 import TemplatesSelectForm from '@/components/servers/settings/TemplatesSelectForm'
 
 
-const ReinstallServerCard = () => {
+interface Props {
+    title?: string
+    description?: string
+    submitLabel?: string
+}
+
+const ReinstallServerCard = ({ title, description, submitLabel }: Props) => {
     const { t } = useTranslation('server.settings')
     const { t: tStrings } = useTranslation('strings')
     const [isModalOpen, setIsModalOpen] = useState(false)
@@ -87,13 +93,15 @@ const ReinstallServerCard = () => {
             <FormProvider {...form}>
                 <FormCard className='w-full'>
                     <FormCard.Body>
-                        <FormCard.Title>{t('reinstall.title')}</FormCard.Title>
+                        <FormCard.Title>
+                            {title ?? t('reinstall.title')}
+                        </FormCard.Title>
                         <FlashMessageRender
                             className='mt-3'
                             byKey={`servers.${server.uuid}.settings.general.reinstall`}
                         />
                         <p className='description-small mt-3'>
-                            {t('reinstall.description')}
+                            {description ?? t('reinstall.description')}
                         </p>
                         <div className='flex flex-col space-y-3 mt-3'>
                             <TemplatesSelectForm />
@@ -119,7 +127,7 @@ const ReinstallServerCard = () => {
                             color='danger'
                             size='sm'
                         >
-                            {tStrings('reinstall')}
+                            {submitLabel ?? tStrings('reinstall')}
                         </Button>
                     </FormCard.Footer>
                 </FormCard>

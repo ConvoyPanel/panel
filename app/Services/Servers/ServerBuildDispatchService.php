@@ -20,12 +20,16 @@ use Illuminate\Support\Str;
 
 class ServerBuildDispatchService
 {
+    public function __construct(private ServerBuildService $buildService)
+    {
+    }
+
     public function build(ServerDeploymentData $deployment): void
     {
         $jobs = $this->getChainedBuildJobs($deployment);
 
         Bus::chain($jobs)
-            ->catch(fn () => $deployment->server->update(['status' => Status::INSTALL_FAILED->value]))
+            ->catch(self::markInstallFailed($deployment->server->id))
             ->dispatch();
 
         $deployment->server->update(['status' => Status::INSTALLING->value]);
@@ -42,16 +46,36 @@ class ServerBuildDispatchService
 
     public function rebuild(ServerDeploymentData $deployment): void
     {
+        // A retry after a failed install can find no VM at all -- the build
+        // may have died before or during the clone. Stopping and deleting a VM
+        // that does not exist fails on Proxmox's "does not exist", which would
+        // fail the whole chain, so go straight to building instead. If the VM
+        // does exist after all, the clone refuses its VMID and nothing is lost.
         $jobs = [
-            ...$this->getChainedDeleteJobs($deployment->server),
+            ...($this->buildService->isVmDeleted($deployment->server)
+                ? []
+                : $this->getChainedDeleteJobs($deployment->server)),
             ...$this->getChainedBuildJobs($deployment),
         ];
 
         Bus::chain($jobs)
-            ->catch(fn () => $deployment->server->update(['status' => Status::INSTALL_FAILED->value]))
+            ->catch(self::markInstallFailed($deployment->server->id))
             ->dispatch();
 
         $deployment->server->update(['status' => Status::INSTALLING->value]);
+    }
+
+    /**
+     * The chain's failure handler. It writes by ID rather than through the
+     * model captured at dispatch: that copy is serialized with the chain, and
+     * if it already read install_failed -- as it does when retrying a failed
+     * install -- Eloquent sees nothing dirty and skips the write, leaving the
+     * server stuck on "installing".
+     */
+    private static function markInstallFailed(int $serverId): \Closure
+    {
+        return static fn () => Server::whereKey($serverId)
+            ->update(['status' => Status::INSTALL_FAILED->value]);
     }
 
     private function getChainedBuildJobs(ServerDeploymentData $deployment): array
