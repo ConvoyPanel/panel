@@ -114,6 +114,56 @@ ddev snapshot --name pre-migration
 ddev snapshot restore pre-migration
 ```
 
+## End-to-end tests (Playwright)
+
+The Playwright suite lives in `tests/e2e/` and runs **inside the ddev web container**, like the rest
+of Node. Its headless Chromium runs there too: `.ddev/config.yaml` installs the libraries it needs
+through `webimage_extra_packages`, and `PLAYWRIGHT_BROWSERS_PATH` keeps the browser under
+`node_modules/.cache` so it survives `ddev restart`. Nothing is installed on the host.
+
+One-time setup (and again after `npm ci`, which clears the browser):
+
+```bash
+ddev restart                      # picks up the Chromium libraries
+ddev npm run test:e2e:install     # downloads headless Chromium into the container
+```
+
+Add this to the panel's `.env` so the catalogue specs read the fixture instead of the live CDN.
+`tests/e2e/fixtures/registry.json` is served on that port while the suite runs:
+
+```dotenv
+IMAGE_REGISTRY_URL=http://127.0.0.1:4174/registry.json
+```
+
+Then:
+
+```bash
+ddev npm run test:e2e                         # everything except @live
+ddev npm run test:e2e -- catalogue            # one spec file
+ddev npm run test:e2e -- --grep @live         # needs PROXMOX_* exported, see below
+```
+
+- **Base URL.** It is `E2E_BASE_URL`, then ddev's `DDEV_PRIMARY_URL`, so it is the project you
+  run it in. Outside ddev it falls back to `https://convoy-pr168.ddev.site`. Certificate errors are
+  ignored because the container doesn't trust mkcert's CA.
+- **Fixtures.** Global setup runs `php artisan db:seed --class=E2eSeeder` before every run. It
+  resets three accounts: `admin@e2e.test` (Superadmin), `user@e2e.test` (no role) and
+  `guest@e2e.test` (guest), all with the password `password`. It also switches guest accounts off,
+  deletes the `E2E …` roles and the images an earlier run imported or uploaded, and recreates the
+  `E2E Uploads` image. A run therefore works on a fresh `migrate:fresh` and on a reused database
+  alike. It is also why the runner must sit where `php artisan` can reach the panel's database. Set
+  `E2E_SKIP_SEED=1` to point the suite at a panel you've seeded yourself.
+- **Isolation.** The specs share one database and one global guest switch, so they run with one
+  worker.
+- **`@live` specs.** Specs that need a real node are in `tests/e2e/live/`, tagged `@live`. They skip
+  unless `PROXMOX_FQDN`, `PROXMOX_TOKEN_ID` and `PROXMOX_TOKEN_SECRET` are set in the runner's
+  environment, not just in `.env` (see Live End-to-End Testing).
+- **Reports.** Traces and screenshots of failures land in `tests/e2e/.results`, and the HTML report
+  in `tests/e2e/.report`. Both are gitignored.
+
+CI runs the same suite (minus `@live`) in the `e2e` job of `.github/workflows/tests.yml`, against
+`php artisan serve`.
+
 ## Running PHP, Composer, Artisan, and npm
 
 There is no host-side `php` / `composer` / `node`; they run inside the ddev web container:

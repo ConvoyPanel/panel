@@ -59,6 +59,17 @@ class ImageDefinition extends Model
     }
 
     /**
+     * `{image_version}` under `{image_definition}` is resolved through a relation
+     * named after the parameter (see ImageGroup), and here that is `versions()`.
+     */
+    protected function childRouteBindingRelationshipName($childType): string
+    {
+        return $childType === 'image_version'
+            ? 'versions'
+            : parent::childRouteBindingRelationshipName($childType);
+    }
+
+    /**
      * @return BelongsTo<ImageGroup, $this>
      */
     public function group(): BelongsTo
