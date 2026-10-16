@@ -8,6 +8,7 @@ use Convoy\Repositories\Proxmox\Server\ProxmoxConfigRepository;
 use Convoy\Repositories\Proxmox\Server\ProxmoxServerRepository;
 use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Illuminate\Http\Client\RequestException;
+use Illuminate\Http\Client\Response;
 
 /**
  * Class SnapshotService
@@ -89,10 +90,13 @@ class ServerBuildService
      */
     public static function isVmMissingError(\Throwable $e): bool
     {
-        $request = $e->getPrevious();
+        // The response sits on the exception itself, or -- before it kept one --
+        // on the RequestException it wrapped.
+        $response = $e->response
+            ?? ($e->getPrevious() instanceof RequestException ? $e->getPrevious()->response : null);
 
-        return $request instanceof RequestException
-            && $request->response->status() === 500
-            && str_contains((string) $request->response->json('message'), 'does not exist');
+        return $response instanceof Response
+            && $response->status() === 500
+            && str_contains((string) $response->json('message'), 'does not exist');
     }
 }
