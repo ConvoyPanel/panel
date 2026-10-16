@@ -148,7 +148,8 @@ jobs:
           sed -i 's/^REDIS_HOST=.*/REDIS_HOST=127.0.0.1/' .env
           sed -i 's/^REDIS_PASSWORD=.*/REDIS_PASSWORD=/' .env
           sed -i "s#^APP_URL=.*#APP_URL=$E2E_BASE_URL#" .env
-          echo 'IMAGE_REGISTRY_URL=http://127.0.0.1:4174/registry.json' >> .env
+          # .env.ci has no trailing newline, so start a fresh line before appending.
+          printf '\nIMAGE_REGISTRY_URL=http://127.0.0.1:4174/registry.json\n' >> .env
 
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-interaction --no-progress
