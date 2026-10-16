@@ -7,6 +7,15 @@ follows [Semantic Versioning](https://semver.org) guidelines.
 
 ## Unreleased
 
+### Added
+
+- A server whose installation failed can now be retried. The "Install failed" screen was a dead end that only said to
+  contact an administrator; it now offers the reinstall form, and the API accepts a reinstall for a server in that
+  state. Every other blocked state, such as suspended, still refuses it.
+- The "Installing", "Restoring Backup" and "Restoring Snapshot" screens now update by themselves. They check the
+  server every few seconds and move on once the work is done, with a spinning icon to show they're live; before, they
+  stayed put until the page was refreshed.
+
 ### Changed
 
 - Deleting a server and keeping its virtual machine are now separate actions. **Delete** always removes everything --
@@ -17,12 +26,22 @@ follows [Semantic Versioning](https://semver.org) guidelines.
 
 ### Fixed
 
+- Fixed every error from Proxmox filling the log with three copies of the same stack trace -- about 256 lines per error,
+  every few seconds while a page polled a server whose VM was gone. An error is now logged once, with one trace, and its
+  message is Proxmox's own ("Proxmox returned 500: Configuration file ... does not exist").
+- Fixed reinstalling a server whose VM no longer exists failing every time. Reinstall stopped and deleted the old VM
+  first, and Proxmox answers both with "does not exist" when a previous install died before or during the clone. It
+  now skips straight to building when there is no VM.
+- Fixed a failed reinstall of an already-failed server staying on "Installing" forever instead of going back to
+  "Install failed". The failure handler wrote through the copy of the server captured when the reinstall started, and
+  when that copy already read "install_failed" the write was skipped as a no-op.
 - Fixed deleting a server failing, over and over, when its virtual machine was already gone from the node or it had a
   locked backup. A failed delete can now also be retried, or the server disconnected, straight from the "Failed to
   Delete" screen, and a server stuck on "Deleting" can be disconnected.
 - Fixed a delete treating any error from Proxmox as "the virtual machine is gone". Only Proxmox's own "does not exist"
   counts now, so a node that is briefly unreachable can no longer get a server removed from Convoy while its virtual
   machine keeps running.
+
 
 ## v4.7.0-rc.2
 
