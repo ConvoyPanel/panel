@@ -35,4 +35,20 @@ test('offers to retry a failed install', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'Installing' })).toBeVisible()
     expect(body).toMatchObject({ account_password: 'Rt-Aa1!bcdefgh9' })
     expect(body?.template_uuid).toBeTruthy()
+
+    // Pretend the install has now finished. The Installing screen polls, so it
+    // has to move on by itself -- nobody reloads the page.
+    await page.route('**/api/client/servers/e2e00000', async route => {
+        const response = await route.fetch()
+        const json = await response.json()
+        json.data.status = null
+        await route.fulfill({ response, json })
+    })
+
+    await expect(page.getByRole('heading', { name: 'Installing' })).toBeHidden({
+        timeout: 15_000,
+    })
+    await expect(
+        page.getByRole('heading', { name: 'Install failed' })
+    ).toBeHidden()
 })

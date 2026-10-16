@@ -12,6 +12,9 @@ follows [Semantic Versioning](https://semver.org) guidelines.
 - A server whose installation failed can now be retried. The "Install failed" screen was a dead end that only said to
   contact an administrator; it now offers the reinstall form, and the API accepts a reinstall for a server in that
   state. Every other blocked state, such as suspended, still refuses it.
+- The "Installing", "Restoring Backup" and "Restoring Snapshot" screens now update by themselves. They check the
+  server every few seconds and move on once the work is done, with a spinning icon to show they're live; before, they
+  stayed put until the page was refreshed.
 
 ### Fixed
 
