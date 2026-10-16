@@ -5,6 +5,14 @@ This file is a running track of new features and fixes to each version of the pa
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 follows [Semantic Versioning](https://semver.org) guidelines.
 
+## Unreleased
+
+### Fixed
+
+- Fixed every error from Proxmox filling the log with three copies of the same stack trace -- about 256 lines per error,
+  every few seconds while a page polled a server whose VM was gone. An error is now logged once, with one trace, and its
+  message is Proxmox's own ("Proxmox returned 500: Configuration file ... does not exist").
+
 ## v4.7.0-rc.2
 
 ### Fixed
