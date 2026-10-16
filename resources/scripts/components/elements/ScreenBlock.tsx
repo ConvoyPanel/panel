@@ -107,6 +107,7 @@ export const NotFound = ({
             "The link is either broken or doesn't exist on the server."
         }
         icon={LinkIcon}
+        center
         full={full}
         onBack={onBack}
     />
