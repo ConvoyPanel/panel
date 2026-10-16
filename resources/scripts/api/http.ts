@@ -64,6 +64,13 @@ export default http
  * Converts an error into a human readable response. Mostly just a generic helper to
  * make sure we display the message from the server back to the user if we can.
  */
+/**
+ * Whether a request failed because the record it asked for doesn't exist --
+ * typically one deleted since the page was opened.
+ */
+export const isNotFoundError = (error: any): boolean =>
+    error?.response?.status === 404
+
 export function httpErrorToHuman(error: any): string {
     if (error.response && error.response.data) {
         let {data} = error.response

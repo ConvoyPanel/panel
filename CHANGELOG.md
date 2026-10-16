@@ -5,6 +5,15 @@ This file is a running track of new features and fixes to each version of the pa
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 follows [Semantic Versioning](https://semver.org) guidelines.
 
+## Unreleased
+
+### Fixed
+
+- Fixed opening a server that has been deleted showing "Something went wrong" with "No query results for model
+  [Convoy\Models\Server]". It now shows "Server not found" with a way back to the server list, and the API names a
+  missing record in plain words ("This server could not be found. It may have been deleted."). Deleted nodes and users
+  in the admin area, which used to break the page outright, now get the same screen.
+
 ## v4.7.0-rc.2
 
 ### Fixed

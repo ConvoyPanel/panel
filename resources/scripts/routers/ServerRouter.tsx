@@ -8,12 +8,15 @@ import {
 } from '@heroicons/react/24/outline'
 import { lazy, useContext, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Outlet, useMatches } from 'react-router-dom'
+import { Outlet, useMatches, useNavigate } from 'react-router-dom'
 
-import { httpErrorToHuman } from '@/api/http'
+import { httpErrorToHuman, isNotFoundError } from '@/api/http'
 import { EloquentStatus } from '@/api/server/types'
 
-import ScreenBlock, { ErrorMessage } from '@/components/elements/ScreenBlock'
+import ScreenBlock, {
+    ErrorMessage,
+    NotFound,
+} from '@/components/elements/ScreenBlock'
 import Spinner from '@/components/elements/Spinner'
 import { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
 
@@ -128,6 +131,8 @@ const ServerRouter = () => {
     const matches = useMatches()
     const id = matches[0].params.id
     const [error, setError] = useState<string>()
+    const [notFound, setNotFound] = useState(false)
+    const navigate = useNavigate()
     const server = ServerContext.useStoreState(state => state.server.data)
     const getServer = ServerContext.useStoreActions(
         actions => actions.server.getServer
@@ -157,8 +162,10 @@ const ServerRouter = () => {
 
     useEffect(() => {
         setError(undefined)
+        setNotFound(false)
 
         getServer(id as string).catch((error: any) => {
+            setNotFound(isNotFoundError(error))
             setError(httpErrorToHuman(error))
         })
 
@@ -243,7 +250,13 @@ const ServerRouter = () => {
     return (
         <>
             {!server ? (
-                error ? (
+                notFound ? (
+                    <NotFound
+                        title='Server not found'
+                        message="This server doesn't exist, or it has been deleted."
+                        onBack={() => navigate('/')}
+                    />
+                ) : error ? (
                     <ErrorMessage message={error} />
                 ) : (
                     <Spinner />
