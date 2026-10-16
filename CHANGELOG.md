@@ -50,6 +50,10 @@ follows [Semantic Versioning](https://semver.org) guidelines.
 - Fixed failing jobs retrying with no pause. A job whose request to Proxmox failed was retried at once, again and
   again, until it ran out of time -- thousands of requests a minute against a node that was already struggling. Jobs
   now wait a few seconds, then longer, between retries.
+- Fixed opening a server that has been deleted showing "Something went wrong" with "No query results for model
+  [Convoy\Models\Server]". It now shows "Server not found" with a way back to the server list, and the API names a
+  missing record in plain words ("This server could not be found. It may have been deleted."). Deleted nodes and users
+  in the admin area, which used to break the page outright, now get the same screen.
 
 
 ## v4.7.0-rc.2

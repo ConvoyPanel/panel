@@ -1,7 +1,13 @@
-import { lazyLoad, query } from '@/routers/helpers'
+import {
+    LoadFailureScreen,
+    isLoadFailure,
+    lazyLoad,
+    loadFailure,
+    query,
+} from '@/routers/helpers'
 import { Route } from '@/routers/router'
 import { lazy, useContext, useEffect } from 'react'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useLoaderData } from 'react-router-dom'
 
 import getUser from '@/api/admin/users/getUser'
 import useUserSWR, { getKey } from '@/api/admin/users/useUserSWR'
@@ -30,7 +36,7 @@ export const routes: Route[] = [
                         const user = await query(getKey(id), () => getUser(id));
                         return user;
                     } catch (error) {
-                        return null;
+                        return loadFailure(error)
                     }
                 },
                 children: [
@@ -89,6 +95,7 @@ const visibleRoutes = [
 const AdminUserRouter = () => {
     const { setRoutes, setBreadcrumb } = useContext(NavigationBarContext)
     const { data: user } = useUserSWR()
+    const loaded = useLoaderData()
 
     useEffect(() => {
         setRoutes(visibleRoutes)
@@ -97,8 +104,18 @@ const AdminUserRouter = () => {
     }, [])
 
     useEffect(() => {
-        setBreadcrumb(user.name)
-    }, [user.name])
+        setBreadcrumb(user?.name)
+    }, [user?.name])
+
+    if (isLoadFailure(loaded)) {
+        return (
+            <LoadFailureScreen
+                failure={loaded}
+                record='User'
+                backTo='/admin/users'
+            />
+        )
+    }
 
     return <Outlet />
 }

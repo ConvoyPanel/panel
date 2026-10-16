@@ -4,8 +4,12 @@ namespace Convoy\Exceptions;
 
 use Exception;
 use Throwable;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Container\Container;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class Handler extends ExceptionHandler
 {
@@ -27,6 +31,25 @@ class Handler extends ExceptionHandler
     {
         $this->reportable(function (Throwable $e) {
             //
+        });
+
+        // A missing route-bound model came back with Laravel's own message --
+        // "No query results for model [Convoy\Models\Server]" -- which the panel
+        // showed as-is. Name the record in plain words instead. Laravel has
+        // already turned it into a NotFoundHttpException by the time this runs,
+        // so the model is on the original exception.
+        $this->renderable(function (NotFoundHttpException $e, Request $request) {
+            $missing = $e->getPrevious();
+
+            if (! $missing instanceof ModelNotFoundException || ! $request->expectsJson()) {
+                return null;
+            }
+
+            $model = Str::of(class_basename($missing->getModel()))->headline()->lower();
+
+            return response()->json([
+                'message' => "This {$model} could not be found. It may have been deleted.",
+            ], 404);
         });
     }
 

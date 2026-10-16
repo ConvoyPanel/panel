@@ -1,8 +1,14 @@
-import { lazyLoad, query } from '@/routers/helpers'
+import {
+    LoadFailureScreen,
+    isLoadFailure,
+    lazyLoad,
+    loadFailure,
+    query,
+} from '@/routers/helpers'
 import { Route } from '@/routers/router'
 import { lazy, useContext, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useLoaderData } from 'react-router-dom'
 
 import getNode from '@/api/admin/nodes/getNode'
 import useNodeSWR, { getKey as getPoolKey } from '@/api/admin/nodes/useNodeSWR'
@@ -31,7 +37,7 @@ export const routes: Route[] = [
                         const node = await query(getPoolKey(nodeId), () => getNode(nodeId));
                         return node;
                     } catch (error) {
-                        return null;
+                        return loadFailure(error)
                     }
                 },
                 element: lazyLoad(
@@ -126,6 +132,7 @@ export const routes: Route[] = [
 const AdminNodeRouter = () => {
     const { t: tStrings } = useTranslation('strings')
     const { data: node } = useNodeSWR()
+    const loaded = useLoaderData()
 
     const routes = [
         {
@@ -164,8 +171,18 @@ const AdminNodeRouter = () => {
     }, [])
 
     useEffect(() => {
-        setBreadcrumb(node.name)
+        setBreadcrumb(node?.name)
     }, [node])
+
+    if (isLoadFailure(loaded)) {
+        return (
+            <LoadFailureScreen
+                failure={loaded}
+                record='Node'
+                backTo='/admin/nodes'
+            />
+        )
+    }
 
     return <>{!node ? <Spinner /> : <Outlet />}</>
 }

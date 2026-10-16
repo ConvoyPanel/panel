@@ -4,11 +4,14 @@ import { AdminServerContext } from '@/state/admin/server'
 import { ExclamationCircleIcon } from '@heroicons/react/24/outline'
 import { lazy, useContext, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Outlet, useMatch } from 'react-router-dom'
+import { Outlet, useMatch, useNavigate } from 'react-router-dom'
 
-import { httpErrorToHuman } from '@/api/http'
+import { httpErrorToHuman, isNotFoundError } from '@/api/http'
 
-import ScreenBlock, { ErrorMessage } from '@/components/elements/ScreenBlock'
+import ScreenBlock, {
+    ErrorMessage,
+    NotFound,
+} from '@/components/elements/ScreenBlock'
 import Spinner from '@/components/elements/Spinner'
 import { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
 
@@ -95,6 +98,8 @@ export const routes: Route[] = [
 const AdminServerRouter = () => {
     const match = useMatch('/admin/servers/:id/*')
     const [error, setError] = useState<string>()
+    const [notFound, setNotFound] = useState(false)
+    const navigate = useNavigate()
     const server = AdminServerContext.useStoreState(state => state.server.data)
     const getServer = AdminServerContext.useStoreActions(
         actions => actions.server.getServer
@@ -118,8 +123,10 @@ const AdminServerRouter = () => {
 
     useEffect(() => {
         setError(undefined)
+        setNotFound(false)
 
         getServer(match!.params.id as string).catch((error: any) => {
+            setNotFound(isNotFoundError(error))
             setError(httpErrorToHuman(error))
         })
 
@@ -143,7 +150,13 @@ const AdminServerRouter = () => {
     return (
         <>
             {!server ? (
-                error ? (
+                notFound ? (
+                    <NotFound
+                        title='Server not found'
+                        message="This server doesn't exist, or it has been deleted."
+                        onBack={() => navigate('/admin/servers')}
+                    />
+                ) : error ? (
                     <ErrorMessage message={error} />
                 ) : (
                     <Spinner />
