@@ -31,6 +31,38 @@ it('records the current web session on an authenticated request', function () {
     expect(SessionRecord::query()->where('user_id', $user->id)->count())->toBe(1);
 });
 
+it('marks the account active on a session request, without touching updated_at', function () {
+    $user = User::factory()->create(['updated_at' => now()->subWeek()]);
+
+    $this->actingAs($user)->getJson('/api/client/user')->assertOk();
+
+    $user->refresh();
+
+    expect($user->last_active_at?->toDateTimeString())->toBe(now()->toDateTimeString())
+        ->and($user->updated_at->toDateTimeString())->toBe(now()->subWeek()->toDateTimeString());
+});
+
+it('writes the account\'s activity at most once a minute across sessions', function () {
+    $user = User::factory()->create(['last_active_at' => now()->subSeconds(30)]);
+    seedSession($user, 'another-tab', ['last_active_at' => now()->subMinutes(5)]);
+
+    $this->actingAs($user)->getJson('/api/client/user')->assertOk();
+
+    expect($user->refresh()->last_active_at->toDateTimeString())->toBe(now()->subSeconds(30)->toDateTimeString());
+});
+
+it('does not mark the account active from a bearer-token request', function () {
+    $user = User::factory()->create();
+    $plain = app(CreateAccountTokenService::class)
+        ->handle($user, 'cli', ['servers:read'])->plainTextToken;
+
+    $this->withHeader('Authorization', "Bearer {$plain}")
+        ->getJson('/api/client/servers')
+        ->assertOk();
+
+    expect($user->refresh()->last_active_at)->toBeNull();
+});
+
 it('does not record a bearer-token (sessionless) request', function () {
     $user = User::factory()->create();
     $plain = app(CreateAccountTokenService::class)
