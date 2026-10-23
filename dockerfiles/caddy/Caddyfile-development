@@ -4,7 +4,6 @@
     encode gzip
     file_server
 
-    # Don't tell visitors what serves the panel or which PHP it runs
     header {
         -Server
         -X-Powered-By

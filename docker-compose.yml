@@ -7,8 +7,6 @@ services:
         - APP_URL=$APP_URL
     restart: unless-stopped
     volumes:
-      # Caddy serves static files from public/ and hands everything else to
-      # php-fpm, so it has no business seeing .env or the rest of the panel.
       - ./public:/var/www/public:ro
       - ./dockerfiles/caddy/data/config:/config
       - ./dockerfiles/caddy/data/data:/data
@@ -76,9 +74,6 @@ services:
       timeout: 5s
       retries: 20
   database:
-    # 8.4 is the long-term support release. 8.0 stopped getting security fixes in
-    # April 2026. MySQL upgrades an 8.0 data directory in place on first start,
-    # and there is no way back, so take a backup before updating.
     image: mysql:8.4
     restart: unless-stopped
     volumes:
