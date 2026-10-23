@@ -1,0 +1,69 @@
+name: convoy4x
+type: laravel
+docroot: public
+php_version: "8.2"
+webserver_type: nginx-fpm
+
+# 4.x ships MySQL (docker-compose.yml pins mysql:8.0), unlike 5.x's Postgres.
+database:
+  type: mysql
+  version: "8.0"
+
+# Without this DDEV assigns a random ephemeral host port on every start, which
+# breaks saved connections in GUI clients (TablePlus, DataGrip, mysql aliases).
+host_db_port: "3306"
+
+# The release workflow builds on Node 20.
+nodejs_version: "20"
+corepack_enable: false
+
+# ext-gmp is required by composer.json. Without it `composer install` fails its
+# platform check -- and `ddev composer` still exits 0, so vendor/ silently stays
+# stale and every artisan call dies on the next platform_check.php.
+webimage_extra_packages:
+  - php8.2-gmp
+
+# MySQL + redis + mail overrides. These are real container env vars, so they
+# take precedence over .env (Laravel's Dotenv does not overwrite existing env).
+# Note CACHE_DRIVER, not 5.x's CACHE_STORE: this branch is on Laravel 11 but
+# still ships the pre-11 config/cache.php, which reads the old key.
+web_environment:
+  - APP_URL=https://convoy4x.ddev.site
+  - DB_CONNECTION=mysql
+  - DB_HOST=db
+  - DB_PORT=3306
+  - DB_DATABASE=db
+  - DB_USERNAME=db
+  - DB_PASSWORD=db
+  - REDIS_HOST=redis
+  - REDIS_PORT=6379
+  - REDIS_PASSWORD=
+  - CACHE_DRIVER=redis
+  - QUEUE_CONNECTION=redis
+  - SESSION_DRIVER=redis
+  - MAIL_MAILER=smtp
+  - MAIL_HOST=localhost
+  - MAIL_PORT=1025
+
+# Deliberately no `db_test` database, unlike 5.x. This branch's tests/Pest.php
+# uses DatabaseTransactions rather than RefreshDatabase, so they run against
+# whatever is in the dev database and roll their own writes back. That means
+# seeded dev data is visible to the suite and will fail any test asserting on a
+# fleet-wide aggregate (the overview endpoint's counts, most of all). Run
+# `ddev artisan migrate:fresh` before a full run, or scope to one file.
+
+# Replaces the compose `workers` service and its scheduler.
+web_extra_daemons:
+  - name: horizon
+    command: "php artisan horizon"
+    directory: /var/www/html
+  - name: scheduler
+    command: "php artisan schedule:work"
+    directory: /var/www/html
+
+# Expose the Vite dev server, which vite.config.js pins to 1234.
+web_extra_exposed_ports:
+  - name: vite
+    container_port: 1234
+    http_port: 1235
+    https_port: 1234

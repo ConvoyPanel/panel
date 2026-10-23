@@ -2,7 +2,6 @@
 
 namespace Convoy\Http\Controllers\Admin;
 
-use Convoy\Enums\Server\Status;
 use Convoy\Enums\Server\SuspensionAction;
 use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Convoy\Http\Controllers\ApiController;
@@ -138,13 +137,14 @@ class ServerController extends ApiController
         return $this->returnNoContent();
     }
 
+    /**
+     * Deletes the server: its backups, its VM, then the Convoy entry. With
+     * `no_purge`, only disconnects it -- the Convoy entry goes and everything on
+     * the node stays.
+     */
     public function destroy(Request $request, Server $server)
     {
-        $this->connection->transaction(function () use ($server, $request) {
-            $server->update(['status' => Status::DELETING->value]);
-
-            $this->deletionService->handle($server, $request->input('no_purge', false));
-        });
+        $this->deletionService->handle($server, disconnect: $request->boolean('no_purge'));
 
         return $this->returnNoContent();
     }

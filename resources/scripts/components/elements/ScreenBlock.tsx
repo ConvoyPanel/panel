@@ -14,6 +14,8 @@ interface BaseProps {
     message: string
     full?: boolean
     center?: boolean
+    /** Spin the icon, for screens that update themselves when the work is done. */
+    spin?: boolean
     children?: ReactNode
     onRetry?: () => void
     onBack?: () => void
@@ -36,6 +38,7 @@ const ScreenBlock = ({
     icon: Icon,
     message,
     center,
+    spin,
     onBack,
     onRetry,
     full,
@@ -54,7 +57,15 @@ const ScreenBlock = ({
                 }`}
             >
                 {Icon && (
-                    <Icon className='w-16 h-16 border dark:border-stone-600 rounded-md p-3 text-black dark:text-stone-400 mx-auto' />
+                    <div className='w-16 h-16 border dark:border-stone-600 rounded-md p-3 mx-auto'>
+                        <Icon
+                            className={`w-full h-full text-black dark:text-stone-400 ${
+                                spin
+                                    ? 'animate-[spin_2s_linear_infinite] motion-reduce:animate-none'
+                                    : ''
+                            }`}
+                        />
+                    </div>
                 )}
 
                 <h2 className='text-stone-900 dark:text-white font-bold text-4xl mt-6'>
@@ -107,6 +118,7 @@ export const NotFound = ({
             "The link is either broken or doesn't exist on the server."
         }
         icon={LinkIcon}
+        center
         full={full}
         onBack={onBack}
     />

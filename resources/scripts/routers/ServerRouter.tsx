@@ -8,14 +8,19 @@ import {
 } from '@heroicons/react/24/outline'
 import { lazy, useContext, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Outlet, useMatches } from 'react-router-dom'
+import { Outlet, useMatches, useNavigate } from 'react-router-dom'
 
-import { httpErrorToHuman } from '@/api/http'
+import { httpErrorToHuman, isNotFoundError } from '@/api/http'
 import { EloquentStatus } from '@/api/server/types'
 
-import ScreenBlock, { ErrorMessage } from '@/components/elements/ScreenBlock'
+import ScreenBlock, {
+    ErrorMessage,
+    NotFound,
+} from '@/components/elements/ScreenBlock'
 import Spinner from '@/components/elements/Spinner'
 import { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
+
+import InstallFailedScreen from '@/components/servers/InstallFailedScreen'
 
 
 export const routes: Route[] = [
@@ -128,6 +133,8 @@ const ServerRouter = () => {
     const matches = useMatches()
     const id = matches[0].params.id
     const [error, setError] = useState<string>()
+    const [notFound, setNotFound] = useState(false)
+    const navigate = useNavigate()
     const server = ServerContext.useStoreState(state => state.server.data)
     const getServer = ServerContext.useStoreActions(
         actions => actions.server.getServer
@@ -157,8 +164,10 @@ const ServerRouter = () => {
 
     useEffect(() => {
         setError(undefined)
+        setNotFound(false)
 
         getServer(id as string).catch((error: any) => {
+            setNotFound(isNotFoundError(error))
             setError(httpErrorToHuman(error))
         })
 
@@ -166,6 +175,26 @@ const ServerRouter = () => {
             clearServerState()
         }
     }, [id])
+
+    // These statuses are only ever cleared by a queued job in the background, so
+    // poll while the server is in one and let the screen move on by itself
+    // instead of waiting for the user to refresh.
+    const isBusy =
+        server?.status === 'installing' ||
+        server?.status === 'restoring_backup' ||
+        server?.status === 'restoring_snapshot'
+
+    useEffect(() => {
+        if (!isBusy) return
+
+        const interval = setInterval(() => {
+            // A failed poll is retried on the next tick; the screen keeps
+            // showing the last known status meanwhile.
+            getServer(id as string).catch(() => {})
+        }, 5000)
+
+        return () => clearInterval(interval)
+    }, [id, isBusy])
 
     const getScreenBlock = (status: EloquentStatus) => {
         switch (status) {
@@ -183,6 +212,7 @@ const ServerRouter = () => {
                     <ScreenBlock
                         center
                         icon={ArrowPathIcon}
+                        spin
                         message='Your server is being installed. This can take from 1-15 minutes.'
                         title='Installing'
                     />
@@ -192,6 +222,7 @@ const ServerRouter = () => {
                     <ScreenBlock
                         center
                         icon={ArrowPathIcon}
+                        spin
                         message='Your server is being restored from a backup. This can take from 1-15 minutes.'
                         title='Restoring Backup'
                     />
@@ -201,19 +232,13 @@ const ServerRouter = () => {
                     <ScreenBlock
                         center
                         icon={ArrowPathIcon}
+                        spin
                         message='Your server is being restored from a snapshot. This can take from 1-15 minutes.'
                         title='Restoring Snapshot'
                     />
                 )
             case 'install_failed':
-                return (
-                    <ScreenBlock
-                        center
-                        icon={ExclamationCircleIcon}
-                        message='Your server failed to install. Please contact your administrator.'
-                        title='Install failed'
-                    />
-                )
+                return <InstallFailedScreen />
             case null:
                 return null
             default:
@@ -243,7 +268,13 @@ const ServerRouter = () => {
     return (
         <>
             {!server ? (
-                error ? (
+                notFound ? (
+                    <NotFound
+                        title='Server not found'
+                        message="This server doesn't exist, or it has been deleted."
+                        onBack={() => navigate('/')}
+                    />
+                ) : error ? (
                     <ErrorMessage message={error} />
                 ) : (
                     <Spinner />

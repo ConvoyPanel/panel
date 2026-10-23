@@ -4,15 +4,19 @@ import { AdminServerContext } from '@/state/admin/server'
 import { ExclamationCircleIcon } from '@heroicons/react/24/outline'
 import { lazy, useContext, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Outlet, useMatch } from 'react-router-dom'
+import { Outlet, useMatch, useNavigate } from 'react-router-dom'
 
-import { httpErrorToHuman } from '@/api/http'
+import { httpErrorToHuman, isNotFoundError } from '@/api/http'
 
-import ScreenBlock, { ErrorMessage } from '@/components/elements/ScreenBlock'
+import ScreenBlock, {
+    ErrorMessage,
+    NotFound,
+} from '@/components/elements/ScreenBlock'
 import Spinner from '@/components/elements/Spinner'
 import { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
 
 import RestoreAccessButton from '@/components/admin/servers/RestoreAccessButton'
+import DeleteServerActions from '@/components/admin/servers/settings/partials/general/DeleteServerActions'
 
 export const routes: Route[] = [
     {
@@ -94,6 +98,8 @@ export const routes: Route[] = [
 const AdminServerRouter = () => {
     const match = useMatch('/admin/servers/:id/*')
     const [error, setError] = useState<string>()
+    const [notFound, setNotFound] = useState(false)
+    const navigate = useNavigate()
     const server = AdminServerContext.useStoreState(state => state.server.data)
     const getServer = AdminServerContext.useStoreActions(
         actions => actions.server.getServer
@@ -117,8 +123,10 @@ const AdminServerRouter = () => {
 
     useEffect(() => {
         setError(undefined)
+        setNotFound(false)
 
         getServer(match!.params.id as string).catch((error: any) => {
+            setNotFound(isNotFoundError(error))
             setError(httpErrorToHuman(error))
         })
 
@@ -142,7 +150,13 @@ const AdminServerRouter = () => {
     return (
         <>
             {!server ? (
-                error ? (
+                notFound ? (
+                    <NotFound
+                        title='Server not found'
+                        message="This server doesn't exist, or it has been deleted."
+                        onBack={() => navigate('/admin/servers')}
+                    />
+                ) : error ? (
                     <ErrorMessage message={error} />
                 ) : (
                     <Spinner />
@@ -157,7 +171,7 @@ const AdminServerRouter = () => {
                             message={
                                 server.status === 'deleting'
                                     ? "This server is being deleted. If you think this is an error, click below to make the server accessible. Clicking the button will not stop the server from being deleted if it's in progress"
-                                    : 'This server failed to delete. if you think this is an error, click below to make the server accessible. The server MAY not be in a usable state.'
+                                    : 'This server failed to delete. Delete it again, disconnect it to remove it from Convoy only, or make it accessible again if you think this is an error. The server MAY not be in a usable state.'
                             }
                             title={
                                 server.status === 'deleting'
@@ -166,6 +180,7 @@ const AdminServerRouter = () => {
                             }
                         >
                             <RestoreAccessButton />
+                            <DeleteServerActions className='mt-6 justify-center' />
                         </ScreenBlock>
                     ) : (
                         <Outlet />

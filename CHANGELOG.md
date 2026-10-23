@@ -5,6 +5,98 @@ This file is a running track of new features and fixes to each version of the pa
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 follows [Semantic Versioning](https://semver.org) guidelines.
 
+## v4.7.0-rc.3
+
+### Added
+
+- A server whose installation failed can now be retried. The "Install failed" screen was a dead end that only said to
+  contact an administrator; it now offers the reinstall form, and the API accepts a reinstall for a server in that
+  state. Every other blocked state, such as suspended, still refuses it.
+- The "Installing", "Restoring Backup" and "Restoring Snapshot" screens now update by themselves. They check the
+  server every few seconds and move on once the work is done, with a spinning icon to show they're live; before, they
+  stayed put until the page was refreshed.
+
+### Changed
+
+- Deleting a server and keeping its virtual machine are now separate actions. **Delete** always removes everything --
+  backups (including locked ones), the virtual machine on the node, and the server's entry in Convoy -- and when the
+  virtual machine is already gone from the node, it simply removes the Convoy entry. **Disconnect**, a new button next
+  to it, replaces the "Do not purge VM and related files" checkbox: it removes the server from Convoy and leaves the
+  virtual machine and its backups on the node. The API is unchanged; `DELETE` with `no_purge` still disconnects.
+
+### Fixed
+
+- Fixed reinstalling a server while its node couldn't be reached being taken as "there's no VM": the reinstall then
+  skipped removing the old VM and failed later on its taken VMID. It now fails straight away with the node's error, so
+  it can just be retried.
+- Fixed every error from Proxmox filling the log with three copies of the same stack trace -- about 256 lines per error,
+  every few seconds while a page polled a server whose VM was gone. An error is now logged once, with one trace, and its
+  message is Proxmox's own ("Proxmox returned 500: Configuration file ... does not exist").
+- Fixed reinstalling a server whose VM no longer exists failing every time. Reinstall stopped and deleted the old VM
+  first, and Proxmox answers both with "does not exist" when a previous install died before or during the clone. It
+  now skips straight to building when there is no VM.
+- Fixed a failed reinstall of an already-failed server staying on "Installing" forever instead of going back to
+  "Install failed". The failure handler wrote through the copy of the server captured when the reinstall started, and
+  when that copy already read "install_failed" the write was skipped as a no-op.
+- Fixed deleting a server failing, over and over, when its virtual machine was already gone from the node or it had a
+  locked backup. A failed delete can now also be retried, or the server disconnected, straight from the "Failed to
+  Delete" screen, and a server stuck on "Deleting" can be disconnected.
+- Fixed a delete treating any error from Proxmox as "the virtual machine is gone". Only Proxmox's own "does not exist"
+  counts now, so a node that is briefly unreachable can no longer get a server removed from Convoy while its virtual
+  machine keeps running.
+- Fixed a server's jobs getting permanently stuck after one slow request to Proxmox. The locks that keep two jobs of the
+  same kind from running on a server at once never expired, so a job the queue killed for running past its time limit
+  left its lock behind for good: every later job of that kind for the server -- including the force-stop that reinstall
+  and delete start with -- failed instantly until the lock was cleared from Redis by hand. Locks now expire shortly
+  after their job's time limit, a job that finds one held waits and retries, and the power and password jobs' time
+  limits no longer fall below a single Proxmox request.
+- Fixed failing jobs retrying with no pause. A job whose request to Proxmox failed was retried at once, again and
+  again, until it ran out of time -- thousands of requests a minute against a node that was already struggling. Jobs
+  now wait a few seconds, then longer, between retries.
+- Fixed opening a server that has been deleted showing "Something went wrong" with "No query results for model
+  [Convoy\Models\Server]". It now shows "Server not found" with a way back to the server list, and the API names a
+  missing record in plain words ("This server could not be found. It may have been deleted."). Deleted nodes and users
+  in the admin area, which used to break the page outright, now get the same screen.
+
+
+## v4.7.0-rc.2
+
+### Fixed
+
+- Fixed the Create Server modal offering no templates once a node was picked. The node select holds its id as a string,
+  and since v4.7.0-rc.1 the template group lookup skips anything that is not a positive integer -- which was meant to
+  stop requests going out before a node is chosen, but also stopped them after. The id is now converted before the
+  lookup.
+
+## v4.7.0-rc.1
+
+### Changed
+
+- The admin overview's Attention card now names what needs attention instead of reporting a bare count, and every row
+  links to the record itself -- a failed server to its admin page, a failed backup to its server's backups tab. Groups
+  holding several records open a sheet listing them, capped at the 25 most recent with a note saying how many more
+  there are. Previously the card showed only a failed-server count while its caption mixed in failed backups and
+  servers mid-delete, so it could read "0" with backups broken, and its link went to the unfiltered server list either
+  way. Suspended and mid-delete servers are deliberately left off it: neither is a failure, and both are already
+  counted under Server State.
+
+### Fixed
+
+- Fixed a disk resize during server build failing without anything noticing, leaving the guest at its template's disk
+  size rather than the one the plan asks for. Proxmox answers a resize by forking a worker and returning its task ID,
+  which Convoy discarded, so the build reported success whatever became of the resize. It now waits for the task, and
+  retries one that failed with a timeout -- Proxmox runs `qemu-img` under a fixed 10 second limit, which a resize
+  issued right after a full clone can exceed on slower storage.
+- Fixed modals taller than the browser window clipping their own header and submit row with no way to scroll to them.
+  The panel is now bounded by the viewport and its body scrolls within it, so Create Server and Create Node stay usable
+  at shorter window heights.
+- Fixed opening a modal leaving keyboard focus behind it, which sent the first few Tab presses through the page
+  underneath instead of the dialog.
+- Fixed the create-server form requesting addresses and template groups before a node is chosen, producing a handful of
+  404s every time the modal opened.
+- Fixed modals going out without an accessible name, so a screen reader announced only "dialog" instead of reading the
+  heading already on screen.
+
 ## v4.6.2
 
 ### Security

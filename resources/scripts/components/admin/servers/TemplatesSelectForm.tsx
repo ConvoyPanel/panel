@@ -13,10 +13,11 @@ interface Props {
 
 const TemplatesSelectForm = ({ disabled }: Props) => {
     const { setValue, watch } = useFormContext()
-    const nodeId: number | null = watch('nodeId', null)
-    const { data, mutate, isValidating, isLoading } = useTemplateGroupsSWR(
-        nodeId ?? -1
-    )
+    // The form binds the node select to a string ('' until one is picked), and
+    // useTemplateGroupsSWR only fetches for a positive integer.
+    const nodeId = Number(watch('nodeId'))
+    const { data, mutate, isValidating, isLoading } =
+        useTemplateGroupsSWR(nodeId)
     const templateGroups =
         data?.map(group => {
             return {

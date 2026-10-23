@@ -7,6 +7,8 @@ use Convoy\Models\Template;
 use Convoy\Repositories\Proxmox\Server\ProxmoxConfigRepository;
 use Convoy\Repositories\Proxmox\Server\ProxmoxServerRepository;
 use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
+use Illuminate\Http\Client\RequestException;
+use Illuminate\Http\Client\Response;
 
 /**
  * Class SnapshotService
@@ -46,14 +48,44 @@ class ServerBuildService
         return true;
     }
 
-    public function isVmDeleted(Server $server): bool
+    /**
+     * Whether the server's VM exists on its node.
+     *
+     * Only Proxmox's own "does not exist" answer counts as missing. Any other
+     * failure -- the node unreachable, a bad token, a 5xx -- is rethrown, so an
+     * outage can never be mistaken for a VM that's gone and lead to a server
+     * being dropped from Convoy while its VM keeps running.
+     *
+     * @throws ProxmoxConnectionException
+     */
+    public function vmExists(Server $server): bool
     {
         try {
             $this->configRepository->setServer($server)->getConfig();
         } catch (ProxmoxConnectionException $e) {
-            return true;
+            if (self::isVmMissingError($e)) {
+                return false;
+            }
+
+            throw $e;
         }
 
-        return false;
+        return true;
+    }
+
+    /**
+     * Proxmox answers any request about a VMID it doesn't have with a 500 and
+     * "Configuration file 'nodes/<node>/qemu-server/<vmid>.conf' does not exist".
+     */
+    public static function isVmMissingError(\Throwable $e): bool
+    {
+        // The response sits on the exception itself, or -- before it kept one --
+        // on the RequestException it wrapped.
+        $response = $e->response
+            ?? ($e->getPrevious() instanceof RequestException ? $e->getPrevious()->response : null);
+
+        return $response instanceof Response
+            && $response->status() === 500
+            && str_contains((string) $response->json('message'), 'does not exist');
     }
 }

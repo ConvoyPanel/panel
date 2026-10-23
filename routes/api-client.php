@@ -31,8 +31,9 @@ Route::prefix('/servers/{server}')->middleware(
         Route::post('/rename', [Client\Servers\SettingsController::class, 'rename']);
         Route::get(
             '/template-groups', [Client\Servers\SettingsController::class, 'getTemplateGroups'],
-        );
-        Route::post('/reinstall', [Client\Servers\SettingsController::class, 'reinstall']);
+        )->name('servers.settings.template-groups');
+        Route::post('/reinstall', [Client\Servers\SettingsController::class, 'reinstall'])
+             ->name('servers.settings.reinstall');
 
         Route::get(
             '/hardware/boot-order', [Client\Servers\SettingsController::class, 'getBootOrder'],

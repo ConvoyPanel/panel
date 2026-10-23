@@ -45,15 +45,24 @@ const Modal: Modal = ({ open, onClose, children }) => {
 }
 
 Modal.Header = styled.div`
-    ${tw`p-8 sm:p-6 border-b border-accent-200`}
+    ${tw`shrink-0 p-8 sm:p-6 border-b border-accent-200`}
 `
 
-Modal.Title = styled.h3`
+/*
+ * Dialog.Title rather than a bare h3: Headless UI points the dialog's
+ * `aria-labelledby` at whatever it renders, and without it the panel had no
+ * accessible name at all -- a screen reader announced "dialog" and nothing
+ * else, even though a visible heading was sitting right there. `as='h3'`
+ * keeps the heading level the markup already used.
+ */
+const StyledTitle = styled(Dialog.Title)`
     ${tw`text-xl font-medium text-foreground text-center`}
 `
 
+Modal.Title = ({ children }) => <StyledTitle as='h3'>{children}</StyledTitle>
+
 Modal.Body = styled.div`
-    ${tw`max-h-[60vh] overflow-y-auto p-6 bg-accent-100`}
+    ${tw`min-h-0 flex-1 overflow-y-auto p-6 bg-accent-100`}
 `
 
 Modal.Description = ({ children, bottomMargin }) => {
@@ -67,7 +76,7 @@ Modal.Description = ({ children, bottomMargin }) => {
 }
 
 Modal.Actions = styled.div`
-    ${tw`flex border-t border-accent-200`}
+    ${tw`shrink-0 flex border-t border-accent-200`}
 
     & > button:is(:first-of-type) {
         ${tw`rounded-bl`}

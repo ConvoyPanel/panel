@@ -1,0 +1,27 @@
+#ddev-generated
+services:
+  redis:
+    container_name: ddev-${DDEV_SITENAME}-redis
+    image: ${REDIS_DOCKER_IMAGE:-redis:7}
+    hostname: ${REDIS_HOSTNAME:-redis}
+    # These labels ensure this service is discoverable by ddev.
+    labels:
+      com.ddev.site-name: ${DDEV_SITENAME}
+      com.ddev.approot: ${DDEV_APPROOT}
+    restart: "no"
+    expose:
+      - 6379
+    volumes:
+      - ".:/mnt/ddev_config"
+      - "ddev-global-cache:/mnt/ddev-global-cache"
+      - "./redis:/etc/redis/conf"
+      - "redis:/data"
+    command: /etc/redis/conf/redis.conf
+    x-ddev:
+      describe-url-port: |
+        Backend: ${REDIS_DOCKER_IMAGE:-redis:7}
+      describe-info: |
+        Pass: <none>
+
+volumes:
+  redis:
