@@ -9,4 +9,10 @@
         path *.ico *.css *.js *.gif *.webp *.avif *.jpg *.jpeg *.png *.svg *.woff *.woff2
     }
     header @static Cache-Control max-age=5184000
+
+    # Don't tell visitors what serves the panel or which PHP it runs
+    header {
+        -Server
+        -X-Powered-By
+    }
 }

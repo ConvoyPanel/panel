@@ -5,6 +5,37 @@ This file is a running track of new features and fixes to each version of the pa
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 follows [Semantic Versioning](https://semver.org) guidelines.
 
+## v4.6.2
+
+### Security
+
+- PHP no longer announces its exact version in an `X-Powered-By` header on every response, and Caddy no longer sends
+  its `Server` header. Anyone could read which PHP a panel ran and pick out the ones still carrying a known
+  vulnerability.
+
+### Changed
+
+- The php, workers and workspace images are built on an exact PHP version, 8.2.35, which fixes the PHP2Shell remote
+  code execution bugs (CVE-2026-109618, CVE-2026-109619). They used to be built on whichever PHP 8.2 Docker had already
+  downloaded, so a panel installed in September stayed on 8.2.34 through every update until its base image was pulled
+  by hand. A PHP security release now becomes a Convoy patch release that pins the fixed version.
+- The redis extension is installed with PIE, from Packagist and GitHub, instead of from PECL. PECL was unreachable for
+  most of 21 October, which left panels unable to rebuild their images on the day the PHP fix came out, and the PHP
+  project has deprecated it.
+- The workspace image is built on Debian bookworm, since the PHP project no longer publishes 8.2 images for bullseye.
+
+### Fixed
+
+- Fixed rebuilding the workspace image failing, seemingly at random, with "404 Not Found" for packages such as `sudo`
+  and `unzip` from the Debian mirror. The Dockerfile ran `apt-get update` and `apt-get install` as two steps, so a
+  rebuild could reuse a package index cached months earlier and ask the mirror for versions it had since replaced. They
+  now run as one step.
+- Fixed `docker compose up -d --build` reinstalling every PHP extension whenever the extension installer published a
+  new release, which was most weeks. The installer was fetched as `latest`, which Docker re-downloads on every build,
+  and a new copy threw away every cached layer after it. That is how a rebuild could fail on a day nothing in Convoy
+  had changed, such as when PECL was down. The installer and PIE are now pinned to exact versions, so a rebuild does
+  the same thing every time.
+
 ## v4.6.1
 
 ### Security
