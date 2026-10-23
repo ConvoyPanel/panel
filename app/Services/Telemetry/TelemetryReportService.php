@@ -31,7 +31,8 @@ use Throwable;
  * Everything in it is a count, a switch or a version number. It never carries
  * a name, email, hostname, address, APP_URL or license key: the only string a
  * panel picks is the installation id, and the console only keeps the version
- * numbers it can parse.
+ * numbers it can parse. Map keys are fixed names: page views are only counted
+ * for the pages PageViewCounter lists.
  */
 class TelemetryReportService
 {
@@ -49,9 +50,16 @@ class TelemetryReportService
      */
     private const NODE_LOOKUP_SECONDS = 60;
 
-    public function __construct(private ProxmoxNodeRepository $repository) {}
+    public function __construct(
+        private ProxmoxNodeRepository $repository,
+        private PageViewCounter $views,
+    ) {}
 
-    public function build(string $installation): array
+    /**
+     * @param  bool  $flushViews  Take the page views off the counters, for the
+     *                            report that is actually sent
+     */
+    public function build(string $installation, bool $flushViews = false): array
     {
         return [
             'schema' => self::SCHEMA,
@@ -61,6 +69,8 @@ class TelemetryReportService
             'nodes' => $this->nodes(),
             'resources' => $this->resources(),
             'features' => $this->features(),
+            // An object even when empty, as the console expects a map.
+            'views' => (object) ($flushViews ? $this->views->flush() : $this->views->counts()),
         ];
     }
 

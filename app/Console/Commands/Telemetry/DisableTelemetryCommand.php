@@ -2,6 +2,7 @@
 
 namespace Convoy\Console\Commands\Telemetry;
 
+use Convoy\Services\Telemetry\PageViewCounter;
 use Convoy\Services\Telemetry\TelemetryService;
 use Illuminate\Console\Command;
 use Illuminate\Http\Client\ConnectionException;
@@ -19,9 +20,10 @@ class DisableTelemetryCommand extends Command
      */
     protected $description = 'Stop sending telemetry, and erase this installation\'s reports from the Convoy console.';
 
-    public function handle(TelemetryService $telemetry): int
+    public function handle(TelemetryService $telemetry, PageViewCounter $views): int
     {
         $telemetry->disable();
+        $views->flush();
 
         if ($telemetry->url() === '') {
             $this->info('Telemetry is off. CONVOY_TELEMETRY_URL is empty, so the console was not contacted.');

@@ -11,12 +11,13 @@ follows [Semantic Versioning](https://semver.org) guidelines.
 
 - Replaced Plausible with anonymous telemetry. Every page used to load Plausible's analytics script from
   beacon.performave.com in the visitor's browser; it's gone. Instead, once a day the panel sends the Convoy console a
-  short report of numbers: how many accounts and admins there are and how many were active in the last day, week and
-  30 days; the panel, PHP and database versions; each node's Proxmox version, CPU count, memory and number of servers;
-  how many locations, backups, ISOs, templates, address pools, SSH keys and API tokens there are; and whether Coterm
-  is in use. It's filed under a random installation id and holds nothing that names a person or the panel -- no
-  license key, URL, hostname, name or email. The console looks up a country from the address the report comes from
-  and doesn't keep the address. `php artisan c:telemetry:show` prints the exact report. To turn it off, run
+  short report of numbers: how many accounts and admins there are and how many were active in the last day, week and 30
+  days; the panel, PHP and database versions; each node's Proxmox version, CPU count, memory and number of servers; how
+  many locations, backups, ISOs, templates, address pools, SSH keys and API tokens there are; whether Coterm is in use;
+  and how many times each page was opened since the day before, counted by the panel itself rather than by a script in
+  the browser. It's filed under a random installation id and holds nothing that names a person or the panel -- no
+  license key, URL, hostname, name or email. The console looks up a country from the address the report comes from and
+  doesn't keep the address. `php artisan c:telemetry:show` prints the exact report. To turn it off, run
   `php artisan c:telemetry:disable` or set `CONVOY_TELEMETRY_ENABLED=false`: either one also has the console erase the
   reports it holds for the panel. Setting `CONVOY_TELEMETRY_URL` to nothing stops the panel contacting the console at
   all.

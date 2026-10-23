@@ -2,6 +2,7 @@
 
 namespace Convoy\Jobs\Telemetry;
 
+use Convoy\Services\Telemetry\PageViewCounter;
 use Convoy\Services\Telemetry\TelemetryReportService;
 use Convoy\Services\Telemetry\TelemetryService;
 use Illuminate\Bus\Queueable;
@@ -28,12 +29,17 @@ class SendTelemetryReportJob implements ShouldQueue
 
     public int $timeout = 120;
 
-    public function handle(TelemetryService $telemetry, TelemetryReportService $reports): void
+    /**
+     * The page views are taken off the counters before the report goes out, so
+     * a report that fails costs that day's views rather than counting them twice.
+     */
+    public function handle(TelemetryService $telemetry, TelemetryReportService $reports, PageViewCounter $views): void
     {
         try {
             if ($telemetry->enabled()) {
-                $telemetry->send($reports->build($telemetry->installationOrCreate()));
+                $telemetry->send($reports->build($telemetry->installationOrCreate(), flushViews: true));
             } else {
+                $views->flush();
                 $telemetry->erase();
             }
         } catch (ConnectionException|RequestException $exception) {
