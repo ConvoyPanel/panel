@@ -5,5 +5,5 @@
     rotate 8
     compress
     notifempty
-    su root adm
+    su www-data www-data
 }

@@ -1,4 +1,4 @@
-FROM php:8.2-bullseye
+FROM php:8.2.35-bookworm
 
 ARG PHP_XDEBUG
 ARG PHP_XDEBUG_MODE='debug'
@@ -7,8 +7,10 @@ ENV PHP_IDE_CONFIG="serverName=convoy"
 ENV TZ=UTC
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-RUN apt-get update
-RUN apt-get -y install ca-certificates gnupg software-properties-common curl sudo unzip default-mysql-client
+# update and install in one step, or a rebuild on a machine with an old cached
+# package index asks the mirror for versions it no longer carries
+RUN apt-get update && \
+    apt-get -y install ca-certificates gnupg software-properties-common curl sudo unzip default-mysql-client
 
 RUN sudo mkdir -p /etc/apt/keyrings; \
     curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg; \
@@ -17,9 +19,21 @@ RUN sudo mkdir -p /etc/apt/keyrings; \
     apt-get update; \
     sudo apt-get install nodejs -y;
 
-ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
+# Pinned, not `latest`: Docker re-downloads a URL on every build, so each new
+# release of the installer threw away the cached layers below and reinstalled
+# every extension, which is how a rebuild could fail on a day nothing changed.
+ADD https://github.com/mlocati/docker-php-extension-installer/releases/download/2.12.3/install-php-extensions /usr/local/bin/
 RUN chmod +x /usr/local/bin/install-php-extensions && \
-    install-php-extensions pdo_mysql pcntl redis opcache gmp
+    install-php-extensions pdo_mysql pcntl opcache gmp
+
+# redis is the one extension PHP doesn't ship with. It comes from Packagist and
+# GitHub through PIE rather than from PECL, which the PHP project has deprecated
+# and which fails for hours at a time.
+RUN --mount=type=bind,from=ghcr.io/php/pie:1.5.2-bin,source=/pie,target=/usr/local/bin/pie \
+    apt-get update && \
+    apt-get -y install --no-install-recommends $PHPIZE_DEPS && \
+    pie install phpredis/phpredis:6.3.0
+
 RUN echo "opcache.enable_cli=1" >> /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini; \
     echo "opcache.validate_timestamps=1" >> /usr/local/etc/php/conf.d/docker-php-ext-opcache-cli.ini;
 

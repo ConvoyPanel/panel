@@ -3,4 +3,9 @@
     php_fastcgi php:9000
     encode gzip
     file_server
+
+    header {
+        -Server
+        -X-Powered-By
+    }
 }
