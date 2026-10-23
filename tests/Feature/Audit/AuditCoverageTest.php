@@ -39,6 +39,10 @@ const AUDIT_EXEMPT = [
     'ConfirmedTwoFactorAuthenticationController@store' => 'Audited via Fortify\'s two-factor events.',
     'ConfirmableIdentityController@store' => 'Re-authentication step; the action it gates is audited.',
     'RecoveryCodeController@store' => 'Audited in App\\Http\\Controllers\\Client\\RecoveryCodeController.',
+
+    // Telemetry page-view counts, sent by the browser every minute. Auditing them would log every
+    // page anyone opens, which is the opposite of what anonymous counts are for.
+    'PageViewController@__invoke' => 'Anonymous page-view counts; changes no record.',
 ];
 
 /** The prefixes this guard governs. Horizon and the SPA shell are not ours to audit. */
