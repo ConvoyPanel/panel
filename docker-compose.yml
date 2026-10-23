@@ -7,7 +7,9 @@ services:
         - APP_URL=$APP_URL
     restart: unless-stopped
     volumes:
-      - .:/var/www/
+      # Caddy serves static files from public/ and hands everything else to
+      # php-fpm, so it has no business seeing .env or the rest of the panel.
+      - ./public:/var/www/public:ro
       - ./dockerfiles/caddy/data/config:/config
       - ./dockerfiles/caddy/data/data:/data
     ports:

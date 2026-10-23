@@ -1,4 +1,6 @@
-FROM caddy:2.6-alpine
+# Pinned to an exact version: the 2.6 tag stopped at 2.6.4 in February 2023, so
+# the one container that faces the internet went years without security fixes.
+FROM caddy:2.11.7-alpine
 
 ARG APP_ENV
 ARG APP_URL
