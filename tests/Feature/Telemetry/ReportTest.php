@@ -168,3 +168,12 @@ it('reports which of the bundled OAuth providers are configured, never one an op
         ->and($features['oauth.google'])->toBeFalse()
         ->and(json_encode($features))->not->toContain('acme');
 });
+
+it('documents every resource and feature key it sends', function () use ($build) {
+    $docs = file_get_contents(base_path('docs/telemetry.md'));
+    $report = $build();
+
+    foreach ([...array_keys($report['resources']), ...array_keys($report['features'])] as $key) {
+        expect($docs)->toContain("`{$key}`");
+    }
+});
