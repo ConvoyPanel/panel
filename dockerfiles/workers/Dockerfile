@@ -24,5 +24,6 @@ RUN apk add --no-cache bash logrotate supervisor
 
 COPY supervisord.conf /etc/supervisord.conf
 COPY laravel-logrotate /etc/logrotate.d/laravel
+COPY --chmod=755 entrypoint.sh /usr/local/bin/convoy-entrypoint
 
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
+CMD ["convoy-entrypoint"]

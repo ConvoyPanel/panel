@@ -39,6 +39,9 @@ RUN echo "pm.max_children = $PHP_MAX_CHILDREN" >> /usr/local/etc/php-fpm.d/zz-do
 # announcing its exact version in an X-Powered-By header on every response.
 RUN echo "expose_php = Off" > /usr/local/etc/php/conf.d/zz-convoy.ini
 
+COPY --chmod=755 entrypoint.sh /usr/local/bin/convoy-entrypoint
+
 WORKDIR /var/www
 
+ENTRYPOINT ["convoy-entrypoint"]
 CMD ["php-fpm"]
