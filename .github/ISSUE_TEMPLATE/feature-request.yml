@@ -1,6 +1,6 @@
 name: Feature Request
 description: Suggest a new feature or improvement for the software.
-labels: [enhancement]
+type: Feature
 body:
   - type: checkboxes
     id: preflight
