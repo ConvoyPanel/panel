@@ -575,6 +575,20 @@ Route::prefix('/settings')->group(function () {
         '/mail/test',
         [Admin\Settings\MailSettingsController::class, 'test'],
     );
+
+    Route::get(
+        '/telemetry',
+        [Admin\Settings\TelemetrySettingsController::class, 'show'],
+    );
+    Route::put(
+        '/telemetry',
+        [Admin\Settings\TelemetrySettingsController::class, 'update'],
+    );
+    // The exact report the daily job would send now. Read-only: nothing is reset by viewing it.
+    Route::get(
+        '/telemetry/report',
+        [Admin\Settings\TelemetrySettingsController::class, 'report'],
+    );
 });
 
 /*
