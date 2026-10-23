@@ -65,7 +65,7 @@ services:
       redis:
         condition: service_healthy
   redis:
-    image: redis:7.0-alpine
+    image: redis:8-alpine
     restart: unless-stopped
     command: redis-server --save 60 1 --loglevel notice --requirepass '${REDIS_PASSWORD}'
     environment:
@@ -76,7 +76,10 @@ services:
       timeout: 5s
       retries: 20
   database:
-    image: mysql:8.0
+    # 8.4 is the long-term support release. 8.0 stopped getting security fixes in
+    # April 2026. MySQL upgrades an 8.0 data directory in place on first start,
+    # and there is no way back, so take a backup before updating.
+    image: mysql:8.4
     restart: unless-stopped
     volumes:
       - ./dockerfiles/mysql/data:/var/lib/mysql/
