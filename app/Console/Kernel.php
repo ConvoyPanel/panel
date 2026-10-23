@@ -5,6 +5,8 @@ namespace Convoy\Console;
 use Convoy\Models\ActivityLog;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Database\Console\PruneCommand;
+use Convoy\Services\Telemetry\TelemetryService;
+use Convoy\Jobs\Telemetry\SendTelemetryReportJob;
 use Convoy\Console\Commands\Server\ResetUsagesCommand;
 use Convoy\Console\Commands\Server\UpdateUsagesCommand;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
@@ -34,6 +36,15 @@ class Kernel extends ConsoleKernel
         $schedule->command(PruneUsersCommand::class)->daily();
         $schedule->command(UpdateUsagesCommand::class)->everyFiveMinutes();
         $schedule->command(UpdateRateLimitsCommand::class)->everyTenMinutes();
+
+        // Once a day, at a minute taken from the installation id. Read from the
+        // database, so it is skipped rather than failing the whole schedule if
+        // the database can't be reached or hasn't been migrated yet.
+        $telemetryTime = rescue(fn () => $this->app->make(TelemetryService::class)->reportTime(), null, false);
+
+        if (! is_null($telemetryTime)) {
+            $schedule->job(new SendTelemetryReportJob)->dailyAt($telemetryTime);
+        }
     }
 
     /**
