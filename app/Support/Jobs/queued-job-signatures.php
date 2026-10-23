@@ -123,4 +123,9 @@ return [
         ['name' => 'step', 'type' => 'App\\Models\\DeploymentStep', 'optional' => false, 'promoted' => true, 'variadic' => false],
         ['name' => 'transferId', 'type' => 'int', 'optional' => false, 'promoted' => true, 'variadic' => false],
     ],
+    'App\\Jobs\\Telemetry\\EraseTelemetryJob' => [
+        ['name' => 'installation', 'type' => 'string', 'optional' => false, 'promoted' => true, 'variadic' => false],
+    ],
+    'App\\Jobs\\Telemetry\\SendTelemetryReportJob' => [
+    ],
 ];
