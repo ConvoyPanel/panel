@@ -5,6 +5,59 @@ This file is a running track of new features and fixes to each version of the pa
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 follows [Semantic Versioning](https://semver.org) guidelines.
 
+## v4.7.0-rc.4
+
+Everything in v4.6.2, the security release cut from v4.6.1:
+
+### Security
+
+- PHP no longer announces its exact version in an `X-Powered-By` header on every response, and Caddy no longer sends
+  its `Server` header. Anyone could read which PHP a panel ran and pick out the ones still carrying a known
+  vulnerability.
+- Caddy, the one container that faces the internet, is upgraded from 2.6.4 to 2.11.7. The `caddy:2.6-alpine` tag the
+  image was built from stopped moving in February 2023, so panels have been terminating TLS with a web server that
+  missed every security fix since, including the HTTP/2 Rapid Reset one.
+- The Caddy container now mounts only `public/`, read-only, instead of the whole panel directory. It never needed
+  `.env`, which holds the application key and database password, and a bug in the web server should not be able to
+  reach them.
+- Horizon and the scheduler now run as `www-data`, the user PHP-FPM already serves the panel as, instead of root. A
+  queue job is a PHP object handed over through Redis, so anyone who reaches Redis can have Horizon run code, and
+  until now that code ran as root with the whole panel directory mounted read-write: it could rewrite the panel and
+  `.env`. The php and workers containers now put `storage/` and `bootstrap/cache` under `www-data` each time they
+  start, so an existing install needs nothing done by hand, and the install guide's `chmod -R o+w storage/*
+  bootstrap/cache` is no longer needed.
+
+### Changed
+
+- MySQL 8.4, the long-term support release, replaces 8.0, which stopped getting security fixes in April 2026. MySQL
+  upgrades an 8.0 data directory in place the first time 8.4 starts, and there is no way back, so back up before
+  updating, as the update guide already says.
+- Redis 8 replaces 7.0, which is end of life. It reads 7.0's data files as they are.
+- The php, workers and workspace images are built on an exact PHP version, 8.2.35, which fixes the PHP2Shell remote
+  code execution bugs (CVE-2026-109618, CVE-2026-109619). They used to be built on whichever PHP 8.2 Docker had already
+  downloaded, so a panel installed in September stayed on 8.2.34 through every update until its base image was pulled
+  by hand. A PHP security release now becomes a Convoy patch release that pins the fixed version.
+- The redis extension is installed with PIE, from Packagist and GitHub, instead of from PECL. PECL was unreachable for
+  most of 21 October, which left panels unable to rebuild their images on the day the PHP fix came out, and the PHP
+  project has deprecated it.
+- The workspace image is built on Debian bookworm. Debian 11 (bullseye) left support in August 2026 and its security
+  packages have since been removed from the mirror, so the old image no longer builds at all: `docker compose up -d
+  --build` fails with "404 Not Found" for `sudo` and `unzip` on every fresh install and update. The PHP project also no
+  longer publishes 8.2 images for bullseye.
+
+### Fixed
+
+- Fixed rebuilding the workspace image failing, seemingly at random, with "404 Not Found" for packages such as `sudo`
+  and `unzip` from the Debian mirror. The Dockerfile ran `apt-get update` and `apt-get install` as two steps, so a
+  rebuild could reuse a package index cached months earlier and ask the mirror for versions it had since replaced. They
+  now run as one step. (Since bullseye's packages were removed from the mirror, the same error happens on every build;
+  moving to bookworm is what fixes that.)
+- Fixed `docker compose up -d --build` reinstalling every PHP extension whenever the extension installer published a
+  new release, which was most weeks. The installer was fetched as `latest`, which Docker re-downloads on every build,
+  and a new copy threw away every cached layer after it. That is how a rebuild could fail on a day nothing in Convoy
+  had changed, such as when PECL was down. The installer and PIE are now pinned to exact versions, so a rebuild does
+  the same thing every time.
+
 ## v4.7.0-rc.3
 
 ### Added
