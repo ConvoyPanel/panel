@@ -2,8 +2,8 @@
 
 `convoy support` collects what the Convoy team needs to diagnose a broken install, removes secrets from it
 on the operator's machine, shows the operator what it collected, and, if they agree, uploads it to the
-console. The operator gets a short code to paste into Discord or a GitHub issue. Only the Convoy team can
-open a bundle, and it is deleted after 30 days.
+console. The operator chooses who can open it, and gets a link to share however they like. It is deleted
+after 30 days.
 
 It replaces [ConvoyPanel/log-collector](https://github.com/ConvoyPanel/log-collector), which posted the same
 kind of data to a public paste site and removed nothing from inside the logs.
@@ -52,38 +52,105 @@ Before anything is written to the archive, every collected file is passed throug
 
 Redaction is a safety net, not a licence: the collector still never reads anything it doesn't need.
 
+Redaction is the same whoever can open the bundle. It removes secrets, not everything that identifies the
+install: the logs still hold the panel's address, the IP addresses of people who used it (5.x's web
+container logs every request), the nodes' addresses, and, when a query on a user fails, that user's email.
+The consent question says so before a password-protected or public upload.
+
+## Who can open it
+
+The operator picks one of three when uploading, and can change it later:
+
+| Visibility | Who can open the link |
+|---|---|
+| `staff` (default) | The Convoy team only. |
+| `password` | Anyone with the link and the password. |
+| `public` | Anyone with the link. |
+
+The Convoy team can open every bundle, whatever its visibility.
+
 ## Consent
 
-The CLI writes the archive to `$CONVOY_DIR/backups/support/convoy-support-<UTC stamp>.tar.gz`, prints
-every file in it with its size, and asks:
+The CLI writes the archive to `$CONVOY_DIR/backups/support/convoy-support-<UTC stamp>.tar.gz` and prints
+every file in it with its size. `--no-upload` stops here.
 
-> Upload this bundle to the Convoy team's console? Only the Convoy team can see it, and it is deleted
-> after 30 days. [y/N]
+It then asks who can open it, unless `--visibility staff|password|public` was given; pressing Enter picks
+`staff`. For `password` it prompts for one twice without echoing it, or reads it from standard input with
+`--password-stdin`. A password is never taken as an argument, so it stays out of shell history and the
+process list.
 
-`--no-upload` stops before the question; `--yes` answers it. Nothing leaves the machine without one of
-the two.
+Last, it asks for consent, worded for the choice:
+
+> Only the Convoy team can open these logs. They're deleted after 30 days. Upload? [y/N]
+
+> Anyone with this link can open these logs. Secrets are removed, but the logs still show your panel's
+> address, the IP addresses of people who used it, your nodes' addresses, and occasionally a customer's
+> email. Upload? [y/N]
+
+The `password` question is the public one, starting "Anyone with the link and the password". `--yes`
+answers it. Nothing leaves the machine without one of the two.
 
 ## The requests
 
+### Upload
+
 ```
 POST https://convoypanel.com/api/v1/support-bundles
-Content-Type: multipart/form-data   (one part, `bundle`: the .tar.gz)
+Content-Type: multipart/form-data
 Accept: application/json
 User-Agent: Convoy/<panel version> convoy-cli/<collector version>
 ```
 
+| Part | Value |
+|---|---|
+| `bundle` | The `.tar.gz`. |
+| `visibility` | `staff`, `password` or `public`. |
+| `password` | Only with `password`: 8 to 128 characters. |
+
 | Status | Body | Meaning |
 |---|---|---|
-| `201` | `{"code": "CVY-7K3M-Q2XP", "delete_token": "<40 characters>", "expires_at": "<ISO 8601>"}` | Stored. |
+| `201` | below | Stored. |
 | `413` | | Larger than 20 MiB. |
-| `422` | `{"message": "..."}` | Not a gzip tar, or `manifest.json` missing, unreadable or of an unknown `schema`. |
+| `422` | `{"message": "...", "errors": {...}}` | Not a gzip tar; `manifest.json` missing, unreadable or of an unknown `schema`; a bad `visibility`; a missing or out-of-range `password`. |
 | `429` | | Too many uploads: 10 an hour from one address, 200 an hour in total. |
 
-The CLI prints the code and keeps the response in `$CONVOY_DIR/backups/support/<code>.json` (mode 600).
+```json
+{
+    "code": "CVY-7K3M-Q2XP",
+    "url": "https://convoypanel.com/support/CVY-7K3M-Q2XP",
+    "manage_url": "https://convoypanel.com/support/CVY-7K3M-Q2XP/manage#<manage_token>",
+    "manage_token": "<40 characters>",
+    "visibility": "staff",
+    "expires_at": "2026-12-13T05:00:00Z"
+}
+```
+
+The CLI prints `url` for the operator to share, and `manage_url` with a note that it is private: whoever
+has it can change who sees the logs or delete them. The token sits after the `#`, so the browser never
+sends it to the console and it can't leak through server logs or a `Referer`; the manage page reads it and
+sends it as the bearer header below. The CLI keeps the response in
+`$CONVOY_DIR/backups/support/<code>.json` (mode 600).
+
+### Change who can open it
+
+```
+PATCH https://convoypanel.com/api/v1/support-bundles/{code}
+Authorization: Bearer <manage_token>
+Content-Type: application/json
+
+{"visibility": "password", "password": "..."}
+```
+
+`password` is required when switching to `password`, and sets a new one when already there. Answers `200`
+with the upload response minus `manage_token`, `404` for an unknown code or a wrong token (the same, so a
+token can't be tested against codes), `422` for bad input. `convoy support visibility <code>
+<staff|password|public>` sends it, prompting for a password the same way as on upload.
+
+### Delete
 
 ```
 DELETE https://convoypanel.com/api/v1/support-bundles/{code}
-Authorization: Bearer <delete_token>
+Authorization: Bearer <manage_token>
 ```
 
 answers `204` whether or not the code exists, and erases the bundle and everything parsed from it.
@@ -187,4 +254,5 @@ followed by `[stacktrace]` lines), which the console groups by exception.
 ## Retention
 
 The console deletes a bundle and everything parsed from it 30 days after upload, unless a Convoy admin
-marks it as kept for an open case. The operator can delete it at any time with the delete token.
+marks it as kept for an open case. The operator can delete it at any time with the manage link or
+`convoy support delete`.
