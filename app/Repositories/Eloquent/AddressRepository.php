@@ -34,7 +34,7 @@ class AddressRepository
             );
         SQL;
 
-        DB::select($query, [
+        DB::update($query, [
             $server->id,
             ...$addressIds,
             $server->node_id,

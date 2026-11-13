@@ -9,8 +9,15 @@ class FiltersNodeWildcard implements Filter
 {
     public function __invoke(Builder $query, $value, string $property): void
     {
-        $query->where('id', $value)
-              ->orWhereRaw('LOWER(fqdn) LIKE ?', ["%$value%"])
-              ->orWhereRaw('LOWER(name) LIKE ?', ["%$value%"]);
+        // Grouped, so the ORs can't escape a constraint the controller applied first
+        // (the nodes of one address pool or one Coterm).
+        $query->where(function (Builder $query) use ($value) {
+            if (! is_null($id = SearchTerm::id($value))) {
+                $query->orWhere('id', $id);
+            }
+
+            $query->orWhereRaw('LOWER(fqdn) LIKE ?', [SearchTerm::contains($value)])
+                  ->orWhereRaw('LOWER(name) LIKE ?', [SearchTerm::contains($value)]);
+        });
     }
 }

@@ -10,14 +10,21 @@ class FiltersAddressWildcard implements Filter
 {
     public function __invoke(Builder $query, $value, string $property): void
     {
-        if (is_array($value)) {
-            $query->whereIn('id', $value)
-                  ->orWhereIn('address', Arr::map($value, fn ($v) => strtolower($v)))
-                  ->orWhereIn('mac_address', Arr::map($value, fn ($v) => strtolower($v)));
-        } else {
-            $query->where('id', $value)
-                  ->orWhere('address', strtolower($value))
-                  ->orWhere('mac_address', strtolower($value));
-        }
+        // The query builder splits a value on commas, so this gets a list for "a,b".
+        $values = Arr::wrap($value);
+        $ids = array_values(array_filter(array_map(SearchTerm::id(...), $values), fn ($id) => ! is_null($id)));
+        // Addresses and MACs are stored lowercase.
+        $lowered = array_map(SearchTerm::lower(...), $values);
+
+        // Grouped, so the ORs can't escape the node or pool the controller scoped
+        // the list to.
+        $query->where(function (Builder $query) use ($ids, $lowered) {
+            if ($ids !== []) {
+                $query->orWhereIn('id', $ids);
+            }
+
+            $query->orWhereIn('address', $lowered)
+                  ->orWhereIn('mac_address', $lowered);
+        });
     }
 }

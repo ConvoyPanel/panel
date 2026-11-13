@@ -229,7 +229,8 @@ class OverviewService
     {
         $stats = Address::query()
             ->selectRaw('COUNT(*) as total')
-            ->selectRaw('SUM(server_id IS NOT NULL) as assigned')
+            // COUNT(CASE …) rather than SUM(condition): Postgres can't sum a boolean.
+            ->selectRaw('COUNT(CASE WHEN server_id IS NOT NULL THEN 1 END) as assigned')
             ->first();
 
         $total = (int) $stats->total;
@@ -248,9 +249,9 @@ class OverviewService
     {
         $stats = Backup::query()
             ->selectRaw('COUNT(*) as total')
-            ->selectRaw('SUM(completed_at IS NOT NULL) as completed')
-            ->selectRaw('SUM(is_successful = 1) as successful')
-            ->selectRaw('SUM(completed_at IS NULL) as pending')
+            ->selectRaw('COUNT(CASE WHEN completed_at IS NOT NULL THEN 1 END) as completed')
+            ->selectRaw('COUNT(CASE WHEN is_successful THEN 1 END) as successful')
+            ->selectRaw('COUNT(CASE WHEN completed_at IS NULL THEN 1 END) as pending')
             ->first();
 
         return [
@@ -265,7 +266,7 @@ class OverviewService
     {
         $stats = ISO::query()
             ->selectRaw('COUNT(*) as total')
-            ->selectRaw('SUM(is_successful = 1) as successful')
+            ->selectRaw('COUNT(CASE WHEN is_successful THEN 1 END) as successful')
             ->first();
 
         $total = (int) $stats->total;

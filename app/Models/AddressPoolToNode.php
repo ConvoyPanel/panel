@@ -22,6 +22,14 @@ class AddressPoolToNode extends Model
 
     public $timestamps = false;
 
+    /**
+     * The table has no id column. Left incrementing, Eloquent inserts with
+     * `RETURNING "id"` on Postgres, which fails; MySQL never asked.
+     */
+    public $incrementing = false;
+
+    protected $primaryKey = null;
+
     public function addressPool(): BelongsTo
     {
         return $this->belongsTo(AddressPool::class);
