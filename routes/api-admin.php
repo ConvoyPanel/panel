@@ -44,6 +44,8 @@ Route::prefix('/settings')->group(function () {
     Route::put('/telemetry', [Admin\Settings\TelemetryController::class, 'update']);
     Route::get('/telemetry/report', [Admin\Settings\TelemetryController::class, 'report']);
     Route::post('/telemetry/notice/dismiss', [Admin\Settings\TelemetryController::class, 'dismissNotice']);
+
+    Route::get('/upgrade', Admin\Settings\UpgradeController::class);
 });
 
 /*
