@@ -7,7 +7,6 @@ import useUsersSWR from '@/api/admin/users/useUsersSWR'
 import DescriptiveItemComponent from '@/components/elements/DescriptiveItemComponent'
 import SelectForm from '@/components/elements/forms/SelectForm'
 
-
 const UsersSelectForm = () => {
     const { setValue, watch } = useFormContext()
     const userId: string = watch('userId')
@@ -33,6 +32,10 @@ const UsersSelectForm = () => {
             searchable
             searchValue={query}
             onSearchChange={val => setQuery(val)}
+            // The API already searched by name, email and id. Mantine filtering
+            // the results again by label (the name) hid every user found by
+            // email.
+            filter={() => true}
             loading={isValidating || isLoading}
             nothingFound={'No users found'}
             name={'userId'}
