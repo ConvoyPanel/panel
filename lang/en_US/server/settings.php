@@ -33,6 +33,9 @@ return [
         'unused' => 'Unused Devices',
         'unused_empty' => 'There are no unused devices.',
         'no_boot_device_warning' => 'No boot device has been configured. Your VM will not start.',
+        'remove_device' => 'Remove :device from the boot order',
+        'add_device' => 'Add :device to the boot order',
+        'reorder_device' => 'Drag to reorder :device',
     ],
     'nameservers' => [
         'title' => 'Nameservers',

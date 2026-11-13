@@ -28,6 +28,7 @@ const SearchBar = ({ value, onChange, buttonText, onClick }: Props) => {
             <Button
                 className='grid sm:hidden place-items-center'
                 onClick={onClick}
+                aria-label={buttonText}
                 shape='square'
                 variant='filled'
             >
