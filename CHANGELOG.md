@@ -7,25 +7,27 @@ follows [Semantic Versioning](https://semver.org) guidelines.
 
 ## Unreleased
 
-v5 rewrites the panel: a new frontend, PostgreSQL instead of MySQL, Anchor instead of Coterm, and a container install.
+The rewritten panel: a new frontend, PostgreSQL instead of MySQL, Anchor instead of Coterm, and a container install.
+It comes after 5.x, the transitional release of the 4.x panel.
 
-### Upgrading from 4.x
+### Upgrading
 
-The upgrade is a one-time cutover with a maintenance window, not an in-place update. Customers' virtual machines keep
-running throughout. Only the panel is offline.
+Upgrading is a one-time cutover with a maintenance window, not an in-place update. Customers' virtual machines keep
+running throughout. Only the panel is offline. 5.x moves an install onto PostgreSQL and this container setup first,
+which leaves less to do here.
 
-- **Move the database to PostgreSQL 17.** MySQL is no longer supported.
+- **Be on PostgreSQL 17.** MySQL is no longer supported. 5.x makes the move. Coming straight from 4.x,
   [`database/cutover/RUNBOOK.md`](database/cutover/RUNBOOK.md) copies the data across and runs the renaming migrations.
 - **Add an image for every OS you offer.** Templates are gone and are not migrated. A template row is only a VMID,
   while an image needs the disks and their hardware profile.
-- **Enroll each Proxmox host with Anchor.** Coterm is gone. Nodes carried over from 4.x work for everything except the
-  console until their host is enrolled.
+- **Enroll each Proxmox host with Anchor.** Coterm is gone. Nodes carried over from 4.x or 5.x work for everything
+  except the console until their host is enrolled.
 - **Update your billing module and other API clients** for the changes in the table below.
 - **Check mail after upgrading.** SMTP `MAIL_*` values are imported into the panel once and not read again.
 
 #### Breaking API changes
 
-| What | 4.x | v5 |
+| What | 4.x and 5.x | After |
 | --- | --- | --- |
 | Power commands | `PATCH /api/client/servers/{server}/state` with `state` | `POST /api/client/servers/{server}/power` with `command`. `GET …/state` is unchanged. The admin and application APIs have the same pair. |
 | Server status | `status` | `lifecycle`, `suspendedAt` and `powerState` |
@@ -200,7 +202,7 @@ running throughout. Only the panel is offline.
 
 ### Changed
 
-- **PostgreSQL 17 only.** See [Upgrading from 4.x](#upgrading-from-4x).
+- **PostgreSQL 17 only.** See [Upgrading](#upgrading).
 - **PHP 8.4, Laravel 12 and React 19.**
 - **New frontend.** A sidebar that switches to a server's own pages when you open one, light and dark themes, and
   layouts that work on a phone. Page subtitles are gone, and page actions sit on a toolbar under the heading.
@@ -215,7 +217,7 @@ running throughout. Only the panel is offline.
 
 ### Removed
 
-- **Templates, Coterm, and adding nodes by hand.** See [Upgrading from 4.x](#upgrading-from-4x).
+- **Templates, Coterm, and adding nodes by hand.** See [Upgrading](#upgrading).
 
 ### Fixed
 
