@@ -220,7 +220,7 @@ upgrade/import-v4.log
 | `collected_at` | UTC, when collection started. |
 | `since` | The window the container logs cover, as passed to `docker compose logs --since`. |
 | `host` | As above. Any field may be `null` when it can't be read. No hostname or IP addresses. |
-| `containers` | One entry per service in the compose project, running or not. `health` is `null` for a service with no healthcheck. |
+| `containers` | One entry per service in the compose project, running or not. `state` is Docker's (`running`, `exited`, `restarting`, …), or `missing` for a service defined in the compose file that has no container at all. `health` is `null` for a service with no healthcheck. |
 | `skipped` | Each optional item that was left out, and why. |
 
 ### `env.json`
@@ -249,7 +249,8 @@ followed by `[stacktrace]` lines), which the console groups by exception.
 { "count": 3, "recent": [{ "failed_at": "2026-11-12T21:00:04Z", "queue": "default", "job": "Convoy\\Jobs\\Server\\MonitorBackupJob", "exception": "Convoy\\Exceptions\\Repository\\Proxmox\\ProxmoxConnectionException: ..." }] }
 ```
 
-`exception` is the first line of the stored exception only.
+`exception` is the first line of the stored exception only. `job` is the payload's `displayName`, or `null`
+when the payload has none.
 
 ## Retention
 
