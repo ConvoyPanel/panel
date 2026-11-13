@@ -14,7 +14,7 @@ class BulkAddressCreationService
         string      $from,
         string      $to,
         int         $poolId,
-        ?int        $serverId = null,
+        ?int        $serverId,
         int         $cidr,
         string      $gateway,
         ?string     $macAddress = null,
