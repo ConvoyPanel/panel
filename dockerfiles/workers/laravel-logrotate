@@ -1,9 +1,0 @@
-/var/www/storage/logs/laravel.log {
-    maxsize 50M
-    hourly
-    missingok
-    rotate 8
-    compress
-    notifempty
-    su www-data www-data
-}
