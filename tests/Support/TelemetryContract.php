@@ -25,7 +25,7 @@ final class TelemetryContract
      */
     public static function errors(array $report): array
     {
-        $count = ['required', 'integer', 'min:0', 'max:2000000000'];
+        $count = ['required', 'integer', 'min:0', 'max:10000000'];
         $version = ['string', 'max:64', 'regex:'.self::VERSION];
 
         return Validator::make($report, [
@@ -50,12 +50,12 @@ final class TelemetryContract
             'users.active_admins.week' => $count,
             'users.active_admins.month' => $count,
 
-            'nodes' => ['present', 'list', 'max:1000'],
+            'nodes' => ['present', 'list', 'max:500'],
             'nodes.*.proxmox' => ['nullable', ...$version],
             'nodes.*.agent' => ['nullable', ...$version],
-            'nodes.*.cpus' => ['required', 'integer', 'min:0', 'max:100000'],
+            'nodes.*.cpus' => ['required', 'integer', 'min:0', 'max:10000'],
             'nodes.*.memory_gib' => ['required', 'integer', 'min:0', 'max:1000000'],
-            'nodes.*.servers' => $count,
+            'nodes.*.servers' => ['required', 'integer', 'min:0', 'max:100000'],
 
             'resources' => ['sometimes', self::slugMap()],
             'features' => ['sometimes', self::slugMap(booleans: true)],
@@ -73,8 +73,8 @@ final class TelemetryContract
                 return;
             }
 
-            if (count($value) > 500) {
-                $fail("{$attribute} may not have more than 500 keys.");
+            if (count($value) > 200) {
+                $fail("{$attribute} may not have more than 200 keys.");
 
                 return;
             }
@@ -86,7 +86,7 @@ final class TelemetryContract
                     return;
                 }
 
-                if ($booleans ? ! is_bool($item) : ! is_int($item) || $item < 0 || $item > 2000000000) {
+                if ($booleans ? ! is_bool($item) : ! is_int($item) || $item < 0 || $item > 10000000) {
                     $fail("{$attribute}.{$key} is not a ".($booleans ? 'boolean' : 'count').'.');
 
                     return;

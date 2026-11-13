@@ -2,6 +2,7 @@
 
 use App\Enums\Audit\AuditEvent;
 use App\Models\AuditLog;
+use App\Models\Location;
 use App\Models\Node;
 use App\Models\Server;
 use App\Models\User;
@@ -176,4 +177,31 @@ it('documents every resource and feature key it sends', function () use ($build)
     foreach ([...array_keys($report['resources']), ...array_keys($report['features'])] as $key) {
         expect($docs)->toContain("`{$key}`");
     }
+});
+
+// The console refuses a whole report with one value past its limits, so the
+// builder caps instead of sending them (docs/telemetry.md, "General rules").
+it('sends at most the 500 nodes the console accepts', function () use ($build) {
+    $location = Location::factory()->create();
+    Node::factory()->count(TelemetryReportBuilder::MAX_NODES + 1)->create(['location_id' => $location->id]);
+
+    $report = $build();
+
+    expect($report['nodes'])->toHaveCount(TelemetryReportBuilder::MAX_NODES)
+        ->and(TelemetryContract::errors($report))->toBe([]);
+});
+
+it('caps counts and node figures at the console\'s limits', function () {
+    Node::factory()->create(['cpu_count' => 50_000, 'memory' => 2_000_000 * 1024 ** 3]);
+    app(ViewCounter::class)->record('admin.nodes.show', TelemetryReportBuilder::MAX_COUNT + 5);
+
+    $built = app(TelemetryReportBuilder::class)->build(CarbonImmutable::now());
+
+    expect(TelemetryContract::errors($built->payload))->toBe([])
+        ->and($built->payload['nodes'][0]['cpus'])->toBe(10_000)
+        ->and($built->payload['nodes'][0]['memory_gib'])->toBe(1_000_000)
+        ->and($built->payload['views'])->toBe(['admin.nodes.show' => TelemetryReportBuilder::MAX_COUNT])
+        // What the job takes off the counter once the console accepts: the
+        // capped amount, so the rest is reported the next day.
+        ->and($built->views)->toBe(['admin.nodes.show' => TelemetryReportBuilder::MAX_COUNT]);
 });

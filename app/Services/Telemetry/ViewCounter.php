@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Cache;
 class ViewCounter
 {
     /** The console's limit on keys per map. */
-    public const MAX_KEYS = 500;
+    public const MAX_KEYS = TelemetryReportBuilder::MAX_MAP_KEYS;
 
     private const PREFIX = 'telemetry:views:';
 

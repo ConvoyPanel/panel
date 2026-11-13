@@ -59,6 +59,24 @@ class TelemetryReportBuilder
     /** The OAuth drivers the panel ships. A provider an operator added to the config is not reported by name. */
     private const OAUTH_PROVIDERS = ['google', 'github', 'gitlab', 'oidc'];
 
+    /*
+     * The console's limits (its StoreTelemetryReportRequest and SlugMap). One
+     * value past them gets the whole report refused with a 422, every day the
+     * panel stays past them, so the builder caps values instead of sending
+     * them. tests/Support/TelemetryContract.php holds the same limits.
+     */
+    public const MAX_COUNT = 10_000_000;
+
+    public const MAX_NODES = 500;
+
+    public const MAX_MAP_KEYS = 200;
+
+    private const MAX_NODE_CPUS = 10_000;
+
+    private const MAX_NODE_MEMORY_GIB = 1_000_000;
+
+    private const MAX_NODE_SERVERS = 100_000;
+
     public function __construct(
         private TelemetryService $telemetry,
         private ViewCounter $views,
@@ -72,7 +90,9 @@ class TelemetryReportBuilder
 
     public function build(CarbonImmutable $until): TelemetryReport
     {
-        $views = $this->views->peek();
+        // Capped before it is also handed back as what was sent, so a counter
+        // above the cap keeps its remainder for the next report.
+        $views = array_map(self::count(...), $this->views->peek());
 
         return new TelemetryReport(
             payload: [
@@ -133,10 +153,10 @@ class TelemetryReportBuilder
         );
 
         return [
-            'total' => User::query()->count(),
-            'admins' => User::query()->where('root_admin', true)->count(),
-            'active' => $active(false),
-            'active_admins' => $active(true),
+            'total' => self::count(User::query()->count()),
+            'admins' => self::count(User::query()->where('root_admin', true)->count()),
+            'active' => array_map(self::count(...), $active(false)),
+            'active_admins' => array_map(self::count(...), $active(true)),
         ];
     }
 
@@ -146,7 +166,7 @@ class TelemetryReportBuilder
         return Node::query()
             ->withCount('servers')
             ->orderBy('id')
-            ->limit(1000)
+            ->limit(self::MAX_NODES)
             ->get()
             ->map(fn (Node $node) => [
                 // What the host reported when its Anchor enrolled. A node added without an Anchor
@@ -154,9 +174,9 @@ class TelemetryReportBuilder
                 // every "View report") wait on every node.
                 'proxmox' => self::version($node->agent_reported_facts['pve_version'] ?? null),
                 'agent' => self::version($node->agent_version),
-                'cpus' => max(0, $node->cpu_count),
-                'memory_gib' => (int) round(max(0, $node->memory) / 1024 ** 3),
-                'servers' => (int) $node->servers_count,
+                'cpus' => min(max(0, $node->cpu_count), self::MAX_NODE_CPUS),
+                'memory_gib' => min((int) round(max(0, $node->memory) / 1024 ** 3), self::MAX_NODE_MEMORY_GIB),
+                'servers' => min((int) $node->servers_count, self::MAX_NODE_SERVERS),
             ])
             ->values()
             ->all();
@@ -169,7 +189,7 @@ class TelemetryReportBuilder
             ->whereHas('addressBlock', fn ($query) => $query->where('version', $version->value))
             ->count();
 
-        return [
+        return array_map(self::count(...), [
             'address_blocks' => AddressBlock::query()->count(),
             'addresses.assigned' => Address::query()->whereNotNull('server_id')->count(),
             'addresses.ipv4' => $addresses(AddressVersion::IPv4),
@@ -192,7 +212,7 @@ class TelemetryReportBuilder
             'users.passkeys' => User::query()->whereHas('passkeys')->count(),
             'users.two_factor' => User::query()->whereNotNull('two_factor_confirmed_at')->count(),
             'vlans' => Vlan::query()->count(),
-        ];
+        ]);
     }
 
     /** @return array<string, bool> */
@@ -248,13 +268,20 @@ class TelemetryReportBuilder
 
         foreach ($counts as $event => $count) {
             if (AuditEvent::tryFrom((string) $event) !== null && TelemetryKey::valid((string) $event)) {
-                $activity[(string) $event] = (int) $count;
+                $activity[(string) $event] = self::count((int) $count);
             }
         }
 
         ksort($activity);
 
-        return $activity;
+        // The catalog has well under 200 events today; the slice only keeps a
+        // future catalog from getting the whole report refused.
+        return array_slice($activity, 0, self::MAX_MAP_KEYS, true);
+    }
+
+    private static function count(int $value): int
+    {
+        return min(max(0, $value), self::MAX_COUNT);
     }
 
     private static function version(?string $value): ?string

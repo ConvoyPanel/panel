@@ -94,10 +94,13 @@ The connect timeout is 5 seconds and the whole request has 10.
 
 General rules:
 
-- Every count is a whole number from 0 to 2,000,000,000.
+- Every count is a whole number from 0 to 10,000,000.
 - Keys in `resources`, `features`, `activity` and `views` match
   `^[a-z0-9]+(?:[._-][a-z0-9]+)*$`, are at most 120 characters, and a map has
-  at most 500 keys. `features` values are booleans; the others are counts.
+  at most 200 keys. `features` values are booleans; the others are counts.
+- These are the console's limits, and one value past them gets the whole
+  report refused. The panel caps a count at 10,000,000 and leaves keys past
+  the 200th out rather than send a report the console would refuse.
 - A version starts with `major.minor` digits. The panel sends only the digits
   (`8.4.12`, never `8.4.12-1ubuntu2`), and the console keeps only the digits.
 - The console drops fields it doesn't know. New fields and keys are additive.
@@ -136,7 +139,9 @@ on its own.
 
 ### `nodes`
 
-One entry per node, at most 1,000.
+One entry per node, at most 500: a panel with more nodes reports its first
+500 by id. Each field has its own cap: `cpus` 10,000, `memory_gib` 1,000,000
+and `servers` 100,000.
 
 | Field | Meaning |
 | --- | --- |
