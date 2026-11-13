@@ -33,6 +33,9 @@ return [
         'unused' => 'Unused Devices',
         'unused_empty' => 'None',
         'no_boot_device_warning' => 'This server won\'t start without a boot device. Add one from Unused Devices.',
+        'remove_device' => 'Remove :device from the boot order',
+        'add_device' => 'Add :device to the boot order',
+        'reorder_device' => 'Drag to reorder :device',
     ],
     'nameservers' => [
         'title' => 'Nameservers',

@@ -2,6 +2,7 @@ import { useStoreActions, useStoreState } from '@/state'
 import { MoonIcon, SunIcon } from '@heroicons/react/20/solid'
 import { Switch } from '@mantine/core'
 import { ReactNode, useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { CSSTransition } from 'react-transition-group'
 
 import ContentContainer from '@/components/elements/ContentContainer'
@@ -22,6 +23,7 @@ const PageContentBlock = ({
 }: PageContentBlockProps) => {
     const theme = useStoreState(state => state.settings.data!.theme)
     const setTheme = useStoreActions(actions => actions.settings.setTheme)
+    const { t: tStrings } = useTranslation('strings')
     const ref = useRef(null)
 
     useEffect(() => {
@@ -60,6 +62,7 @@ const PageContentBlock = ({
 
                         <Switch
                             size='md'
+                            aria-label={tStrings('dark_mode')}
                             checked={theme === 'dark'}
                             onChange={() =>
                                 setTheme(theme === 'light' ? 'dark' : 'light')

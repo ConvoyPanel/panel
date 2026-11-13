@@ -2,6 +2,7 @@ import { useStoreActions, useStoreState } from '@/state'
 import { MoonIcon, SunIcon } from '@heroicons/react/20/solid'
 import { LoadingOverlay, Switch } from '@mantine/core'
 import { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 
@@ -20,6 +21,7 @@ const LoginFormContainer = ({
 }: Props) => {
     const theme = useStoreState(state => state.settings.data!.theme)
     const setTheme = useStoreActions(actions => actions.settings.setTheme)
+    const { t: tStrings } = useTranslation('strings')
 
     return (
         <div className='min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-accent-100'>
@@ -45,6 +47,7 @@ const LoginFormContainer = ({
                     </p>
                     <Switch
                         size='md'
+                        aria-label={tStrings('dark_mode')}
                         checked={theme === 'dark'}
                         onChange={() =>
                             setTheme(theme === 'light' ? 'dark' : 'light')
