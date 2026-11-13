@@ -33,6 +33,14 @@ class Handler extends ExceptionHandler
             //
         });
 
+        // Everything under /api answers in JSON whatever the Accept header
+        // says. A signed-out request without `Accept: application/json` (a
+        // script, curl) used to be redirected to route('login'), which the
+        // panel doesn't define, so it got a 500 instead of a 401.
+        $this->shouldRenderJsonWhen(
+            fn (Request $request, Throwable $e) => $request->expectsJson() || $request->is('api/*')
+        );
+
         // A missing route-bound model came back with Laravel's own message --
         // "No query results for model [Convoy\Models\Server]" -- which the panel
         // showed as-is. Name the record in plain words instead. Laravel has
