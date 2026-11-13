@@ -1,5 +1,6 @@
 import { AdminServerContext } from '@/state/admin/server'
 import { useFlashKey } from '@/util/useFlash'
+import useNotify from '@/util/useNotify'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { FormProvider, useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
@@ -14,7 +15,6 @@ import TextInputForm from '@/components/elements/forms/TextInputForm'
 
 import AddressesMultiSelectForm from '@/components/admin/servers/AddressesMultiSelectForm'
 
-
 const ServerBuildSettingsCard = () => {
     const server = AdminServerContext.useStoreState(state => state.server.data!)
     const setServer = AdminServerContext.useStoreActions(
@@ -24,6 +24,7 @@ const ServerBuildSettingsCard = () => {
         `admin.servers.${server.uuid}.settings.hardware.build`
     )
     const { t: tStrings } = useTranslation('strings')
+    const notify = useNotify()
     const { t } = useTranslation('admin.servers.settings')
     const { t: tIndex } = useTranslation('admin.servers.index')
 
@@ -61,9 +62,10 @@ const ServerBuildSettingsCard = () => {
             addressIds: pluckedAddressIds,
             snapshotLimit: server.limits.snapshots?.toString() ?? '',
             backupLimit: server.limits.backups?.toString() ?? '',
-            bandwidthLimit: server.limits.bandwidth !== null
-                ? (server.limits.bandwidth / 1048576).toString()
-                : '',
+            bandwidthLimit:
+                server.limits.bandwidth !== null
+                    ? (server.limits.bandwidth / 1048576).toString()
+                    : '',
             bandwidthUsage: (server.usages.bandwidth / 1048576).toString(),
         },
     })
@@ -105,6 +107,9 @@ const ServerBuildSettingsCard = () => {
                     bandwidthLimit !== '' ? bandwidthLimit.toString() : '',
                 bandwidthUsage: bandwidthUsage.toString(),
             })
+
+            // Nothing on the page changes visibly after a save, so say so.
+            notify({ message: tStrings('saved'), color: 'green' })
         } catch (error) {
             clearAndAddHttpError(error as any)
         }

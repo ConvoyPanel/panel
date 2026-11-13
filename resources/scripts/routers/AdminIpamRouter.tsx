@@ -33,18 +33,22 @@ export const routes: Route[] = [
                 path: ':poolId',
                 loader: async ({ params }) => {
                     try {
-                        const poolId = parseInt(params.poolId!);
-                        const pool = await query(getPoolKey(poolId), () => getAddressPool(poolId));
-                        return pool;
+                        const poolId = parseInt(params.poolId!)
+                        const pool = await query(getPoolKey(poolId), () =>
+                            getAddressPool(poolId)
+                        )
+                        return pool
                     } catch (error) {
-                        return null;
+                        return null
                     }
                 },
                 element: lazyLoad(lazy(() => import('./AdminIpamRouter'))),
                 handle: {
+                    // `data` is the loader's pool, which has an `id`, not a
+                    // `poolId`: the crumb linked to /admin/ipam/undefined.
                     crumb: data => ({
-                        to: `/admin/ipam/${data.poolId}`,
-                        element: data.name,
+                        to: `/admin/ipam/${data?.id}`,
+                        element: data?.name,
                     }),
                 },
                 children: [
@@ -57,13 +61,17 @@ export const routes: Route[] = [
                         loader: async ({ params }) => {
                             try {
                                 const id = parseInt(params.poolId!)
-                                const page = params.page ? parseInt(params.page) : 1
-                                const addresses = await query(getAddressesKey(id, page, ''), () =>
-                                    getAddresses(id, {
-                                        page,
-                                        query: '',
-                                        include: ['server'],
-                                    })
+                                const page = params.page
+                                    ? parseInt(params.page)
+                                    : 1
+                                const addresses = await query(
+                                    getAddressesKey(id, page, ''),
+                                    () =>
+                                        getAddresses(id, {
+                                            page,
+                                            query: '',
+                                            include: ['server'],
+                                        })
                                 )
                                 return addresses
                             } catch (error) {
@@ -116,8 +124,16 @@ const AdminIpamRouter = () => {
             path: '/admin/users',
         },
         {
+            name: 'Coterms',
+            path: '/admin/coterms',
+        },
+        {
             name: tStrings('token_other'),
             path: '/admin/tokens',
+        },
+        {
+            name: tStrings('setting_other'),
+            path: '/admin/settings',
         },
     ]
 
