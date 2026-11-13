@@ -7,6 +7,7 @@ use App\Data\PaginationMeta;
 use App\Data\User\UserData;
 use App\Data\User\UserInviteData;
 use App\Enums\Audit\AuditEvent;
+use App\Enums\User\UserType;
 use App\Facades\Audit;
 use App\Http\Requests\Admin\Users\StoreUserRequest;
 use App\Http\Requests\Admin\Users\UpdateUserRequest;
@@ -37,11 +38,20 @@ class UserController
     public function index(Request $request)
     {
         $users = QueryBuilder::for(User::query())
+            ->with('adminRole')
             ->withCount(['servers'])
             ->allowedFilters(
-                [AllowedFilter::exact('id'), 'name', AllowedFilter::exact(
-                    'email',
-                ), AllowedFilter::custom('*', new FiltersUserWildcard)],
+                [
+                    AllowedFilter::exact('id'),
+                    'name',
+                    AllowedFilter::exact('email'),
+                    // Guests are provisioned by a customer sharing a server rather than by the
+                    // operator, and conflating the two is exactly what this filter exists to
+                    // prevent. `admin_role_id` filters staff the same way.
+                    AllowedFilter::exact('type'),
+                    AllowedFilter::exact('adminRoleId', 'admin_role_id'),
+                    AllowedFilter::custom('*', new FiltersUserWildcard),
+                ],
             )
             // The admin list is sortable by every column it shows. Sorts are named after the
             // response's camelCase properties, since the table sends the column it sorted by.
@@ -49,7 +59,12 @@ class UserController
                 'id',
                 'name',
                 'email',
-                AllowedSort::field('rootAdmin', 'root_admin'),
+                // `root_admin` is no longer a column, and a query builder cannot see the
+                // accessor that replaced it. Sorting by the role id groups the unassigned
+                // accounts together and the staff by role, which is what the column shows.
+                AllowedSort::field('rootAdmin', 'admin_role_id'),
+                AllowedSort::field('adminRoleId', 'admin_role_id'),
+                'type',
                 AllowedSort::field('serversCount', 'servers_count'),
                 AllowedSort::field('createdAt', 'created_at'),
             ])
@@ -83,7 +98,8 @@ class UserController
             // characters nobody has ever seen. It is not a password anyone can use — the account
             // is unreachable until the invite is redeemed, which is the intended state.
             'password' => $invited ? Str::random(64) : $password,
-            'root_admin' => $request->root_admin,
+            'type' => $request->enum('type', UserType::class) ?? UserType::STANDARD,
+            'admin_role_id' => $request->resolvedAdminRoleId(),
         ])->loadCount(['servers']);
 
         Audit::record(
@@ -91,7 +107,8 @@ class UserController
             subject: $user,
             properties: [
                 'email' => $user->email,
-                'root_admin' => $user->root_admin,
+                'type' => $user->type->value,
+                'admin_role' => $user->adminRole?->name,
                 'invited' => $invited,
             ],
         );
@@ -158,29 +175,54 @@ class UserController
 
     public function update(UpdateUserRequest $request, User $user)
     {
-        // Demoting yourself is a one-way door: the screen you would fix it from is the one you
-        // just lost. Another admin can still do it, which is the point.
-        if ($user->is($request->user()) && $user->root_admin && ! $request->boolean('root_admin')) {
+        $roleId = $request->resolvedAdminRoleId($user);
+        $type = $request->enum('type', UserType::class) ?? $user->type;
+
+        // Changing your own role is a one-way door: the screen you would fix it from is the one
+        // you just narrowed. Another admin can still do it, which is the point.
+        if ($user->is($request->user()) && $roleId !== $user->admin_role_id) {
             throw new BadRequestHttpException(
-                'You cannot remove administrator access from your own account.',
+                'You cannot change the role on the account you are signed in as.',
             );
         }
 
-        DB::transaction(function () use ($request, $user) {
-            // Demoting an admin: revoke their API tokens so elevated access
-            // doesn't linger on tokens issued while they were an admin.
-            if ($user->root_admin && ! $request->boolean('root_admin')) {
+        // A guest exists only to hold shares. The database refuses the combination too; this is
+        // what turns that into a message rather than a 500.
+        if ($type === UserType::GUEST && $roleId !== null) {
+            throw new BadRequestHttpException('A guest account cannot hold an admin role.');
+        }
+
+        if ($type === UserType::GUEST && $user->type !== UserType::GUEST) {
+            $user->loadCount('servers');
+
+            if ($user->servers_count > 0) {
+                throw new BadRequestHttpException(
+                    'This account owns servers, so it cannot be turned into a guest.',
+                );
+            }
+        }
+
+        DB::transaction(function () use ($request, $user, $roleId, $type) {
+            $previousRole = $user->adminRole?->name;
+            $previousType = $user->type;
+            $roleChanged = $roleId !== $user->admin_role_id;
+
+            // Their API tokens were minted while they held the old role, and Sanctum abilities
+            // are checked against the token rather than re-derived from the account. Revoking
+            // them is what keeps a narrowed role from lingering on a credential.
+            if ($roleChanged && $user->admin_role_id !== null) {
                 $user->tokens()->delete();
             }
-
-            $wasAdmin = $user->root_admin;
 
             $user->update([
                 'name' => $request->name,
                 'email' => $request->email,
-                'root_admin' => $request->root_admin,
+                'type' => $type,
+                'admin_role_id' => $roleId,
                 ...(is_null($request->password) ? [] : ['password' => $request->password]),
             ]);
+
+            $user->unsetRelation('adminRole');
 
             // Which fields moved, never their values — this covers a password reset performed on
             // someone else's account, which is exactly the kind of thing the log exists for.
@@ -191,9 +233,27 @@ class UserController
                     'email' => $user->wasChanged('email') ? $user->email : null,
                     'name' => $user->wasChanged('name') ? $user->name : null,
                     'password_changed' => $user->wasChanged('password') ?: null,
-                    'root_admin' => $wasAdmin !== $user->root_admin ? $user->root_admin : null,
                 ], fn ($value) => $value !== null),
             );
+
+            // Separate, permanently retained events: who can administer the panel and which
+            // accounts are outsiders are the two questions a privilege investigation starts from,
+            // and neither should be buried in a generic "user updated" row.
+            if ($roleChanged) {
+                Audit::record(
+                    AuditEvent::ADMIN_USER_ROLE_CHANGED,
+                    subject: $user,
+                    properties: ['from' => $previousRole, 'to' => $user->adminRole?->name],
+                );
+            }
+
+            if ($previousType !== $user->type) {
+                Audit::record(
+                    AuditEvent::ADMIN_USER_TYPE_CHANGED,
+                    subject: $user,
+                    properties: ['from' => $previousType->value, 'to' => $user->type->value],
+                );
+            }
         });
 
         $user->loadCount(['servers']);
@@ -230,6 +290,13 @@ class UserController
 
     public function getSSOToken(User $user)
     {
+        // A guest is not a customer of the provider, so there is no billing session for this link
+        // to land in. Minting one would put an operator inside an account that exists only because
+        // somebody else shared a server.
+        if ($user->isGuest()) {
+            throw new BadRequestHttpException('A guest account cannot be signed in to.');
+        }
+
         // A single-use, expiring Laravel signed URL — the integration redirects the browser
         // straight to it. The `nonce` is consumed on first use (see Auth\SsoController) so a
         // captured link cannot be replayed within its short lifetime.

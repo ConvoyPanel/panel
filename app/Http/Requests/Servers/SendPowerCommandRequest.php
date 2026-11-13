@@ -16,7 +16,12 @@ class SendPowerCommandRequest extends BaseApiRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('sendPowerCommand', $this->parameter('server', Server::class));
+        // The command is part of the question: starting a server and pulling its power are
+        // separate permissions on one endpoint, so the gate has to see which was asked for.
+        return $this->user()->can('sendPowerCommand', [
+            $this->parameter('server', Server::class),
+            PowerCommand::tryFrom((string) $this->input('command')),
+        ]);
     }
 
     public function rules(): array

@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Actions\Auth\DisableAuthenticator;
 use App\Actions\Auth\EnableAuthenticator;
+use App\Actions\Auth\EnsureGuestAccessIsEnabled;
 use App\Actions\Auth\RedirectIfSecondFactorAuthenticatable;
 use App\Http\Requests\Auth\SecondFactorLoginRequest;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -48,6 +49,9 @@ class FortifyServiceProvider extends ServiceProvider
                 ? RedirectIfSecondFactorAuthenticatable::class
                 : null,
             AttemptToAuthenticate::class,
+            // After the credentials are proven, so refusing a locked-out guest cannot be used to
+            // discover which addresses have accounts.
+            EnsureGuestAccessIsEnabled::class,
             PrepareAuthenticatedSession::class,
         ]));
 

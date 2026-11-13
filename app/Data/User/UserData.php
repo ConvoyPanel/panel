@@ -2,7 +2,10 @@
 
 namespace App\Data\User;
 
+use App\Data\Admin\AdminRoleData;
+use App\Enums\Admin\AdminPermission;
 use App\Enums\Audit\AuditEvent;
+use App\Enums\User\UserType;
 use App\Models\AuditLog;
 use App\Models\User;
 use Carbon\CarbonImmutable;
@@ -19,7 +22,16 @@ class UserData extends Data
         public string $name,
         public string $email,
         public ?string $avatarUrl,
+        /**
+         * Where the account came from. A guest exists only because somebody shared a server with
+         * an address that had no account; it is never a customer of the provider, and every admin
+         * surface that lists accounts says which is which.
+         */
+        public UserType $type,
+        /** Holds the unrestricted Superadmin role. Narrower roles answer false. */
         public bool $rootAdmin,
+        /** The admin role, or null for an account with no admin access at all. */
+        public ?AdminRoleData $adminRole,
         public int|Optional $serversCount,
         public ?CarbonImmutable $createdAt,
         /*
@@ -44,6 +56,14 @@ class UserData extends Data
          * has no use for their capabilities, and `createdBy` on an API key certainly does not.
          */
         public AccountCapabilitiesData|Optional $accountCapabilities = new Optional,
+        /**
+         * What this account may reach in the admin area, so the sidebar can leave out sections it
+         * would only 403 on. Filled by {@see self::forSelf()} alone -- one person's reach is
+         * nobody else's business.
+         *
+         * @var list<AdminPermission>|Optional
+         */
+        public array|Optional $adminPermissions = new Optional,
     ) {}
 
     public static function fromModel(User $user): self
@@ -53,7 +73,11 @@ class UserData extends Data
             name: $user->name,
             email: $user->email,
             avatarUrl: $user->avatarUrl(),
+            type: $user->type,
             rootAdmin: (bool) $user->root_admin,
+            adminRole: $user->admin_role_id === null || $user->adminRole === null
+                ? null
+                : AdminRoleData::from($user->adminRole),
             serversCount: isset($user->servers_count)
                 ? (int) $user->servers_count
                 : Optional::create(),
@@ -75,6 +99,7 @@ class UserData extends Data
         $base = self::fromModel($user);
 
         $base->accountCapabilities = $capabilities;
+        $base->adminPermissions = $user->adminPermissions();
 
         return $base;
     }

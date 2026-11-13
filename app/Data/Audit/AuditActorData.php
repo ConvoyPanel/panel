@@ -43,7 +43,7 @@ class AuditActorData extends Data
         // Masking applies only to *other people's* admin actions seen by a non-admin. Viewers
         // always see their own name, and admins always see the truth.
         $isOtherAdmin = $actor instanceof User
-            && $actor->root_admin
+            && $actor->isAdmin()
             && ! $actor->is($viewer);
 
         if ($isOtherAdmin && ! $viewerIsAdmin && ! app(AuditSettings::class)->reveal_staff_identity) {

@@ -14,6 +14,7 @@ use App\Data\Admin\Overview\ResourceAllocationData;
 use App\Data\Admin\Overview\ServerBreakdownData;
 use App\Enums\Node\Storage\StorageContentType;
 use App\Enums\Server\ServerLifecycle;
+use App\Enums\User\UserType;
 use App\Models\Address;
 use App\Models\AddressBlockGroup;
 use App\Models\Backup;
@@ -206,7 +207,8 @@ class OverviewService
         return new FleetSummaryData(
             servers: (int) $lifecycles->sum(),
             nodes: $nodes->count(),
-            users: User::query()->count(),
+            users: User::query()->where('type', '=', UserType::STANDARD)->count(),
+            guests: User::query()->where('type', '=', UserType::GUEST)->count(),
             locations: Location::query()->count(),
             failedServers: $this->failedServers($lifecycles),
             flaggedClusters: Cluster::query()->whereNotNull('flagged_at')->count(),

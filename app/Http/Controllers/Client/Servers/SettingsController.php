@@ -66,7 +66,7 @@ class SettingsController
 
     public function getImageGroups(Request $request, Server $server)
     {
-        $isAdmin = $request->user()->root_admin;
+        $isAdmin = $request->user()->isAdmin();
 
         $groups = QueryBuilder::for(ImageGroup::query())
             ->allowedFilters(['name']);
@@ -188,7 +188,7 @@ class SettingsController
         // node happens to hold the file yet is settled at mount time, not here.
         $query = ISO::query();
 
-        if (! $request->user()->root_admin) {
+        if (! $request->user()->isAdmin()) {
             $query->where('hidden', '=', false);
         }
 

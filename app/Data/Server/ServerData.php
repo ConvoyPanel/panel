@@ -5,7 +5,9 @@ namespace App\Data\Server;
 use App\Data\Node\NodeData;
 use App\Enums\Server\PowerState;
 use App\Enums\Server\ServerLifecycle;
+use App\Enums\Server\ServerPermission;
 use App\Models\Server;
+use App\Models\User;
 use App\Services\Nodes\GuestStateCache;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Auth;
@@ -78,12 +80,25 @@ class ServerData extends Data
         public ?OveragePenaltyData $overagePenalty,
         public ?int $vlanTag,
         public CarbonImmutable $createdAt,
+        /**
+         * Whether the account this payload was built for owns the server, and what it may do on
+         * it. A sub-user gets the server's own permission list; the owner gets all of them.
+         *
+         * Here rather than on a second request because every server screen needs it to decide
+         * which tabs and buttons exist, and a page that renders a control the API will refuse is
+         * worse than one that never offered it.
+         */
+        public bool $isOwner,
+        /** @var list<ServerPermission> */
+        public array $permissions,
         #[LoadRelation]
         public Lazy|NodeData $node,
     ) {}
 
     public static function fromModel(Server $server): self
     {
+        $viewer = self::viewer();
+
         return new self(
             id: $server->id,
             uuid: $server->uuid,
@@ -97,8 +112,8 @@ class ServerData extends Data
             description: $server->description,
             lifecycle: $server->lifecycle,
             suspendedAt: $server->suspended_at,
-            flaggedAt: Auth::user()?->root_admin ? $server->flagged_at : null,
-            flagReason: Auth::user()?->root_admin ? $server->flag_reason : null,
+            flaggedAt: self::viewerIsStaff() ? $server->flagged_at : null,
+            flagReason: self::viewerIsStaff() ? $server->flag_reason : null,
             powerState: app(GuestStateCache::class)->stateFor($server),
             cpu: $server->cpu,
             memory: (int) $server->memory,
@@ -112,11 +127,42 @@ class ServerData extends Data
             overagePenalty: $server->overage_penalty,
             vlanTag: $server->vlan_tag,
             createdAt: CarbonImmutable::parse($server->created_at),
+            isOwner: $viewer !== null && $viewer->id === $server->user_id,
+            permissions: self::permissionsFor($server, $viewer),
             node: Lazy::whenLoaded(
                 'node',
                 $server,
                 fn () => NodeData::from($server->node),
             ),
         );
+    }
+
+    private static function viewer(): ?User
+    {
+        return Auth::user() instanceof User ? Auth::user() : null;
+    }
+
+    /** Fields the customer has no business seeing are gated on staff, not on ownership. */
+    private static function viewerIsStaff(): bool
+    {
+        return self::viewer()?->isAdmin() === true;
+    }
+
+    /**
+     * @return list<ServerPermission>
+     */
+    private static function permissionsFor(Server $server, ?User $viewer): array
+    {
+        if ($viewer === null) {
+            return [];
+        }
+
+        // The owner and an operator both act without a stored grant, so they are handed the whole
+        // catalog rather than a subset the frontend would then have to special-case.
+        if ($viewer->id === $server->user_id || $viewer->isAdmin()) {
+            return ServerPermission::cases();
+        }
+
+        return $server->subuserFor($viewer)?->grantedPermissions() ?? [];
     }
 }

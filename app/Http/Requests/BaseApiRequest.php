@@ -18,7 +18,7 @@ abstract class BaseApiRequest extends FormRequest
 
     public function authorize(): bool
     {
-        return $this->user()->root_admin;
+        return $this->user()->isAdmin();
     }
 
     /**

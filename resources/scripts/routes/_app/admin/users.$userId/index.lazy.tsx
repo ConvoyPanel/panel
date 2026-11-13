@@ -44,13 +44,14 @@ function UserOverview() {
                     )}
                     {user && (
                         <>
-                            <Badge
-                                variant={
-                                    user.rootAdmin ? 'secondary' : 'outline'
-                                }
-                            >
-                                {user.rootAdmin ? 'Administrator' : 'User'}
-                            </Badge>
+                            {user.type === 'guest' && (
+                                <Badge variant={'outline'}>Guest</Badge>
+                            )}
+                            {user.adminRole && (
+                                <Badge variant={'secondary'}>
+                                    {user.adminRole.name}
+                                </Badge>
+                            )}
                             {user.twoFactorEnabled && (
                                 <Badge variant={'outline'}>Two-factor on</Badge>
                             )}

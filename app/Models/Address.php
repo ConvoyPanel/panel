@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use App\Enums\Network\AddressOrigin;
 use App\Enums\Network\AddressState;
 use App\Enums\Network\AddressStateReason;
 use App\Enums\Network\AddressVersion;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -23,6 +25,8 @@ use Staudenmeir\EloquentHasManyDeep\HasRelationships;
  * @property int $prefix_length
  * @property ?string $gateway
  * @property ?string $mac_address
+ * @property AddressOrigin $origin
+ * @property ?CarbonImmutable $observed_at
  * @property AddressBlock $addressBlock
  * @property ?Server $server
  */
@@ -46,6 +50,8 @@ class Address extends Model
         return [
             'state' => AddressState::class,
             'state_reason' => AddressStateReason::class,
+            'origin' => AddressOrigin::class,
+            'observed_at' => 'immutable_datetime',
         ];
     }
 

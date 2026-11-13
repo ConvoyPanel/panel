@@ -24,6 +24,7 @@ use App\Services\Servers\ServerCreationService;
 use App\Services\Servers\ServerDeletionService;
 use App\Services\Servers\ServerNetworkService;
 use App\Services\Servers\ServerSuspensionService;
+use App\Services\Servers\SubuserService;
 use App\Services\Servers\VmSyncService;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Http\Request;
@@ -44,6 +45,7 @@ class ServerController
         private ProxmoxServerClient $serverClient,
         private SendServerPowerCommand $powerCommand,
         private ServerPowerLockService $powerLock,
+        private SubuserService $subusers,
     ) {}
 
     public function index(Request $request)
@@ -102,12 +104,24 @@ class ServerController
                 }
             }
 
+            $previousOwner = $server->user_id;
+
             $server->update($request->validated());
+
+            // The new owner did not share this server with anybody. Inheriting someone else's
+            // guest list means inheriting access they have no way to have reviewed, so a transfer
+            // clears it and the audit line says so.
+            $revoked = $server->user_id === $previousOwner
+                ? 0
+                : $this->subusers->revokeAll($server);
 
             Audit::record(
                 AuditEvent::ADMIN_SERVER_UPDATED,
                 subject: $server,
-                properties: ['changed' => array_keys($server->getChanges())],
+                properties: array_filter([
+                    'changed' => array_keys($server->getChanges()),
+                    'subusers_revoked' => $revoked ?: null,
+                ], fn ($value) => $value !== null),
             );
         });
 

@@ -81,6 +81,12 @@ enum AuditEvent: string
     case SERVER_MEDIA_MOUNTED = 'server.media.mounted';
     case SERVER_MEDIA_UNMOUNTED = 'server.media.unmounted';
 
+    // Sharing a server. Subject is the Server, so the owner sees these in its activity feed --
+    // which is the point: a grant handed out months ago should not be invisible.
+    case SERVER_SUBUSER_ADDED = 'server.subuser.added';
+    case SERVER_SUBUSER_UPDATED = 'server.subuser.updated';
+    case SERVER_SUBUSER_REMOVED = 'server.subuser.removed';
+
     // -----------------------------------------------------------------------------------------
     // Administrative actions on a server. Subject is the Server, so these surface in the owning
     // client's activity feed too — deliberately, since they are things done *to* their server.
@@ -98,6 +104,13 @@ enum AuditEvent: string
     // Recorded by the placement reconciler when PVE moved the guest (HA
     // recovery, migration) and Convoy followed. Actor is the SystemActor.
     case ADMIN_SERVER_REHOMED = 'admin.server.rehomed';
+    // An operator moved the guest to another member of its cluster. Properties
+    // carry the source, the destination and what happened to the addresses.
+    case ADMIN_SERVER_MIGRATED = 'admin.server.migrated';
+    // An existing guest on a registered node was adopted into the panel.
+    // Properties carry the vmid, the node, and each address that was claimed,
+    // left unclaimed or found outside every managed block.
+    case ADMIN_SERVER_ADOPTED = 'admin.server.adopted';
     case ADMIN_BACKUP_DELETED = 'admin.backup.deleted';
 
     // -----------------------------------------------------------------------------------------
@@ -170,6 +183,11 @@ enum AuditEvent: string
     case ADMIN_USER_SSO_TOKEN_GENERATED = 'admin.user.sso-token-generated';
     case ADMIN_USER_INVITED = 'admin.user.invited';
     case ADMIN_USER_INVITE_REVOKED = 'admin.user.invite-revoked';
+    case ADMIN_USER_TYPE_CHANGED = 'admin.user.type-changed';
+    case ADMIN_USER_ROLE_CHANGED = 'admin.user.role-changed';
+    case ADMIN_ROLE_CREATED = 'admin.role.created';
+    case ADMIN_ROLE_UPDATED = 'admin.role.updated';
+    case ADMIN_ROLE_DELETED = 'admin.role.deleted';
     case ADMIN_TOKEN_CREATED = 'admin.token.created';
     case ADMIN_TOKEN_UPDATED = 'admin.token.updated';
     case ADMIN_TOKEN_DELETED = 'admin.token.deleted';
@@ -178,6 +196,7 @@ enum AuditEvent: string
     case ADMIN_SETTINGS_BANDWIDTH_UPDATED = 'admin.settings.bandwidth-updated';
     case ADMIN_SETTINGS_MAIL_UPDATED = 'admin.settings.mail-updated';
     case ADMIN_SETTINGS_MAIL_TESTED = 'admin.settings.mail-tested';
+    case ADMIN_SETTINGS_PERMISSIONS_UPDATED = 'admin.settings.permissions-updated';
 
     // -----------------------------------------------------------------------------------------
     // Presets and templates. Subject is the preset, group, or template.
@@ -195,6 +214,7 @@ enum AuditEvent: string
     case ADMIN_IMAGE_VERSION_UPDATED = 'admin.image-version.updated';
     case ADMIN_IMAGE_VERSION_DELETED = 'admin.image-version.deleted';
     case ADMIN_IMAGE_UPLOADED = 'admin.image.uploaded';
+    case ADMIN_IMAGE_IMPORTED = 'admin.image.imported';
 
     /**
      * How long entries for this event survive. Defaults to the configured prune window; the listed
@@ -226,6 +246,11 @@ enum AuditEvent: string
             self::ADMIN_USER_UPDATED,
             self::ADMIN_USER_DELETED,
             self::ADMIN_USER_SSO_TOKEN_GENERATED,
+            self::ADMIN_USER_TYPE_CHANGED,
+            self::ADMIN_USER_ROLE_CHANGED,
+            self::ADMIN_ROLE_CREATED,
+            self::ADMIN_ROLE_UPDATED,
+            self::ADMIN_ROLE_DELETED,
             self::ADMIN_TOKEN_CREATED,
             self::ADMIN_TOKEN_UPDATED,
             self::ADMIN_TOKEN_DELETED,
@@ -256,7 +281,16 @@ enum AuditEvent: string
             self::ADMIN_USER_SSO_TOKEN_GENERATED => AuditVisibility::ADMIN_ONLY,
             // Names physical nodes; which host a VM lands on is infrastructure
             // detail a client has no lever over and no need to see.
-            self::ADMIN_SERVER_REHOMED => AuditVisibility::ADMIN_ONLY,
+            self::ADMIN_SERVER_REHOMED,
+            self::ADMIN_SERVER_MIGRATED,
+            self::ADMIN_SERVER_ADOPTED => AuditVisibility::ADMIN_ONLY,
+            // What staff may reach, and who is staff. Neither belongs in a customer's feed, and
+            // the subject of a role change is a User a customer can never see anyway.
+            self::ADMIN_USER_TYPE_CHANGED,
+            self::ADMIN_USER_ROLE_CHANGED,
+            self::ADMIN_ROLE_CREATED,
+            self::ADMIN_ROLE_UPDATED,
+            self::ADMIN_ROLE_DELETED => AuditVisibility::ADMIN_ONLY,
             default => AuditVisibility::CLIENT,
         };
     }

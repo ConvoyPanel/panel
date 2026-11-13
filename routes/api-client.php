@@ -119,7 +119,7 @@ Route::prefix('/servers/{server}')->middleware(
     Route::get(
         '/audit-logs',
         Client\Servers\AuditLogController::class,
-    )->name('servers.show.audit-logs');
+    )->name('servers.show.audit-logs')->middleware('can:viewActivity,server');
 
     Route::get(
         '/deployment',
@@ -153,7 +153,8 @@ Route::prefix('/servers/{server}')->middleware(
     Route::get('/resources', Client\Servers\ResourceController::class);
 
     Route::prefix('/backups')->group(function () {
-        Route::get('/', [Client\Servers\BackupController::class, 'index']);
+        Route::get('/', [Client\Servers\BackupController::class, 'index'])
+            ->middleware('can:viewBackups,server');
         Route::post(
             '/',
             [Client\Servers\BackupController::class, 'store'],
@@ -172,10 +173,12 @@ Route::prefix('/servers/{server}')->middleware(
     // index into the remote ruleset, not a Convoy model, so nothing here can
     // be scope-bound to the server.
     Route::prefix('/firewall')->withoutScopedBindings()->group(function () {
-        Route::get('/options', [Client\Servers\FirewallController::class, 'options']);
+        Route::get('/options', [Client\Servers\FirewallController::class, 'options'])
+            ->middleware('can:viewFirewall,server');
         Route::put('/options', [Client\Servers\FirewallController::class, 'updateOptions']);
 
-        Route::get('/rules', [Client\Servers\FirewallController::class, 'index']);
+        Route::get('/rules', [Client\Servers\FirewallController::class, 'index'])
+            ->middleware('can:viewFirewall,server');
         Route::post('/rules', [Client\Servers\FirewallController::class, 'store']);
         Route::put(
             '/rules/{position}',
@@ -190,9 +193,23 @@ Route::prefix('/servers/{server}')->middleware(
             [Client\Servers\FirewallController::class, 'destroy'],
         )->whereNumber('position');
 
-        Route::get('/refs', [Client\Servers\FirewallController::class, 'refs']);
-        Route::get('/macros', [Client\Servers\FirewallController::class, 'macros']);
-        Route::get('/log', [Client\Servers\FirewallController::class, 'log']);
+        Route::middleware('can:viewFirewall,server')->group(function () {
+            Route::get('/refs', [Client\Servers\FirewallController::class, 'refs']);
+            Route::get('/macros', [Client\Servers\FirewallController::class, 'macros']);
+            Route::get('/log', [Client\Servers\FirewallController::class, 'log']);
+        });
+    });
+
+    /*
+     * Who else may reach this server. Owner-only: `manageSubusers` is a policy ability nothing
+     * but ownership (or `servers.manage`) satisfies, so there is no sub-user grant that reaches
+     * this group. `{subuser}` scopes through `{server}`, so a grant on another server 404s.
+     */
+    Route::prefix('/subusers')->middleware('can:manageSubusers,server')->group(function () {
+        Route::get('/', [Client\Servers\SubuserController::class, 'index']);
+        Route::post('/', [Client\Servers\SubuserController::class, 'store']);
+        Route::patch('/{subuser}', [Client\Servers\SubuserController::class, 'update']);
+        Route::delete('/{subuser}', [Client\Servers\SubuserController::class, 'destroy']);
     });
 
     Route::prefix('/settings')->group(function () {
@@ -203,17 +220,19 @@ Route::prefix('/servers/{server}')->middleware(
         Route::get(
             '/image-groups',
             [Client\Servers\SettingsController::class, 'getImageGroups'],
-        )->name('servers.image-groups.index');
+        )->name('servers.image-groups.index')->middleware('can:reinstall,server');
         Route::post(
             '/reinstall',
             [Client\Servers\SettingsController::class, 'reinstall'],
         )->name('servers.show.reinstall');
 
         // Devices plus the boot ordering over them, from one config read.
+        // Either permission opens it: the boot-order editor and the rebuild picker both start
+        // from the same device read.
         Route::get(
             '/hardware/storage',
             [Client\Servers\SettingsController::class, 'getStorage'],
-        );
+        )->middleware('can:viewStorage,server');
         Route::put(
             '/hardware/boot-order',
             [Client\Servers\SettingsController::class, 'updateBootOrder'],
@@ -224,27 +243,27 @@ Route::prefix('/servers/{server}')->middleware(
         Route::get(
             '/hardware/serial-console',
             [Client\Servers\SettingsController::class, 'getSerialConsole'],
-        )->name('servers.show.serial-console');
+        )->name('servers.show.serial-console')->middleware('can:configureConsole,server');
         Route::post(
             '/hardware/serial-console',
             [Client\Servers\SettingsController::class, 'enableSerialConsole'],
-        )->name('servers.show.serial-console.enable');
+        )->name('servers.show.serial-console.enable')->middleware('can:configureConsole,server');
 
         // The same for the display console: a VM whose display is a serial
         // terminal has no VNC server for it to attach to.
         Route::get(
             '/hardware/display-console',
             [Client\Servers\SettingsController::class, 'getDisplayConsole'],
-        )->name('servers.show.display-console');
+        )->name('servers.show.display-console')->middleware('can:configureConsole,server');
         Route::post(
             '/hardware/display-console',
             [Client\Servers\SettingsController::class, 'enableDisplayConsole'],
-        )->name('servers.show.display-console.enable');
+        )->name('servers.show.display-console.enable')->middleware('can:configureConsole,server');
 
         Route::get(
             '/hardware/isos',
             [Client\Servers\SettingsController::class, 'getMedia'],
-        );
+        )->middleware('can:manageMedia,server');
 
         // {iso} cannot be scoped through {server}: the library is panel-wide,
         // so an ISO has no node_id or server_id to resolve against and no
@@ -262,7 +281,7 @@ Route::prefix('/servers/{server}')->middleware(
         Route::get(
             '/network',
             [Client\Servers\SettingsController::class, 'getNetworkSettings'],
-        );
+        )->middleware('can:updateNetworkSettings,server');
         Route::put(
             '/network',
             [Client\Servers\SettingsController::class, 'updateNetworkSettings'],
@@ -271,7 +290,7 @@ Route::prefix('/servers/{server}')->middleware(
         Route::get(
             '/auth',
             [Client\Servers\SettingsController::class, 'getAuthSettings'],
-        );
+        )->middleware('can:updateAuthSettings,server');
         Route::put(
             '/auth',
             [Client\Servers\SettingsController::class, 'updateAuthSettings'],

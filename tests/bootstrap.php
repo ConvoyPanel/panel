@@ -28,3 +28,22 @@ if ($testDatabase = getenv('DB_TEST_DATABASE')) {
     $_ENV['DB_DATABASE'] = $testDatabase;
     putenv('DB_DATABASE='.$testDatabase);
 }
+
+/*
+ * The same precedence problem, for the drivers phpunit.xml already asks for.
+ *
+ * ddev exports CACHE_STORE, QUEUE_CONNECTION and SESSION_DRIVER as real container env vars, so
+ * PHPUnit's <env> entries lose to them exactly the way DB_DATABASE does above — which meant the
+ * suite shared one Redis with the development app. A cached value then outlived the test that
+ * wrote it and reappeared in the next run: `admin:overview` has a fifteen-second TTL, and a test
+ * asserting on it passed or failed depending on how recently the suite had last run.
+ */
+foreach ([
+    'CACHE_STORE' => 'array',
+    'QUEUE_CONNECTION' => 'sync',
+    'SESSION_DRIVER' => 'array',
+] as $key => $value) {
+    $_SERVER[$key] = $value;
+    $_ENV[$key] = $value;
+    putenv("{$key}={$value}");
+}

@@ -1,0 +1,110 @@
+{
+    "schema_version": "2",
+    "name": "Cofoundry Templates",
+    "description": "Proxmox VM disk images built with Cofoundry",
+    "generated_at": "2026-09-04T10:25:51.917Z",
+    "groups": [
+        {
+            "id": "debian",
+            "display_name": "Debian",
+            "description": null,
+            "templates": [
+                {
+                    "name": "debian-13-amd64",
+                    "display": "Debian 13",
+                    "arch": "amd64",
+                    "suggested_vmid": 6102,
+                    "built_at": "2026-09-04T05:28:06Z",
+                    "disks": [
+                        {
+                            "slot": "scsi0",
+                            "role": "system",
+                            "format": "qcow2",
+                            "file": "debian-13-amd64-1111111111111111111111111111111111111111111111111111111111111111.qcow2",
+                            "url": "https://cofoundry.cdn.convoypanel.com/templates/debian/debian-13-amd64/1111111111111111111111111111111111111111111111111111111111111111.qcow2",
+                            "sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+                            "size": 901424128,
+                            "virtual_size": "5G",
+                            "options": {
+                                "discard": "on",
+                                "ssd": 1
+                            }
+                        }
+                    ],
+                    "hardware": {
+                        "agent": 1,
+                        "bios": "seabios",
+                        "ciuser": "root",
+                        "cpu": "host",
+                        "machine": "q35",
+                        "net_model": "virtio",
+                        "ostype": "l26",
+                        "scsihw": "virtio-scsi-single",
+                        "serial0": "socket"
+                    },
+                    "minimum": {
+                        "cores": 1,
+                        "memory": 2048
+                    }
+                }
+            ]
+        },
+        {
+            "id": "windows-server",
+            "display_name": "Windows Server",
+            "description": null,
+            "templates": [
+                {
+                    "name": "windows-server-2025-amd64",
+                    "display": "Windows Server 2025 Datacenter",
+                    "arch": "amd64",
+                    "suggested_vmid": 2002,
+                    "built_at": "2026-08-04T16:53:31Z",
+                    "disks": [
+                        {
+                            "slot": "scsi0",
+                            "role": "system",
+                            "format": "qcow2",
+                            "file": "windows-server-2025-amd64-2222222222222222222222222222222222222222222222222222222222222222.qcow2",
+                            "url": "https://cofoundry.cdn.convoypanel.com/templates/windows-server/windows-server-2025-amd64/2222222222222222222222222222222222222222222222222222222222222222.qcow2",
+                            "sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+                            "size": 7900000000,
+                            "virtual_size": "32G",
+                            "options": {
+                                "discard": "on"
+                            }
+                        },
+                        {
+                            "slot": "efidisk0",
+                            "role": "efivars",
+                            "format": "raw",
+                            "file": "windows-server-2025-amd64-3333333333333333333333333333333333333333333333333333333333333333.efivars.raw",
+                            "url": "https://cofoundry.cdn.convoypanel.com/templates/windows-server/windows-server-2025-amd64/3333333333333333333333333333333333333333333333333333333333333333.efivars.raw",
+                            "sha256": "3333333333333333333333333333333333333333333333333333333333333333",
+                            "size": 540672,
+                            "options": {
+                                "efitype": "4m",
+                                "pre-enrolled-keys": 1,
+                                "ms-cert": "2023k"
+                            }
+                        }
+                    ],
+                    "hardware": {
+                        "agent": 1,
+                        "bios": "ovmf",
+                        "cpu": "host",
+                        "machine": "q35",
+                        "net_model": "virtio",
+                        "ostype": "win11",
+                        "scsihw": "virtio-scsi-single",
+                        "tpm": "v2.0"
+                    },
+                    "minimum": {
+                        "cores": 2,
+                        "memory": 4096
+                    }
+                }
+            ]
+        }
+    ]
+}

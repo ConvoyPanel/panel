@@ -13,7 +13,7 @@ class StoreBackupRequest extends BaseApiRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('create', $this->parameter('server', Server::class));
+        return $this->user()->can('createBackup', $this->parameter('server', Server::class));
     }
 
     public function rules(): array

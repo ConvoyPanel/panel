@@ -24,6 +24,11 @@ const CELL_TONES: Record<AddressMapState, string> = {
     /* Hatched, not just neutral: network, broadcast and gateway are structural. The texture says
        "not a colour you can act on" before the reader has hovered anything. */
     system: 'bg-address-system [background-image:repeating-linear-gradient(45deg,color-mix(in_oklab,var(--foreground)_22%,transparent)_0_2px,transparent_2px_4px)]',
+    /* Held by a migration in flight: the same colour as a reservation, because that is the state
+       the row is in, and the legend word is what says it is temporary. */
+    migrating: 'bg-address-reserved',
+    /* Two servers claim it. The one cell on the map that means "come and look at this". */
+    conflict: 'bg-destructive',
     available: 'bg-background ring-muted-foreground/30 ring-1 ring-inset',
     /* Fainter than free, because the difference matters: free is an address the allocator can
        hand out now, ungenerated is one that does not exist yet. */
@@ -34,6 +39,8 @@ const STATE_LABELS: Record<AddressMapState, string> = {
     assigned: 'Assigned',
     reserved: 'Reserved',
     system: 'System reserved',
+    migrating: 'Migrating',
+    conflict: 'Conflict',
     available: 'Free',
     ungenerated: 'Not generated',
 }

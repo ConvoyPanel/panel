@@ -173,6 +173,29 @@ Route::prefix('/server-presets')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
+| Guest Adoption Routes
+|--------------------------------------------------------------------------
+|
+| Endpoint: /api/admin/adoptable-guests
+|
+| Guests that exist on a registered node and that Convoy does not own. Derived
+| from the same /cluster/resources the poll already reads, never stored: a
+| table of them would be a cache of a cache, stale the moment someone deletes a
+| VM in the PVE web UI. Adoption itself is node-scoped, because by then the
+| operator has picked one.
+|
+*/
+Route::get('/adoptable-guests', [Admin\GuestAdoptionController::class, 'index']);
+
+Route::prefix('/nodes/{node}/adoptable-guests/{vmid}')
+    ->whereNumber('vmid')
+    ->group(function () {
+        Route::get('/', [Admin\GuestAdoptionController::class, 'show']);
+        Route::post('/', [Admin\GuestAdoptionController::class, 'store']);
+    });
+
+/*
+|--------------------------------------------------------------------------
 | Server Controller Routes
 |--------------------------------------------------------------------------
 |
@@ -207,6 +230,23 @@ Route::prefix('/servers')->group(function () {
                 Route::post('/', [Admin\ServerDiskController::class, 'store']);
                 Route::patch('/{disk}', [Admin\ServerDiskController::class, 'update']);
                 Route::delete('/{disk}', [Admin\ServerDiskController::class, 'destroy']);
+            });
+
+            /*
+             * Moving a server to another member of its cluster. The two reads
+             * draw and resolve the choice; the POST commits it. See
+             * App\Http\Controllers\Admin\ServerMigrationController.
+             */
+            Route::prefix('/migration')->group(function () {
+                Route::get('/', [Admin\ServerMigrationController::class, 'index']);
+                // `{destination}` is an id rather than a bound Node on purpose.
+                // The whole admin API is registered with scopeBindings(), and a
+                // bound model nested under {server} would be resolved through
+                // Server::nodes(), a relation that does not and should not
+                // exist -- the destination is not a child of the server.
+                Route::get('/{destination}', [Admin\ServerMigrationController::class, 'show'])
+                    ->whereNumber('destination');
+                Route::post('/', [Admin\ServerMigrationController::class, 'store']);
             });
 
             Route::prefix('/settings')->group(function () {
@@ -296,7 +336,26 @@ Route::resource('/isos', Admin\ISOs\ISOController::class)
 Route::prefix('/images')->group(function () {
     // What Proxmox itself accepts, for the hardware form to build itself from.
     Route::get('/schema', Admin\Images\ImageSchemaController::class);
+
+    // A published catalogue, browsed and copied from. Read-only on the
+    // catalogue's side: an import leaves an ordinary definition behind.
+    Route::get('/registry', [Admin\Images\ImageRegistryController::class, 'index']);
+    Route::post('/registry/imports', [Admin\Images\ImageRegistryController::class, 'store']);
+
+    /*
+    | Uploads are opened, appended to, and finished, because a disk image does
+    | not fit in one request -- Cloudflare rejects a body over 100 MB on most
+    | plans, and a dropped connection through a single POST costs the whole
+    | multi-gigabyte transfer instead of one chunk.
+    */
     Route::post('/uploads', [Admin\Images\ImageUploadController::class, 'store']);
+
+    Route::prefix('/uploads/{image_upload}')->group(function () {
+        Route::get('/', [Admin\Images\ImageUploadController::class, 'show']);
+        Route::put('/', [Admin\Images\ImageUploadController::class, 'append']);
+        Route::post('/finalize', [Admin\Images\ImageUploadController::class, 'finalize']);
+        Route::delete('/', [Admin\Images\ImageUploadController::class, 'destroy']);
+    });
 });
 
 Route::prefix('/image-groups')->group(function () {
@@ -320,6 +379,22 @@ Route::prefix('/image-groups')->group(function () {
             ->only(['index', 'store', 'show', 'update', 'destroy']);
     });
 });
+
+/*
+|--------------------------------------------------------------------------
+| Admin Role Routes
+|--------------------------------------------------------------------------
+|
+| Endpoint: /api/admin/admin-roles
+|
+| What an operator account may reach. Governed by the `users` permission
+| resource -- assigning a role is part of managing accounts -- but authoring one
+| is gated further, to a full administrator, inside AdminRoleFormRequest.
+|
+*/
+Route::resource('admin-roles', Admin\AdminRoleController::class)
+    ->parameters(['admin-roles' => 'admin_role'])
+    ->only(['index', 'show', 'store', 'update', 'destroy']);
 
 /*
 |--------------------------------------------------------------------------
@@ -461,6 +536,15 @@ Route::prefix('/settings')->group(function () {
     Route::put(
         '/account',
         [Admin\Settings\AccountSettingsController::class, 'update'],
+    );
+
+    Route::get(
+        '/permissions',
+        [Admin\Settings\PermissionSettingsController::class, 'show'],
+    );
+    Route::put(
+        '/permissions',
+        [Admin\Settings\PermissionSettingsController::class, 'update'],
     );
 
     Route::get(

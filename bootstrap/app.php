@@ -2,6 +2,8 @@
 
 use App\Exceptions\HasErrorCode;
 use App\Http\Middleware\AdminAuthenticate;
+use App\Http\Middleware\EnforceAdminPermissions;
+use App\Http\Middleware\EnforceGuestAccess;
 use App\Http\Middleware\EnforceTokenAbilities;
 use App\Http\Middleware\EnforceTokenNetworkRestrictions;
 use App\Http\Middleware\RecordSessionActivity;
@@ -33,13 +35,19 @@ return Application::configure(basePath: dirname(__DIR__))
                 // never ability-scoped; a bearer request resolves to a PersonalAccessToken and is.
                 Route::middleware([
                     'auth:web,sanctum',
+                    EnforceGuestAccess::class,
                     EnforceTokenAbilities::class.':'.AccountTokenAbilities::class,
                 ])->prefix('/api/client')
                     ->as('client.')
                     ->scopeBindings()
                     ->group(base_path('routes/api-client.php'));
 
-                Route::middleware(['auth', AdminAuthenticate::class])
+                Route::middleware([
+                    'auth',
+                    EnforceGuestAccess::class,
+                    AdminAuthenticate::class,
+                    EnforceAdminPermissions::class,
+                ])
                     ->prefix('/api/admin')
                     ->as('admin.')
                     ->scopeBindings()
@@ -56,6 +64,9 @@ return Application::configure(basePath: dirname(__DIR__))
                     'auth:sanctum',
                     AdminAuthenticate::class,
                     EnforceTokenNetworkRestrictions::class,
+                    // Both gates apply: the token's abilities scope the credential, the actor's
+                    // role scopes the account. A request needs to satisfy each.
+                    EnforceAdminPermissions::class,
                     EnforceTokenAbilities::class,
                 ])
                     ->prefix('/api/application')

@@ -4,15 +4,17 @@ namespace App\Http\Requests\Client\Servers\Settings;
 
 use App\Http\Requests\BaseApiRequest;
 use App\Models\ISO;
+use App\Models\Server;
 
 /**
  * Shared authorization for the ISO mount/unmount endpoints.
  *
- * The library is panel-wide now, so there is no longer a node to scope against
- * — every ISO is offerable on every node. What remains, and still matters, is
- * visibility: a hidden ISO is one an operator has deliberately kept out of the
- * customer-facing list, and without this check it is one guessed uuid away from
- * anyone. This is the same gate {@see SettingsController::getMedia()} lists by.
+ * Two gates, because they answer different questions. Whether this caller may change what is
+ * mounted on this server is the sub-user permission; whether this particular ISO is one they are
+ * allowed to see is visibility. The library is panel-wide now, so there is no longer a node to
+ * scope against — a hidden ISO is one an operator deliberately kept out of the customer-facing
+ * list, and without the second check it is one guessed uuid away from anyone. That is the same
+ * gate {@see SettingsController::getMedia()} lists by.
  */
 class MediaRequest extends BaseApiRequest
 {
@@ -20,7 +22,11 @@ class MediaRequest extends BaseApiRequest
     {
         $iso = $this->parameter('iso', ISO::class);
 
-        return ! $iso->hidden || $this->user()->root_admin;
+        if (! $this->user()->can('manageMedia', $this->parameter('server', Server::class))) {
+            return false;
+        }
+
+        return ! $iso->hidden || $this->user()->isAdmin();
     }
 
     public function rules(): array

@@ -5,6 +5,7 @@ namespace App\Data\Server\Deployments;
 use App\Enums\Server\DeploymentStatus;
 use App\Enums\Server\ProgressMode;
 use App\Models\DeploymentStep;
+use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Auth;
 use Spatie\LaravelData\Attributes\MapInputName;
@@ -30,7 +31,7 @@ class DeploymentStepData extends Data
 
     public static function fromModel(DeploymentStep $step): self
     {
-        $isAdmin = (bool) Auth::user()?->root_admin;
+        $isAdmin = Auth::user() instanceof User && Auth::user()->isAdmin();
 
         return new self(
             id: $step->id,
