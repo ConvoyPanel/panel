@@ -7,240 +7,243 @@ follows [Semantic Versioning](https://semver.org) guidelines.
 
 ## Unreleased
 
-This is v5, a rewrite of the panel: a new frontend, a new database engine, a new console agent and a new way to
-install. Upgrading a 4.x panel is a one-time cutover with a maintenance window rather than an in-place update. The data
-is copied from MySQL 8.0 to PostgreSQL 17, then a set of renaming migrations runs on it.
-[`database/cutover/RUNBOOK.md`](database/cutover/RUNBOOK.md) walks through it. Customers' virtual machines keep running
-throughout, and only access to the panel is down. Entries marked **BREAKING** need action from operators or from
-anything that calls the API, such as a billing module.
+v5 rewrites the panel: a new frontend, PostgreSQL instead of MySQL, Anchor instead of Coterm, and a container install.
+
+### Upgrading from 4.x
+
+The upgrade is a one-time cutover with a maintenance window, not an in-place update. Customers' virtual machines keep
+running throughout. Only the panel is offline.
+
+- **Move the database to PostgreSQL 17.** MySQL is no longer supported.
+  [`database/cutover/RUNBOOK.md`](database/cutover/RUNBOOK.md) copies the data across and runs the renaming migrations.
+- **Add an image for every OS you offer.** Templates are gone and are not migrated. A template row is only a VMID,
+  while an image needs the disks and their hardware profile.
+- **Enroll each Proxmox host with Anchor.** Coterm is gone. Nodes carried over from 4.x work for everything except the
+  console until their host is enrolled.
+- **Update your billing module and other API clients** for the changes in the table below.
+- **Check mail after upgrading.** SMTP `MAIL_*` values are imported into the panel once and not read again.
+
+#### Breaking API changes
+
+| What | 4.x | v5 |
+| --- | --- | --- |
+| Power commands | `PATCH /api/client/servers/{server}/state` with `state` | `POST /api/client/servers/{server}/power` with `command`. `GET …/state` is unchanged. The admin and application APIs have the same pair. |
+| Server status | `status` | `lifecycle`, `suspendedAt` and `powerState` |
+| Statistics | `GET /api/client/servers/{server}/statistics` returns a bare array | The array is wrapped in `data` |
+| SSO | `generate-sso-token` returns `token`, redeemed at `consume-token` | Returns `link`, a single-use signed URL that expires after `sso.link_ttl`. `consume-token` is gone. Each use is audited. |
+| IP pools | `/api/application/address-pools` | Address block groups |
+| Nodes | `POST /api/application/nodes` | Removed. Nodes join through Anchor enrollment. |
+| Templates | `/api/application/nodes/{node}/template-groups` | Removed. Servers are built from images. |
 
 ### Added
 
 #### Installation and operations
 
-- Convoy installs onto a dedicated host with one command, `curl -fsSL https://install.convoypanel.com | sudo bash`. The
-  installer sets up Docker if it is missing, writes `/opt/convoy`, starts the stack and prints a URL and a temporary
-  password for the first administrator. Supported hosts are Debian 12/13, Ubuntu 22.04/24.04, AlmaLinux 9/10 and Rocky
-  Linux 9/10, on x86_64 or arm64. See [`docs/deployment.md`](docs/deployment.md).
-- The panel ships as one container image, `ghcr.io/convoypanel/panel`, run as three containers: `web` (FrankenPHP,
-  which also terminates TLS and obtains certificates over ACME), `worker` (Horizon) and `scheduler`. All three are
-  required: every Proxmox action is a queued job, and the node and Anchor polls are scheduled. PostgreSQL 17 and Redis 8
-  are bundled, and either can be swapped for your own. The `latest` tag moves only on a release. Set `CONVOY_VERSION` to
-  stay on one.
-- `convoyctl` covers day-to-day operation. `convoyctl upgrade` backs up the database, pulls the new images, restarts
-  the stack and waits for the panel to report healthy. Migrations run when the web container starts. It also has
-  `backup`, `logs`, `ps`, `artisan`, `shell` and `horizon`.
-- Every setting the panel reads is listed with its default in `.env.reference` and explained in
-  [`docs/configuration.md`](docs/configuration.md), including about fifteen that were never documented, such as the
-  timeouts for requests to Proxmox and Anchor. `.env.example` now holds only what an install must set.
-- The panel tells administrators when a newer release is out. It checks GitHub hourly for the newest published,
-  non-prerelease release and shows it in Settings, on the dashboard's attention card and as a banner. A source checkout
-  reports `canary` and is never prompted ([#72](https://github.com/ConvoyPanel/panel/issues/72)).
-- An audit log records what happens in the panel and has its own screen. Sign-in, sign-out, two-factor, credential and
-  token events are kept for good, and everything else is pruned after a configurable window. Each entry keeps the
-  actor's name, so it survives the account being deleted. Each kind of event decides whether customers see it, and
-  the `reveal_staff_identity` setting (off by default) decides whether customers see an administrator's name or
-  "Staff". It replaces the old activity log, which never recorded anything
-  ([#53](https://github.com/ConvoyPanel/panel/issues/53)).
-- Mail is configured in the panel instead of through `MAIL_*` variables. A test sends a real message using the unsaved
-  form and shows the mail server's own error. The SMTP password is write-only and encrypted at rest. On upgrade,
-  existing SMTP `MAIL_*` values are imported once, and the variables are not read after that. Emails (invites, password
-  changes, the test message) use the panel's own styling, dark mode included.
-- The admin dashboard has KPI tiles, fleet capacity for memory, storage and IP addresses, an attention card that names
-  each record needing a look and links to it, servers by state, and a nodes table with memory and total datastore usage
-  per node. Trends and sparklines come from VictoriaMetrics when `VICTORIAMETRICS_URL` is set. The dashboard works
-  without it.
+- **One-command install.** `curl -fsSL https://install.convoypanel.com | sudo bash` sets up Docker, writes
+  `/opt/convoy`, starts the stack and prints a URL and a temporary admin password. It runs on Debian 12/13, Ubuntu
+  22.04/24.04, AlmaLinux 9/10 and Rocky Linux 9/10, on x86_64 or arm64. See [`docs/deployment.md`](docs/deployment.md).
+- **Container image.** `ghcr.io/convoypanel/panel` runs as three containers, all required:
+  - `web`: FrankenPHP, with automatic TLS over ACME.
+  - `worker`: Horizon. Every Proxmox action is a queued job.
+  - `scheduler`: runs the node and Anchor polls.
+  - PostgreSQL 17 and Redis 8 are bundled, and either can be swapped for your own.
+  - `latest` moves only on a release. Set `CONVOY_VERSION` to pin one.
+- **`convoyctl`.** `convoyctl upgrade` backs up the database, pulls new images, restarts and waits for the panel to
+  report healthy. It also has `backup`, `logs`, `ps`, `artisan`, `shell` and `horizon`.
+- **Configuration reference.** Every setting and its default is in `.env.reference` and explained in
+  [`docs/configuration.md`](docs/configuration.md). `.env.example` keeps only what an install must set.
+- **Update notices.** An hourly check of GitHub releases shows a newer version in Settings, on the dashboard and as a
+  banner ([#72](https://github.com/ConvoyPanel/panel/issues/72)).
+- **Audit log.** An append-only record of panel activity, with its own screen. It replaces the old activity log, which
+  never recorded anything ([#53](https://github.com/ConvoyPanel/panel/issues/53)).
+  - Sign-in, two-factor, credential and token events are kept for good. Others are pruned after a configurable window.
+  - Entries keep the actor's name, so they survive the account being deleted.
+  - `reveal_staff_identity` (off by default) shows customers an administrator's name instead of "Staff".
+- **Mail settings in the panel.** SMTP is set under Settings, with a test that sends a real message and shows the mail
+  server's own error. The password is write-only and encrypted at rest. Emails use the panel's own styling, dark mode
+  included.
+- **Admin dashboard.**
+  - KPI tiles, and fleet capacity for memory, storage and IP addresses.
+  - An attention card that links to each record needing a look.
+  - Servers by state, and memory and datastore usage per node.
+  - Trends and sparklines need `VICTORIAMETRICS_URL`. Everything else works without it.
 
 #### Nodes and Anchor
 
-- Anchor, an agent that runs on each Proxmox host, replaces Coterm. It carries the browser consoles and reports on the
-  host it runs on. To add a node, run the install command shown in the panel on the host as root, then approve it
-  ("Let <host> join?") and choose its location, oversubscription and, for now, the Proxmox API token the panel will
-  use. Enrollment keys are single-use and expire unless made otherwise, and can be revoked. The installation secret is
-  rotated on every enrollment, so a leaked `anchor.toml` stops working. An Anchor can reach the panel at a URL other
-  than `APP_URL`. The Anchors screen lists each agent with its endpoint, version and when it was last heard from.
-- The scheduler polls every node each minute with a real Proxmox API call. An unreachable node says why on the card
-  that lost its data (powered off, firewalled, untrusted TLS certificate and so on). A status the poll hasn't refreshed
-  reads Unknown rather than Online, so a stopped scheduler or queue shows up. The same poll records each guest's power
-  state.
-- Nodes have overview, servers and settings pages. Settings can test the saved connection and fill in the host's
-  sockets, cores, CPUs and memory from it. Network interfaces can be created, edited and deleted, and a topology view
-  shows each node's bridges and the VLANs on them.
-- The panel records which Proxmox cluster each node belongs to, identified by the cluster's CA fingerprint so two
-  clusters with the same name stay apart. A host outside a cluster shows as standalone. VMIDs are checked for
-  uniqueness per cluster.
-- Servers follow guests that Proxmox moves between nodes through HA recovery or migration. The minute poll moves the
-  server to its new node when the move is unambiguous and flags it for an administrator otherwise. Network changes are
-  held while the flag stands. Before, a moved guest's server went stale without any sign: power commands seemed to
-  work, usage stopped syncing and network changes went to the wrong host
-  ([#161](https://github.com/ConvoyPanel/panel/issues/161), in part).
+- **Anchor replaces Coterm.** An agent on each Proxmox host that carries the browser consoles and reports on its host.
+  - To add a node, run the install command from the panel on the host as root. Then approve it and pick its location,
+    oversubscription and, for now, its Proxmox API token.
+  - Enrollment keys are single-use and expire by default, and can be revoked.
+  - The installation secret rotates on every enrollment, so a leaked `anchor.toml` stops working.
+  - An Anchor can reach the panel at a URL other than `APP_URL`.
+  - The Anchors screen lists each agent with its endpoint, version and when it was last heard from.
+- **Node status.** The scheduler polls every node each minute with a real Proxmox API call. The same poll records
+  each guest's power state.
+  - An unreachable node says why: powered off, firewalled, untrusted TLS certificate and so on.
+  - A status the poll hasn't refreshed reads Unknown, so a stopped scheduler or queue shows up.
+- **Node pages.** Overview, servers and settings. Settings can test the saved connection and fill in sockets, cores,
+  CPUs and memory from the host.
+- **Network interfaces.** Create, edit and delete them, and see each node's bridges and VLANs in a topology view.
+- **Clusters.** Each node's Proxmox cluster is recorded, identified by its CA fingerprint so two clusters with the same
+  name stay apart. VMIDs are checked for uniqueness per cluster.
+- **Guests that move are followed.** When Proxmox moves a guest through HA recovery or migration, the poll moves the
+  server to its new node, or flags it for an administrator if the move is ambiguous. Before, the server went stale
+  without any sign ([#161](https://github.com/ConvoyPanel/panel/issues/161), in part).
 
 #### Servers
 
-- Servers are built by importing a disk image instead of cloning a template (see Removed). An image definition holds
-  the OS type, hardware settings and minimum resources. An image version is one build of its disks, and each server
-  records the version it came from. Hardware settings are edited in a form generated from the node's own Proxmox API
-  schema, so a key Proxmox won't accept is refused on save instead of at first boot. Images download through Proxmox's
-  `download-url`, which verifies the checksum. A file with nowhere else to live can be uploaded to the panel, which
-  serves it to the node over an expiring signed link.
-- The ISO library is panel-wide. There is one entry per ISO, and a node fetches it the first time someone mounts it
-  there.
-- Servers can have more than one disk. Extra disks can be added at creation (`limits.disks[]`) or later from the admin
-  server page's Disks tab, and can be grown or removed. Capacity is checked per storage across all of a server's disks.
-- The create form asks only for name, hostname, owner, node, storage, image and password. Everything else sits in
-  summaries that open for editing. A build can be saved as a preset and applied in one pick.
-- The server area has Overview (with live CPU and memory trends), Resource usage (CPU, memory, disk and network on one
-  time axis), Networking, Storage (every attached device, with boot switches and boot order), ISO library, Firewall,
-  Backups, Security (SSH keys and root password) and Rebuild. Rebuild shows the install's progress step by step and
-  offers Retry when it fails.
-- The Firewall tab shows inbound and outbound chains, each ending in its default policy, with logging per direction,
-  drag-to-reorder and an on/off switch per rule. The add-rule dialog asks for direction, allow or block, traffic, and
-  source or destination, and offers the cluster's aliases, IP sets and groups by name. Setting inbound to Drop with no
-  rule allowing SSH asks for confirmation. The packet log is parsed into time, verdict, addresses and port. Rules are
-  read from and written to Proxmox, and the client API exposes the same.
-- Consoles open from a split button that remembers the last type used. The display console has a keys bar, scaling
-  options and clipboard in both directions. The serial terminal console needs a serial device, which new servers get
-  and older ones can add from the console picker. A console that fails says why, such as the agent refusing, the agent
-  being unreachable from the browser, or the guest having no display, and offers the fix where there is one.
-- Client and admin server lists show whether each server is running, stopped or unknown. Power actions are tracked by
-  their Proxmox task. A second command while one is running gets a 409 `power_action_in_progress`, and the UI shows one
-  progress toast that survives a reload and ends in success or failure.
-- Backups can be created from a dialog that asks for a name and keeps mode, compression and lock under Advanced. The
-  quota sits in the backups view, and creating is disabled up front, with the reason, when the node has no
-  backup-capable storage. A failed backup records why (storage exceeded, timeout or other). The owner sees the reason,
-  and administrators also see Proxmox's own message.
-- The server overview reads disk usage from the QEMU guest agent when it is running and shows the disk limit when it
-  isn't.
-- The admin server page shows live state, specification and details with copyable owner, VMID and UUID, and has power
-  controls and a link to the client view of the same server. The admin servers list has bulk power actions.
+- **Built from images.** An image definition holds the OS type, hardware settings and minimum resources. An image
+  version is one build of its disks, and each server records the version it came from.
+  - Hardware settings use a form generated from the node's own Proxmox API schema, so a bad key is refused on save
+    instead of at first boot.
+  - Images download through Proxmox's `download-url`, which verifies the checksum. A file can also be uploaded and
+    served to the node over an expiring signed link.
+- **Panel-wide ISO library.** One entry per ISO, fetched onto a node the first time it is mounted there.
+- **Multiple disks.** Add extra disks at creation (`limits.disks[]`) or later from the admin Disks tab, then grow or
+  remove them. Capacity is checked per storage across all of a server's disks.
+- **Shorter create form.** Name, hostname, owner, node, storage, image and password. The rest sits in summaries that
+  open for editing. A build can be saved as a preset and applied in one pick.
+- **Server pages.** Overview with live CPU and memory trends, Resource usage, Networking, Storage, ISO library,
+  Firewall, Backups, Security and Rebuild. Rebuild shows install progress step by step, with Retry on failure.
+- **Firewall tab.**
+  - Inbound and outbound chains, each ending in its default policy.
+  - Logging per direction, drag-to-reorder, and an on/off switch per rule.
+  - A rule dialog that asks for direction, allow or block, traffic, and source or destination. It offers the cluster's
+    aliases, IP sets and groups by name.
+  - Setting inbound to Drop with no rule allowing SSH asks for confirmation.
+  - A parsed packet log.
+  - The same is available over the client API.
+- **Consoles.** A split button that remembers the last type used.
+  - Display console with a keys bar, scaling options and two-way clipboard.
+  - Serial terminal console. New servers get the serial device it needs, and older ones can add it from the picker.
+  - A failed console says why, such as the agent refusing, the agent being unreachable from the browser, or the guest
+    having no display. It offers the fix where there is one.
+- **Power state.** Client and admin server lists show running, stopped or unknown.
+  - Power actions are tracked by their Proxmox task.
+  - A second command while one is running gets a 409 `power_action_in_progress`.
+  - One progress toast follows the action, through a reload, to success or failure.
+- **Backups.**
+  - A Create Backup dialog asks for a name and keeps mode, compression and lock under Advanced.
+  - The quota sits in the backups view.
+  - Creating is disabled, with the reason, when the node has no backup-capable storage.
+  - A failed backup says why. The owner sees the reason, and administrators also see Proxmox's own message.
+- **Guest agent disk usage.** The overview reads disk usage from the QEMU guest agent when it's running, and shows the
+  disk limit when it isn't.
+- **Admin server page.** Live state, specification, copyable owner, VMID and UUID, power controls, and a link to the
+  client view of the same server. The admin servers list has bulk power actions.
 
 #### Storage
 
-- A node can have several storages, and ISOs and backups belong to a storage rather than a node. To register a
-  storage, pick it from what the node reports. Proxmox supplies its name, capacity, content types and whether it is
-  shared, and the operator adds a display name and reserved headroom.
-- Capacity comes from Proxmox: live when the node answers, otherwise what the last poll recorded. The API says which
-  in `capacitySource` and `observedAt`. Each storage shows physical use, what Convoy has allocated and what is
-  untracked. Untracked space is not shown for thin-provisioned and deduplicating backends. The reserved headroom is
-  enforced when servers are created, but an unreachable node doesn't block creation.
-- Shared storage is one entry per cluster definition, linked to every node Proxmox says can reach it. A fleet-wide
-  Storage screen lists each pool once with the nodes that reach it.
-- Each storage has a page listing what fills it, largest first: servers, backups and ISOs. An administrator can delete
-  a backup or ISO from there, or a server after typing its name.
+- **Several storages per node.** ISOs and backups belong to a storage instead of a node.
+- **Registered from Proxmox.** Pick a storage the node reports. Proxmox supplies its name, capacity, content types and
+  whether it's shared. You add a display name and reserved headroom.
+- **Real capacity.**
+  - Live from Proxmox, or the last recorded figure when the node is down. The API says which in `capacitySource` and
+    `observedAt`.
+  - Shows physical use, what Convoy has allocated and what is untracked. Untracked space isn't shown for
+    thin-provisioned and deduplicating backends.
+- **Reserved headroom** is enforced when servers are created. An unreachable node doesn't block creation.
+- **Shared storage** is one entry per cluster definition, linked to every node that reaches it. A fleet-wide Storage
+  screen lists each pool once.
+- **Storage page.** Lists what fills a storage, largest first: servers, backups and ISOs. Each can be deleted from
+  there, and deleting a server needs its name typed.
 
 #### Networking and IPAM
 
-- IPAM organises addresses into address blocks (IPv4 or IPv6, by CIDR) inside address block groups, which replace
-  address pools and are attached to nodes. Existing pools are migrated.
-- Addresses are allocated in numeric order by a single locked query, so two servers created at once can't receive the
-  same address. Large IPv4 blocks and all IPv6 blocks create addresses as they are needed, which removes the old
-  10,000-address limit on IPv6.
-- Each address is available, assigned or reserved. Network, broadcast and gateway addresses are reserved automatically
-  and can't be released, and administrators can reserve any other. Blocks show utilisation. A block of up to 4,096
-  addresses can be shown as a map, where cells are clicked or dragged to select addresses for bulk reserve, release or
-  delete. Assigning an address starts from the server and offers the next free one.
-- VLANs ([#150](https://github.com/ConvoyPanel/panel/issues/150)): a network interface can be VLAN-aware with a default
-  tag, a server can override the tag, and each node keeps a list of declared VLANs that a server's tag must come from.
+- **Address blocks and groups** replace address pools. Groups attach to nodes. Existing pools are migrated.
+- **Allocation.**
+  - Numeric order, through one locked query, so two servers created at once can't get the same address.
+  - Large IPv4 blocks and all IPv6 blocks create addresses as needed, which removes the 10,000-address IPv6 limit.
+- **Address states.** Available, assigned or reserved. Network, broadcast and gateway are reserved automatically and
+  can't be released. Administrators can reserve any other.
+- **Block map.** A block of up to 4,096 addresses shows as a grid. Click or drag cells to select addresses for bulk
+  reserve, release or delete. Every block shows its utilisation.
+- **Assigning addresses** starts from the server and offers the next free one.
+- **VLANs** ([#150](https://github.com/ConvoyPanel/panel/issues/150)). VLAN-aware interfaces with a default tag,
+  per-server overrides, and a per-node list of declared VLANs that a server's tag must come from.
 
 #### Accounts and sign-in
 
-- Passkeys for signing in and confirming identity, named after the authenticator that created them, such as
+- **Passkeys** for sign-in and identity confirmation, named after the authenticator that created them, such as
   "1Password" or "YubiKey 5 Series".
-- Two-factor authentication with an authenticator app, one sign-in challenge for whichever second factor an account
-  has, and recovery codes, which passkey-only accounts get too.
-- Sign-in with Google, GitHub, GitLab or any OpenID Connect provider (Keycloak, Authentik, Okta, Auth0, Azure AD and
-  others), each enabled in configuration. Accounts link providers under Connected Accounts.
-- Account pages have a profile with a cropped picture, an SSH keychain, personal API tokens (full access, servers read
-  and write, or servers read-only), and the active sessions with a button to sign each one out. Deleting a user ends
-  their sessions.
+- **Two-factor** with an authenticator app, one sign-in challenge for whichever second factor an account has, and
+  recovery codes. Passkey-only accounts get recovery codes too.
+- **Single sign-on** with Google, GitHub, GitLab or any OpenID Connect provider (Keycloak, Authentik, Okta, Auth0,
+  Azure AD and others), each enabled in configuration. Accounts link providers under Connected Accounts.
+- **Account pages.** A profile with a cropped picture, an SSH keychain, personal API tokens, and active sessions that
+  can each be signed out. Deleting a user ends their sessions.
 
 #### Administration
 
-- A Users screen lists, searches, creates and edits accounts. An administrator can't demote or delete their own
-  account. A user created without a password gets an invite link to set their own. The link is emailed when mail is
-  configured and always shown to the administrator to copy. Issuing a new link voids the old one.
-- Administrators can review an account's passkeys, SSH keys, API tokens, connected sign-in providers and two-factor,
-  and revoke any of them. They can't add credentials for another user.
-- A Settings screen holds the bandwidth defaults, mail, updates, and the account policy that sets what users may change
-  about their own account, pictures included.
-- A command palette, and admin navigation grouped by area.
+- **Users screen.** List, search, create and edit accounts. An administrator can't demote or delete their own account.
+- **Invites.** A user created without a password gets a link to set their own. It's emailed when mail is set up and
+  always shown to copy. A new link voids the old one.
+- **Credential review.** See and revoke an account's passkeys, SSH keys, API tokens, sign-in providers and two-factor.
+  Administrators can't add credentials for another user.
+- **Settings screen.** Bandwidth defaults, mail, updates, and the account policy that sets what users may change about
+  their own account, pictures included.
+- **Command palette**, and admin navigation grouped by area.
 
 #### API
 
-- The Application API covers everything the admin panel does, including IPAM, storage, network interfaces and the
-  overview. It serves the same routes under `/api/application` with a bearer token as `/api/admin` serves with a
-  session.
-- Application tokens are managed under Tokens in the admin area. They belong to the panel rather than the
-  administrator who created them, so they survive that administrator's deletion, which is still recorded on the token.
-  Each token carries abilities per resource (`servers:read`, `servers:write`, `servers:*` or `*`; write includes read)
-  and can be restricted to networks. A token can never create or revoke tokens.
-- Users can create personal access tokens for the client API. These tokens can't reach account settings.
-- Errors come back as `{ "message": "…", "code": "…" }` with a stable code.
-- Writes to a guest's Proxmox configuration carry Proxmox's config digest. A change made on the node in the meantime is
-  refused with a 409 instead of being overwritten.
+- **Full Application API.** `/api/application` serves with a bearer token the same routes `/api/admin` serves with a
+  session, so it covers IPAM, storage, network interfaces and the overview too.
+- **Application tokens**, under Tokens in the admin area.
+  - Owned by the panel, so they survive the deletion of the administrator who created them.
+  - Abilities per resource: `servers:read`, `servers:write`, `servers:*` or `*`. Write includes read.
+  - Can be restricted to networks.
+  - Can never create or revoke tokens.
+- **Personal access tokens** for the client API. They can't reach account settings.
+- **Consistent errors.** `{ "message": "…", "code": "…" }` with a stable code.
+- **Safe config writes.** Writes carry Proxmox's config digest, so a change made on the node in between gets a 409
+  instead of being overwritten.
 
 ### Changed
 
-- **BREAKING**: PostgreSQL 17 is the only supported database. A 4.x panel's MySQL data is converted during the cutover
-  described above.
-- The panel runs on PHP 8.4 and Laravel 12, and the frontend on React 19.
-- The frontend is rewritten. It has a new sidebar that switches to a server's own pages when you open one, light and
-  dark themes, and layouts that work on a phone.
-- Bandwidth limits are a speed cap plus an overage penalty, which either throttles to a set rate or disconnects the
-  network interface once the quota is used. Both resolve per server, then per node, then from the panel-wide default
-  in Settings. Each server's quota resets on its own day of the month. Speed caps are sent to Proxmox in its decimal
-  MB/s.
-- **BREAKING**: A server's `status` is split into `lifecycle` (installing, ready, and so on), `suspendedAt` and
-  `powerState`.
-- **BREAKING**: Power commands moved from `PATCH /api/client/servers/{server}/state` with `{ "state": … }` to
-  `POST /api/client/servers/{server}/power` with `{ "command": … }`. `GET …/state` is unchanged. The admin and
-  application APIs have the same pair.
-- **BREAKING**: `GET /api/client/servers/{server}/statistics` wraps its array in `data`, like its sibling endpoints.
-- **BREAKING**: `POST /api/application/users/{user}/generate-sso-token` returns `link`, a single-use signed URL that
-  expires after `sso.link_ttl`, instead of `token`. The `consume-token` route is gone, so billing modules that build
-  the login URL themselves need updating. Every use is written to the audit log.
-- **BREAKING**: `/api/application/address-pools` is replaced by address block groups.
-- Cloud-init sets the root password on every OS, Windows included. The 4.x path that set it live through the QEMU guest
-  agent is not carried over.
-- Storage sizes are shown in IEC units (MiB, GiB).
-- Page subtitles and descriptive card text are gone, and page actions sit on a toolbar row below the heading.
+- **PostgreSQL 17 only.** See [Upgrading from 4.x](#upgrading-from-4x).
+- **PHP 8.4, Laravel 12 and React 19.**
+- **New frontend.** A sidebar that switches to a server's own pages when you open one, light and dark themes, and
+  layouts that work on a phone. Page subtitles are gone, and page actions sit on a toolbar under the heading.
+- **Bandwidth limits** are a speed cap plus an overage penalty that applies once the quota is used. The penalty either
+  throttles to a set rate or disconnects the network interface.
+  - Both resolve per server, then per node, then from the default in Settings.
+  - Each server's quota resets on its own day of the month.
+  - Speed caps are sent to Proxmox in its decimal MB/s.
+- **Root passwords** are set through cloud-init on every OS, Windows included. The 4.x path that set them live through
+  the QEMU guest agent is gone.
+- **Storage sizes** are shown in IEC units (MiB, GiB).
 
 ### Removed
 
-- **BREAKING**: Templates. Servers are built from images, and template rows are not migrated, because a template is
-  only a VMID on a node while an image needs the disks and their hardware profile. Existing servers keep running. Add
-  an image for each OS you offer before customers order or rebuild.
-- **BREAKING**: Coterm. Consoles go through Anchor. Nodes carried over from 4.x work for everything except the console
-  until their host is enrolled with Anchor.
-- **BREAKING**: Adding a node by hand, including `POST /api/application/nodes`. Nodes join through Anchor enrollment.
+- **Templates, Coterm, and adding nodes by hand.** See [Upgrading from 4.x](#upgrading-from-4x).
 
 ### Fixed
 
-- Fixed every download with a checksum failing, ISO downloads included. Convoy sent `algorithm` where Proxmox expects
-  `checksum-algorithm`, and Proxmox rejects parameters it doesn't know.
-- Fixed network sync setting a server's firewall default policies back to ACCEPT on every address change, rebuild and
-  sync. It now sets only whether the firewall and IP filter are on, and leaves the policies to the server's owner.
-- Fixed a backup created with lock requested being saved unlocked. The request was validated as `is_locked` but read
-  as `locked`.
-- Fixed a disk resize during server build failing without anything noticing, leaving the guest at the image's disk
-  size. Convoy now waits for the Proxmox task, and retries one that timed out.
-- Fixed a worker killed mid-job leaving a server's job lock behind for good, so every later job of that kind for the
-  server waited forever. Locks now expire, and a job that finds one held waits and retries.
+- **Checksummed downloads always failed, ISOs included.** Convoy sent `algorithm` where Proxmox expects
+  `checksum-algorithm`.
+- **Network sync reset firewall default policies to ACCEPT** on every address change, rebuild and sync. It now only
+  turns the firewall and IP filter on or off.
+- **Backups requested as locked were saved unlocked.** The request was validated as `is_locked` but read as `locked`.
+- **A disk resize during build could fail without anyone noticing**, leaving the guest at the image's disk size.
+  Convoy now waits for the Proxmox task and retries one that timed out.
+- **A killed worker could leave a server's jobs stuck forever.** Job locks now expire, and a job that finds one held
+  waits and retries.
 
 ### Security
 
-- Creating or deleting API tokens and SSH keys, setting a server's root password and rebuilding a server now ask you
-  to confirm your identity first. A confirmation lasts five minutes. A stolen session cookie or an unattended browser
-  could otherwise mint a full-access token that outlives logout and a password change.
-- Changing your password signs out every other session, replaces the remember-me token and emails the account owner.
-- Passwords must be at least 12 characters and no longer than 72 bytes, with no composition rules, and are checked
-  against known breaches through Have I Been Pwned's k-anonymity API. The check is skipped when the service can't be
-  reached, so air-gapped panels still work. Passwords set by an administrator follow the same policy.
-- Two-factor authentication counts as enabled only once a code from the authenticator has been entered. Accounts that
-  already have a secret are carried over as confirmed and are still challenged at sign-in.
-- Uploaded profile pictures are decoded, cropped, scaled to at most 512 px and re-encoded as WebP, so the bytes a user
-  uploads are never served. Images over 50 megapixels are refused.
-- Invite tokens are stored only as a hash, and an unknown, used or expired invite link gets the same answer.
+- **Identity confirmation** before creating or deleting API tokens and SSH keys, setting a server's root password, or
+  rebuilding a server. A confirmation lasts five minutes. Without it, a stolen session could mint a full-access token
+  that outlives logout and a password change.
+- **Changing your password** signs out every other session, replaces the remember-me token and emails the account
+  owner.
+- **Password policy.** At least 12 characters and at most 72 bytes, with no composition rules.
+  - Checked against known breaches through Have I Been Pwned's k-anonymity API, skipped when it can't be reached.
+  - Passwords set by an administrator follow the same policy.
+- **Two-factor** counts as enabled only once a code from the authenticator has been entered. Accounts that already
+  have a secret carry over as confirmed and are still challenged at sign-in.
+- **Profile pictures** are decoded, cropped, scaled to at most 512 px and re-encoded as WebP, so uploaded bytes are
+  never served. Images over 50 megapixels are refused.
+- **Invite tokens** are stored only as a hash. An unknown, used or expired link gets the same answer.
 
 ## v4.6.1
 
