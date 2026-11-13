@@ -5,8 +5,16 @@ namespace Convoy\Exceptions\Repository\Proxmox;
 use Illuminate\Http\Client\Response;
 use Illuminate\Http\Client\RequestException;
 use Convoy\Exceptions\Repository\RepositoryException;
+use Illuminate\Http\Response as HttpResponse;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
-class ProxmoxConnectionException extends RepositoryException
+/**
+ * Proxmox answered, with an error. As an HTTP exception its message reaches
+ * the user -- "Proxmox returned 500: ..." rather than a bare "Server Error" --
+ * so a failed reinstall or delete says what the node said. It is still
+ * reported to the log like any other error.
+ */
+class ProxmoxConnectionException extends RepositoryException implements HttpExceptionInterface
 {
     /**
      * The message is the HTTP status and Proxmox's own error, e.g. "Proxmox
@@ -25,5 +33,15 @@ class ProxmoxConnectionException extends RepositoryException
             ?: $exception->getMessage();
 
         parent::__construct("Proxmox returned {$response->status()}: {$error}", $exception->getCode());
+    }
+
+    public function getStatusCode(): int
+    {
+        return HttpResponse::HTTP_BAD_GATEWAY;
+    }
+
+    public function getHeaders(): array
+    {
+        return [];
     }
 }

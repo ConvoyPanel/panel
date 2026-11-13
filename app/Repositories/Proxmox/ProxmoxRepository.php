@@ -2,6 +2,7 @@
 
 namespace Convoy\Repositories\Proxmox;
 
+use Convoy\Exceptions\Repository\Proxmox\NodeUnreachableException;
 use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
 use Convoy\Models\Node;
 use Convoy\Models\Server;
@@ -10,6 +11,9 @@ use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
+use GuzzleHttp\Exception\ConnectException;
+use GuzzleHttp\Promise\Create;
+use Psr\Http\Message\RequestInterface;
 use Webmozart\Assert\Assert;
 
 abstract class ProxmoxRepository
@@ -81,7 +85,26 @@ abstract class ProxmoxRepository
                 'Content-Type' => 'application/json',
                 'User-Agent' => null,
             ], $headers),
-        ], $options))->throw(function (Response $response, RequestException $exception) {
+        ], $options))->withMiddleware(function (callable $handler): callable {
+            // A node that never answers (refused, timed out, TLS failure)
+            // raises ConnectException, which Laravel would rethrow as a bare
+            // ConnectionException and production shows as "Server Error".
+            return function (RequestInterface $request, array $options) use ($handler) {
+                try {
+                    $promise = $handler($request, $options);
+                } catch (ConnectException $e) {
+                    throw new NodeUnreachableException($this->node, $e->getMessage());
+                }
+
+                return $promise->then(null, function ($reason) {
+                    if ($reason instanceof ConnectException) {
+                        throw new NodeUnreachableException($this->node, $reason->getMessage());
+                    }
+
+                    return Create::rejectionFor($reason);
+                });
+            };
+        })->throw(function (Response $response, RequestException $exception) {
             throw new ProxmoxConnectionException($response, $exception);
         });
     }

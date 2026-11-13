@@ -12,8 +12,13 @@ class Authenticate extends Middleware
      */
     protected function redirectTo(Request $request): ?string
     {
-        if (! $request->expectsJson()) {
-            return route('login');
+        // The API answers 401 instead (see the exception handler). The sign-in
+        // page is a route of the single-page app, not a named Laravel route:
+        // route('login') doesn't exist, and asking for it threw a 500.
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return null;
         }
+
+        return '/auth/login';
     }
 }
