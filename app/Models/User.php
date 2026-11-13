@@ -58,6 +58,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         'two_factor_secret',
         'two_factor_recovery_codes',
         'two_factor_confirmed_at',
+        'last_active_at',
     ];
 
     /**
@@ -68,6 +69,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     protected $casts = [
         'email_verified_at' => 'datetime',
         'root_admin' => 'boolean',
+        'last_active_at' => 'immutable_datetime',
     ];
 
     public function toReactObject(): array

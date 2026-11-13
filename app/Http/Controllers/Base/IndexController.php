@@ -5,6 +5,7 @@ namespace Convoy\Http\Controllers\Base;
 use Illuminate\View\View;
 use Convoy\Http\Controllers\Controller;
 use Illuminate\View\Factory as ViewFactory;
+use Convoy\Services\Telemetry\TelemetryService;
 
 class IndexController extends Controller
 {
@@ -12,7 +13,8 @@ class IndexController extends Controller
      * IndexController constructor.
      */
     public function __construct(
-        protected ViewFactory $view
+        protected ViewFactory $view,
+        protected TelemetryService $telemetry,
     ) {
     }
 
@@ -24,6 +26,8 @@ class IndexController extends Controller
         return $this->view->make('app', [
             'siteConfiguration' => [
                 'version' => config('app.version'),
+                // Whether the browser counts page views for the telemetry report.
+                'telemetry' => $this->telemetry->enabled(),
             ],
         ]);
     }
