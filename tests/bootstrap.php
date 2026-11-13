@@ -7,7 +7,8 @@
 |
 | Points the test suite at a dedicated database when DB_TEST_DATABASE is set
 | (ddev exports it; see .ddev/config.yaml), so RefreshDatabase's migrate:fresh
-| can never drop the development database.
+| can never drop the development database, and at in-memory cache, sessions,
+| queue and mail.
 |
 | It has to happen here rather than in phpunit.xml's <env>: ddev exports
 | DB_DATABASE into the container environment, PHP mirrors that into $_SERVER,
@@ -21,8 +22,26 @@
 
 require __DIR__.'/../vendor/autoload.php';
 
+$override = function (string $key, string $value): void {
+    $_SERVER[$key] = $value;
+    $_ENV[$key] = $value;
+    putenv("{$key}={$value}");
+};
+
 if ($testDatabase = getenv('DB_TEST_DATABASE')) {
-    $_SERVER['DB_DATABASE'] = $testDatabase;
-    $_ENV['DB_DATABASE'] = $testDatabase;
-    putenv('DB_DATABASE='.$testDatabase);
+    $override('DB_DATABASE', $testDatabase);
+}
+
+// phpunit.xml's <env> values lose to ddev's container environment for the same
+// reason, which pointed the suite at the dev project's Redis cache, sessions and
+// queue and its mail server: a test that flushed the cache emptied the dev one.
+// These are the same values phpunit.xml sets.
+foreach ([
+    'APP_ENV' => 'testing',
+    'CACHE_DRIVER' => 'array',
+    'SESSION_DRIVER' => 'array',
+    'QUEUE_CONNECTION' => 'sync',
+    'MAIL_MAILER' => 'array',
+] as $key => $value) {
+    $override($key, $value);
 }
