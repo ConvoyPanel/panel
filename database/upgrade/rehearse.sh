@@ -13,6 +13,8 @@
 #   5. `artisan import:verify` boots 5.x on the result: decryption, every model,
 #      v4 API tokens.
 #   6. The schema is diffed against a fresh 5.x install at the same migration.
+#   7. The same API reads are made against v4 on MySQL and 5.x on the converted
+#      copy (api-snapshot.php), and the responses diffed.
 #
 # Nothing touches the dev database. Needs docker and the ddev project running.
 # Run it after adding a migration:      bash database/upgrade/rehearse.sh
@@ -153,6 +155,19 @@ if diff <(sed 's/ip_addresses_pkey1/ip_addresses_pkey/g' "$WORK/fresh.schema") "
     echo "schema matches a fresh install"
 else
     echo "schema drift (< fresh 5.x, > upgraded from v4):"; cat "$WORK/schema.diff"; FAIL=1
+fi
+
+step "7. the same API answers from v4 on MySQL and 5.x on Postgres"
+# Same data on both sides, so any difference is something the engine changed.
+# APP_DEBUG off: an error then answers with its message, not a stack trace full
+# of paths that differ between the two checkouts.
+v4 "$MYSQL_ENV APP_DEBUG=false php /var/www/html/database/upgrade/api-snapshot.php" | grep -v "Deprecated" > "$WORK/api.v4" || true
+app "DB_DATABASE=$PG_TARGET APP_KEY='$V4_APP_KEY' APP_DEBUG=false php database/upgrade/api-snapshot.php" 2>&1 | grep -v "Deprecated" > "$WORK/api.5x" || true
+echo "$(grep -c '^### GET' "$WORK/api.v4") reads; status codes: $(grep -A1 '^### GET' "$WORK/api.v4" | grep -E '^[0-9]{3}$' | sort | uniq -c | tr -s ' \n' ' ')"
+if diff "$WORK/api.v4" "$WORK/api.5x" > "$WORK/api.diff"; then
+    echo "every response matches"
+else
+    echo "responses differ (< v4 on MySQL, > 5.x on Postgres):"; head -80 "$WORK/api.diff"; FAIL=1
 fi
 
 echo ""
