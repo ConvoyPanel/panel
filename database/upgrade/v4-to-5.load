@@ -1,0 +1,90 @@
+--
+-- pgloader recipe: copies a v4 database from MySQL into Postgres 17 for the
+-- upgrade to 5.x. `convoy import-v4` runs it (and database/upgrade/rehearse.sh
+-- rehearses it); afterwards `php artisan migrate` applies the migrations 5.x
+-- added, and `php artisan import:verify` checks the result.
+--
+-- Placeholders (${...}) are filled in at run time so no credentials live here:
+--   ${MYSQL_URL}  mysql://user:pass@host/db
+--   ${PG_URL}     postgresql://user:pass@host/db
+--   ${MYSQL_DB}   the MySQL database name (pgloader names the target schema after it)
+--
+-- The source MySQL has to accept mysql_native_password: pgloader cannot finish a
+-- caching_sha2_password handshake. MySQL 8.4 needs --mysql-native-password=ON
+-- and --authentication-policy=mysql_native_password for that.
+--
+-- The goal is a schema indistinguishable from a fresh 5.x install at the same
+-- migration, so every later migration behaves the same on both (rehearse.sh
+-- diffs them):
+--   * ALTER SCHEMA ... RENAME TO 'public': pgloader otherwise creates a schema
+--     named after the MySQL database, which Laravel never looks in. `migrate`
+--     would then find no migrations table and build an empty install beside
+--     the data.
+--   * preserve index names: Laravel addresses indexes by name (dropIndex,
+--     dropUnique); pgloader's default is idx_<oid>_<name>.
+--   * tinyint(1) -> boolean, datetime/timestamp -> timestamp (not timestamptz,
+--     which Laravel's Postgres grammar does not create), unsigned ints to the
+--     same width signed (Postgres has no unsigned; pgloader would otherwise widen
+--     int unsigned to bigint), json stays json (pgloader's default is jsonb).
+--     activity_logs.batch is Blueprint's uuid(), which MySQL stores as
+--     char(36) and Postgres as a native uuid.
+--   * reset sequences: ids are copied as they are, so each sequence has to move
+--     past the highest one or the next insert collides.
+--   * AFTER LOAD: MySQL-isms become what Blueprint makes on Postgres: <table>_pkey
+--     primary keys, unique constraints instead of unique indexes, and no
+--     implicit index on every foreign key column.
+--
+-- Adapted from the new panel's database/cutover/v4-to-v5.load.
+--
+LOAD DATABASE
+     FROM      ${MYSQL_URL}
+     INTO      ${PG_URL}
+
+ WITH include drop,
+      create tables,
+      create indexes,
+      reset sequences,
+      foreign keys,
+      preserve index names,
+      workers = 4,
+      concurrency = 1
+
+  ALTER SCHEMA '${MYSQL_DB}' RENAME TO 'public'
+
+  SET PostgreSQL PARAMETERS
+      maintenance_work_mem to '128MB',
+      work_mem to '12MB'
+
+ CAST column activity_logs.batch to uuid drop typemod,
+      type tinyint when (= 1 precision) to boolean drop typemod using tinyint-to-boolean,
+      type int with extra auto_increment to serial drop typemod,
+      type int when unsigned to integer drop typemod,
+      type bigint with extra auto_increment to bigserial drop typemod,
+      type bigint when unsigned to bigint drop typemod,
+      type datetime  to "timestamp" drop typemod using zero-dates-to-null,
+      type timestamp to "timestamp" drop typemod using zero-dates-to-null,
+      type json to json
+
+  BEFORE LOAD DO
+      $$ CREATE SCHEMA IF NOT EXISTS public; $$
+
+  AFTER LOAD DO
+      $$ DO $n$
+         DECLARE r record;
+         BEGIN
+           FOR r IN SELECT c.conrelid::regclass::text AS t, c.conname FROM pg_constraint c
+                    WHERE c.contype = 'p' AND c.connamespace = 'public'::regnamespace LOOP
+             EXECUTE format('ALTER TABLE %I RENAME CONSTRAINT %I TO %I', r.t, r.conname, r.t || '_pkey');
+           END LOOP;
+           FOR r IN SELECT i.indrelid::regclass::text AS t, x.relname AS idx FROM pg_index i
+                    JOIN pg_class x ON x.oid = i.indexrelid
+                    WHERE i.indisunique AND NOT i.indisprimary AND x.relnamespace = 'public'::regnamespace
+                      AND NOT EXISTS (SELECT 1 FROM pg_constraint c WHERE c.conindid = i.indexrelid) LOOP
+             EXECUTE format('ALTER TABLE %I ADD CONSTRAINT %I UNIQUE USING INDEX %I', r.t, r.idx, r.idx);
+           END LOOP;
+           FOR r IN SELECT indexname FROM pg_indexes
+                    WHERE schemaname = 'public' AND indexname LIKE '%\_foreign' LOOP
+             EXECUTE format('DROP INDEX %I', r.indexname);
+           END LOOP;
+         END $n$; $$
+;

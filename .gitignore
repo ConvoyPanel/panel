@@ -23,3 +23,6 @@ lang/php_*.json
 /test-results
 /playwright-report
 /blob-report
+
+# The v4 checkout database/upgrade/rehearse.sh migrates and seeds.
+/.upgrade-v4
