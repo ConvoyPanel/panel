@@ -5,7 +5,10 @@ ARG APP_ENV
 # Pinned, not `latest`: a new release of the installer image threw away the
 # cached layers below and reinstalled every extension on the next build.
 COPY --from=mlocati/php-extension-installer:2.12.3 /usr/bin/install-php-extensions /usr/local/bin/
-RUN install-php-extensions pdo_mysql pcntl opcache
+# gmp as in the php image: composer.json requires it. Only the IPAM range
+# helpers (app/Helpers/Network.php) use it today, from requests, but a job or a
+# scheduled command that reaches them would otherwise die on a missing function.
+RUN install-php-extensions pdo_mysql pcntl opcache gmp
 
 # redis is the one extension PHP doesn't ship with. It comes from Packagist and
 # GitHub through PIE rather than from PECL, which the PHP project has deprecated
