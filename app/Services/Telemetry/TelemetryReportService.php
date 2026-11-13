@@ -19,6 +19,7 @@ use Convoy\Models\Template;
 use Convoy\Models\TemplateGroup;
 use Convoy\Models\User;
 use Convoy\Repositories\Proxmox\Node\ProxmoxNodeRepository;
+use Convoy\Services\Mail\MailConfiguration;
 use Illuminate\Database\MySqlConnection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -40,6 +41,17 @@ class TelemetryReportService
 
     private const BYTES_PER_GIBIBYTE = 1073741824;
 
+    /** The console's limits (StoreTelemetryReportRequest). One value past them gets the whole report refused. */
+    public const MAX_COUNT = 10_000_000;
+
+    public const MAX_NODES = 500;
+
+    private const MAX_NODE_CPUS = 10_000;
+
+    private const MAX_NODE_MEMORY_GIB = 1_000_000;
+
+    private const MAX_NODE_SERVERS = 100_000;
+
     /** How long to wait on each node for its CPU count and Proxmox version. */
     private const NODE_TIMEOUT_SECONDS = 5;
 
@@ -56,10 +68,11 @@ class TelemetryReportService
     ) {}
 
     /**
-     * @param  bool  $flushViews  Take the page views off the counters, for the
-     *                            report that is actually sent
+     * The report as it would be sent now. Building it changes nothing: the page
+     * views stay on the counters until the console accepts a report carrying
+     * them (TelemetryService::markReported()).
      */
-    public function build(string $installation, bool $flushViews = false): array
+    public function build(string $installation): array
     {
         return [
             'schema' => self::SCHEMA,
@@ -70,7 +83,7 @@ class TelemetryReportService
             'resources' => $this->resources(),
             'features' => $this->features(),
             // An object even when empty, as the console expects a map.
-            'views' => (object) ($flushViews ? $this->views->flush() : $this->views->counts()),
+            'views' => (object) array_map(self::count(...), $this->views->counts()),
         ];
     }
 
@@ -115,10 +128,10 @@ class TelemetryReportService
         );
 
         return [
-            'total' => User::query()->count(),
-            'admins' => User::query()->where('root_admin', true)->count(),
-            'active' => $active(false),
-            'active_admins' => $active(true),
+            'total' => self::count(User::query()->count()),
+            'admins' => self::count(User::query()->where('root_admin', true)->count()),
+            'active' => array_map(self::count(...), $active(false)),
+            'active_admins' => array_map(self::count(...), $active(true)),
         ];
     }
 
@@ -126,7 +139,8 @@ class TelemetryReportService
      * One entry per node. The panel doesn't store a node's CPU count or Proxmox
      * version, so those come from asking the node; one that doesn't answer is
      * sent with no version and 0 CPUs. Memory is the node's memory as entered in
-     * the panel. 4.x has no node agent, so `agent` is always null.
+     * the panel. 4.x has no node agent, so `agent` is always null. At most the
+     * console's 500, by id.
      */
     private function nodes(): array
     {
@@ -135,6 +149,7 @@ class TelemetryReportService
         return Node::query()
             ->withCount('servers')
             ->orderBy('id')
+            ->limit(self::MAX_NODES)
             ->get()
             ->map(function (Node $node) use ($deadline) {
                 $status = microtime(true) < $deadline ? $this->status($node) : [];
@@ -144,9 +159,9 @@ class TelemetryReportService
                         Str::after((string) ($status['pveversion'] ?? ''), 'pve-manager/'),
                     ),
                     'agent' => null,
-                    'cpus' => (int) ($status['cpuinfo']['cpus'] ?? 0),
-                    'memory_gib' => (int) round($node->memory / self::BYTES_PER_GIBIBYTE),
-                    'servers' => (int) $node->servers_count,
+                    'cpus' => self::count((int) ($status['cpuinfo']['cpus'] ?? 0), self::MAX_NODE_CPUS),
+                    'memory_gib' => self::count((int) round($node->memory / self::BYTES_PER_GIBIBYTE), self::MAX_NODE_MEMORY_GIB),
+                    'servers' => self::count((int) $node->servers_count, self::MAX_NODE_SERVERS),
                 ];
             })
             ->all();
@@ -169,7 +184,7 @@ class TelemetryReportService
 
     private function resources(): array
     {
-        return [
+        return array_map(self::count(...), [
             'locations' => Location::query()->count(),
             'nodes.without_tls_verification' => Node::query()->where('verify_tls', false)->count(),
             'servers.suspended' => Server::query()->where('status', Status::SUSPENDED->value)->count(),
@@ -185,14 +200,21 @@ class TelemetryReportService
             'ssh_keys' => SSHKey::query()->count(),
             'api_tokens.account' => PersonalAccessToken::query()->where('type', ApiKeyType::ACCOUNT)->count(),
             'api_tokens.application' => PersonalAccessToken::query()->where('type', ApiKeyType::APPLICATION)->count(),
-        ];
+        ]);
     }
 
     private function features(): array
     {
         return [
             'coterm' => Node::query()->whereNotNull('coterm_id')->exists(),
+            'mail' => MailConfiguration::configured(),
         ];
+    }
+
+    /** A count kept inside the console's limits rather than have it refuse the report. */
+    private static function count(int $value, int $max = self::MAX_COUNT): int
+    {
+        return max(0, min($value, $max));
     }
 
     /**

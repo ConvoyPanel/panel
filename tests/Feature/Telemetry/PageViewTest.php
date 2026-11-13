@@ -1,20 +1,20 @@
 <?php
 
-use Convoy\Models\Setting;
 use Convoy\Models\User;
 use Convoy\Services\Telemetry\PageViewCounter;
 use Convoy\Services\Telemetry\TelemetryReportService;
 use Convoy\Services\Telemetry\TelemetryService;
 use Illuminate\Http\Client\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Tests\Support\TelemetryContract;
 
 $url = 'https://console.test/api/v1/telemetry';
 
 beforeEach(function () use ($url) {
     config(['convoy.telemetry.enabled' => true, 'convoy.telemetry.url' => $url]);
 
-    Setting::forget(TelemetryService::DISABLED);
-    app(PageViewCounter::class)->flush();
+    Cache::flush();
 });
 
 it('counts the pages a signed-in user opens, by name', function () {
@@ -60,7 +60,7 @@ it('takes no views from guests', function () {
     expect(app(PageViewCounter::class)->counts())->toBe([]);
 });
 
-it('sends the views since the last report, then starts counting again', function () use ($url) {
+it('takes the views a report carried off the counters once the console accepts it', function () use ($url) {
     Http::fake([$url => Http::response(null, 204), '*' => Http::response(['data' => []])]);
     $views = app(PageViewCounter::class);
 
@@ -75,8 +75,27 @@ it('sends the views since the last report, then starts counting again', function
 
     $views->record('/admin');
 
-    expect($views->flush())->toBe(['admin.overview' => 1])
-        ->and($views->counts())->toBe([]);
+    expect($views->counts())->toBe(['admin.overview' => 1]);
+});
+
+it('keeps the views for the next report when the console turns one down', function () use ($url) {
+    Http::fake([$url => Http::response(['message' => 'Server Error'], 500), '*' => Http::response(['data' => []])]);
+    $views = app(PageViewCounter::class);
+
+    $views->record('/admin');
+
+    runTelemetryReportJob();
+
+    expect($views->counts())->toBe(['admin.overview' => 1]);
+});
+
+it('drops the counts when telemetry is turned off', function () {
+    $views = app(PageViewCounter::class);
+    $views->record('/admin');
+
+    app(TelemetryService::class)->disable();
+
+    expect($views->counts())->toBe([]);
 });
 
 it('shows the views without taking them off the counters', function () {
@@ -87,7 +106,7 @@ it('shows the views without taking them off the counters', function () {
 
     expect((array) $report['views'])->toBe(['client.servers.index' => 1])
         ->and(app(PageViewCounter::class)->counts())->toBe(['client.servers.index' => 1])
-        ->and(validateTelemetryReport($report)->errors()->all())->toBe([]);
+        ->and(TelemetryContract::errors(json_decode(json_encode($report), true)))->toBe([]);
 });
 
 it('sends an empty map, not a list, when no page was opened', function () {

@@ -2,134 +2,161 @@
 
 namespace Convoy\Services\Telemetry;
 
-use Convoy\Models\Setting;
-use Illuminate\Http\Client\PendingRequest;
-use Illuminate\Support\Facades\Http;
+use Carbon\CarbonImmutable;
+use Convoy\Jobs\Telemetry\EraseTelemetryJob;
+use Convoy\Settings\TelemetrySettings;
 use Illuminate\Support\Str;
 
 /**
- * Whether this panel reports to the Convoy console, under which id, and the two
- * requests it makes: the daily report and, once turned off, the request to erase
- * what the console holds for it.
+ * Whether this install reports, and the one place that changes it. Both the
+ * environment and the admin switch have to allow it; the environment wins.
  *
- * Telemetry is on unless one of three things turns it off:
- *
- * - CONVOY_TELEMETRY_ENABLED=false. The next daily run erases the
- *   installation's reports on the console instead of sending one.
- * - `c:telemetry:disable`, which erases them straight away.
- * - An empty CONVOY_TELEMETRY_URL. The panel then never contacts the console,
- *   so nothing is erased either; there is nowhere to send the request.
+ * - The admin switch (Settings → Telemetry, or `c:telemetry:disable`) stops the
+ *   reports, asks the console to erase what it holds, and replaces the id.
+ * - CONVOY_TELEMETRY_ENABLED=false or an empty CONVOY_TELEMETRY_URL stop the
+ *   reports without contacting the console.
  */
 class TelemetryService
 {
-    /** A random UUID, made on the first report. It is never derived from APP_KEY or APP_URL. */
-    public const INSTALLATION = 'telemetry:installation';
+    public function __construct(
+        private TelemetrySettings $settings,
+        private PageViewCounter $views,
+    ) {
+    }
 
-    /** Set by `c:telemetry:disable`, cleared by `c:telemetry:enable`. */
-    public const DISABLED = 'telemetry:disabled_at';
+    /** False when CONVOY_TELEMETRY_ENABLED is off or there is no URL to send to. */
+    public function allowedByEnvironment(): bool
+    {
+        return (bool) config('convoy.telemetry.enabled') && filled(config('convoy.telemetry.url'));
+    }
 
-    private const TIMEOUT_SECONDS = 10;
+    /** The environment variable that keeps telemetry off, if one does. */
+    public function disabledBy(): ?string
+    {
+        return match (true) {
+            ! config('convoy.telemetry.enabled') => 'CONVOY_TELEMETRY_ENABLED',
+            blank(config('convoy.telemetry.url')) => 'CONVOY_TELEMETRY_URL',
+            default => null,
+        };
+    }
+
+    public function enabled(): bool
+    {
+        return $this->allowedByEnvironment() && $this->settings->enabled;
+    }
+
+    /** The admin switch alone, whatever the environment says. */
+    public function switchedOn(): bool
+    {
+        return $this->settings->enabled;
+    }
+
+    public function installationId(): string
+    {
+        return $this->settings->installation_id;
+    }
 
     public function url(): string
     {
         return rtrim((string) config('convoy.telemetry.url'), '/');
     }
 
-    public function enabled(): bool
+    public function enable(): void
     {
-        return (bool) config('convoy.telemetry.enabled')
-            && $this->url() !== ''
-            && is_null(Setting::get(self::DISABLED));
-    }
-
-    public function installation(): ?string
-    {
-        return Setting::get(self::INSTALLATION);
-    }
-
-    public function installationOrCreate(): string
-    {
-        if ($installation = $this->installation()) {
-            return $installation;
-        }
-
-        Setting::put(self::INSTALLATION, $installation = Str::uuid()->toString());
-
-        return $installation;
+        $this->settings->enabled = true;
+        $this->settings->counting_since = CarbonImmutable::now();
+        $this->settings->save();
     }
 
     /**
-     * When the daily job runs, or null when it has nothing to do. The minute is
-     * taken from the installation id, so panels spread out across the day rather
-     * than all reporting at midnight.
+     * Stops reporting and, when there is a console to ask, has it erase what it
+     * holds. The id is replaced in the same save, so a later opt-in reports as a
+     * new install instead of resuming the one that was erased.
+     *
+     * @return string|null The id the console was asked to erase
      */
-    public function reportTime(): ?string
+    public function disable(): ?string
     {
-        if ($this->enabled()) {
-            $installation = $this->installationOrCreate();
-        } elseif ($this->url() !== '') {
-            // Turned off but not yet erased on the console.
-            $installation = $this->installation();
-        }
+        $previous = $this->settings->installation_id;
 
-        if (empty($installation)) {
+        $this->settings->enabled = false;
+        $this->settings->installation_id = (string) Str::uuid();
+        $this->settings->reported_at = null;
+        $this->settings->counting_since = null;
+        $this->settings->save();
+
+        $this->views->clear();
+
+        if (blank(config('convoy.telemetry.url'))) {
             return null;
         }
 
-        $minute = hexdec(substr(str_replace('-', '', $installation), 0, 8)) % 1440;
+        EraseTelemetryJob::dispatch($previous);
+
+        return $previous;
+    }
+
+    /**
+     * Each install reports at its own minute of the UTC day, taken from its
+     * random id, so the console hears from installs spread over 24 hours
+     * instead of all of them at midnight.
+     */
+    public function isDue(CarbonImmutable $now): bool
+    {
+        $now = $now->utc();
+
+        return $this->enabled() && $now->hour * 60 + $now->minute === $this->minuteOfDay();
+    }
+
+    public function minuteOfDay(): int
+    {
+        // The first 32 bits of a random UUID are plenty of spread for 1,440 slots.
+        return (int) (hexdec(substr(str_replace('-', '', $this->settings->installation_id), 0, 8)) % 1440);
+    }
+
+    /** The time of day the report goes out, in UTC ("23:10"). */
+    public function reportTime(): string
+    {
+        $minute = $this->minuteOfDay();
 
         return sprintf('%02d:%02d', intdiv($minute, 60), $minute % 60);
     }
 
-    /**
-     * @throws \Illuminate\Http\Client\ConnectionException
-     * @throws \Illuminate\Http\Client\RequestException
-     */
-    public function send(array $report): void
+    /** At most one report per UTC day: a second one would replace the first on the console. */
+    public function reportedOn(CarbonImmutable $now): bool
     {
-        $this->request()->post($this->url(), $report)->throw();
+        return $this->settings->reported_at?->utc()->isSameDay($now->utc()) ?? false;
+    }
+
+    public function reportedAt(): ?CarbonImmutable
+    {
+        return $this->settings->reported_at;
     }
 
     /**
-     * Asks the console to erase this installation's reports and drops the id, so
-     * a panel that turns telemetry back on starts over as a new installation. The
-     * id is kept until the console confirms, and the daily job tries again until
-     * it does.
+     * The console accepted the report: record the day and take the views it
+     * carried off the counters.
      *
-     * @return bool Whether there was anything to erase
-     *
-     * @throws \Illuminate\Http\Client\ConnectionException
-     * @throws \Illuminate\Http\Client\RequestException
+     * @param  array<string, mixed>  $report
      */
-    public function erase(): bool
+    public function markReported(array $report, CarbonImmutable $at): void
     {
-        $installation = $this->installation();
+        $installation = $report['installation'];
 
-        if (is_null($installation) || $this->url() === '') {
-            return false;
+        $this->settings->refresh();
+
+        // Turned off while the report was in flight. The console has just stored a report under
+        // an id that was meant to be erased, so erase it again. The counters were already
+        // cleared, and subtracting from them now would leave them negative.
+        if (! $this->settings->enabled || $this->settings->installation_id !== $installation) {
+            EraseTelemetryJob::dispatch($installation);
+
+            return;
         }
 
-        $this->request()->delete("{$this->url()}/{$installation}")->throw();
+        $this->settings->reported_at = $at;
+        $this->settings->save();
 
-        Setting::forget(self::INSTALLATION);
-
-        return true;
-    }
-
-    public function disable(): void
-    {
-        Setting::put(self::DISABLED, now()->toIso8601String());
-    }
-
-    public function enable(): void
-    {
-        Setting::forget(self::DISABLED);
-    }
-
-    private function request(): PendingRequest
-    {
-        return Http::acceptJson()
-            ->withUserAgent('Convoy/'.config('app.version'))
-            ->timeout(self::TIMEOUT_SECONDS);
+        $this->views->subtract((array) $report['views']);
     }
 }

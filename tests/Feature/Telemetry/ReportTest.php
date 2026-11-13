@@ -1,11 +1,15 @@
 <?php
 
+use Convoy\Models\Node;
 use Convoy\Models\User;
+use Convoy\Services\Telemetry\PageViewCounter;
 use Convoy\Services\Telemetry\TelemetryReportService;
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Tests\Support\TelemetryContract;
 
-/** Every string value a report holds. Map keys are checked by validateTelemetryReport(). */
+/** Every string value a report holds. Map keys are checked by TelemetryContract. */
 function telemetryReportStrings(array $report): array
 {
     $strings = [];
@@ -22,6 +26,8 @@ function telemetryReportStrings(array $report): array
 $installation = '6f1c2c8e-9b5a-4c1e-8e0f-2a7d3b9c4e51';
 
 beforeEach(function () {
+    Cache::flush();
+
     Http::fake([
         '*/api2/json/nodes/*/status' => Http::response(['data' => [
             'pveversion' => 'pve-manager/8.4.1/2a5fa54a8503f96d',
@@ -36,9 +42,7 @@ it('builds a report the console accepts', function () use ($installation) {
 
     $report = app(TelemetryReportService::class)->build($installation);
 
-    $validator = validateTelemetryReport($report);
-
-    expect($validator->errors()->all())->toBe([])
+    expect(TelemetryContract::errors(json_decode(json_encode($report), true)))->toBe([])
         ->and(array_keys($report))->toBe(['schema', 'installation', 'panel', 'users', 'nodes', 'resources', 'features', 'views'])
         ->and($report['installation'])->toBe($installation)
         ->and($report['panel']['version'])->toBe(config('app.version'))
@@ -114,7 +118,7 @@ it('reports a node that does not answer without the details only Proxmox knows',
         'cpus' => 0,
         'memory_gib' => 64,
         'servers' => 1,
-    ])->and(validateTelemetryReport($report)->errors()->all())->toBe([]);
+    ])->and(TelemetryContract::errors(json_decode(json_encode($report), true)))->toBe([]);
 });
 
 it('counts resources and switches without naming them', function () use ($installation) {
@@ -128,4 +132,50 @@ it('counts resources and switches without naming them', function () use ($instal
     expect($after['resources']['locations'] - $before['resources']['locations'])->toBe(1)
         ->and($after['resources']['nodes.without_tls_verification'] - $before['resources']['nodes.without_tls_verification'])->toBe(1)
         ->and($after['features']['coterm'])->toBeBool();
+});
+
+it('stays inside the console\'s limits on a panel past them', function () use ($installation) {
+    [, , $node] = createServerModel();
+    $node->forceFill(['memory' => 1_500_000 * 1024 * 1024 * 1024])->saveQuietly();
+
+    Http::swap(new Illuminate\Http\Client\Factory);
+    Http::preventStrayRequests();
+    Http::fake(['*/api2/json/nodes/*/status' => Http::response(['data' => [
+        'pveversion' => 'pve-manager/8.4.1/2a5fa54a8503f96d',
+        'cpuinfo' => ['cpus' => 50000],
+    ]])]);
+
+    $views = app(PageViewCounter::class);
+    $views->record('/');
+    Cache::increment('telemetry:views:client.servers.index', 20_000_000);
+
+    $report = app(TelemetryReportService::class)->build($installation);
+
+    expect(end($report['nodes']))->toMatchArray(['cpus' => 10_000, 'memory_gib' => 1_000_000])
+        ->and((array) $report['views'])->toBe(['client.servers.index' => 10_000_000])
+        ->and(TelemetryContract::errors(json_decode(json_encode($report), true)))->toBe([]);
+});
+
+it('reports at most the console\'s 500 nodes', function () use ($installation) {
+    Http::fake(fn () => throw new ConnectionException('cURL error 28: Connection timed out'));
+
+    [, $location] = createServerModel();
+    Node::factory()->for($location)->count(500)->create();
+
+    $report = app(TelemetryReportService::class)->build($installation);
+
+    expect($report['nodes'])->toHaveCount(500);
+});
+
+it('documents every resource and feature key in docs/telemetry.md', function () use ($installation) {
+    $docs = file_get_contents(base_path('docs/telemetry.md'));
+    $report = app(TelemetryReportService::class)->build($installation);
+
+    foreach ([...array_keys($report['resources']), ...array_keys($report['features'])] as $key) {
+        expect($docs)->toContain("| `{$key}` |");
+    }
+
+    foreach (PageViewCounter::PAGES as $name) {
+        expect($docs)->toContain("`{$name}`");
+    }
 });

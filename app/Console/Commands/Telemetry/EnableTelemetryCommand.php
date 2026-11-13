@@ -19,17 +19,19 @@ class EnableTelemetryCommand extends Command
 
     public function handle(TelemetryService $telemetry): int
     {
-        $telemetry->enable();
+        if (! $telemetry->switchedOn()) {
+            $telemetry->enable();
+        }
 
-        if (! $telemetry->enabled()) {
-            $this->warn('Telemetry is still off: CONVOY_TELEMETRY_ENABLED is false or CONVOY_TELEMETRY_URL is empty in .env.');
+        if ($variable = $telemetry->disabledBy()) {
+            $this->warn("Telemetry is switched on, but {$variable} in .env keeps it off.");
 
             return Command::SUCCESS;
         }
 
         $this->info(sprintf(
-            'Telemetry is on. The next report goes out at %s %s; run `php artisan c:telemetry:show` to see it.',
-            $telemetry->reportTime(), config('app.timezone'),
+            'Telemetry is on. The next report goes out at %s UTC; run `php artisan c:telemetry:show` to see it.',
+            $telemetry->reportTime(),
         ));
 
         return Command::SUCCESS;

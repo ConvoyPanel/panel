@@ -16,6 +16,20 @@ Route::get('/overview', Admin\OverviewController::class);
 
 /*
 |--------------------------------------------------------------------------
+| Settings Controller Routes
+|--------------------------------------------------------------------------
+|
+| Endpoint: /api/admin/settings
+|
+*/
+Route::prefix('/settings')->group(function () {
+    Route::get('/telemetry', [Admin\Settings\TelemetryController::class, 'show']);
+    Route::put('/telemetry', [Admin\Settings\TelemetryController::class, 'update']);
+    Route::get('/telemetry/report', [Admin\Settings\TelemetryController::class, 'report']);
+});
+
+/*
+|--------------------------------------------------------------------------
 | Location Controller Routes
 |--------------------------------------------------------------------------
 |

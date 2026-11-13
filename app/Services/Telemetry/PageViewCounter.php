@@ -12,6 +12,10 @@ use Illuminate\Support\Facades\Cache;
  * never the address itself) to POST /api/client/telemetry/views. Only the
  * patterns below are counted, so whatever else a browser sends is dropped and
  * never reaches the report.
+ *
+ * Nothing is reset by reading. The report sends what {@see counts()} returned,
+ * and only once the console has accepted it does {@see subtract()} take those
+ * exact amounts back off.
  */
 class PageViewCounter
 {
@@ -51,6 +55,9 @@ class PageViewCounter
         '/admin/users/:id/servers' => 'admin.users.servers',
         '/admin/coterms' => 'admin.coterms.index',
         '/admin/tokens' => 'admin.tokens.index',
+        '/admin/settings/updates' => 'admin.settings.updates',
+        '/admin/settings/telemetry' => 'admin.settings.telemetry',
+        '/admin/settings/upgrade' => 'admin.settings.upgrade',
     ];
 
     public function record(string $pattern): void
@@ -79,21 +86,30 @@ class PageViewCounter
     }
 
     /**
-     * Reads the counts and takes them off. Each is lowered by what was read
-     * rather than cleared, so a view recorded in between is left for the next
-     * report: it is neither lost nor counted twice.
+     * Takes what a report the console accepted carried back off the counters.
+     * Each is lowered by what was sent rather than cleared, so a view recorded
+     * while the report was in flight is left for the next one: it is neither
+     * lost nor counted twice.
      *
-     * @return array<string, int>
+     * @param  array<string, int>  $counts
      */
-    public function flush(): array
+    public function subtract(array $counts): void
     {
-        $counts = $this->counts();
+        $names = array_flip(self::PAGES);
 
         foreach ($counts as $name => $count) {
-            Cache::decrement($this->key($name), $count);
+            if (isset($names[$name]) && $count > 0) {
+                Cache::decrement($this->key($name), $count);
+            }
         }
+    }
 
-        return $counts;
+    /** Drops every count, when telemetry is turned off. */
+    public function clear(): void
+    {
+        foreach (array_values(self::PAGES) as $name) {
+            Cache::forget($this->key($name));
+        }
     }
 
     private function key(string $name): string
