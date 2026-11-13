@@ -47,9 +47,13 @@ class ImageGroup extends Model
     }
 
     /**
-     * The admin API is registered with scopeBindings(), so `{image_definition}`
-     * under `{image_group}` is resolved through a relation named after the
-     * parameter -- `imageDefinitions()`, which is `definitions()` here.
+     * Names the relation Laravel uses to look up a definition from the URL, as in
+     * `/image-groups/{image_group}/images/{image_definition}`.
+     *
+     * The lookup goes through the group, so a definition that belongs to another
+     * group is a 404. Laravel finds the relation by pluralising the parameter
+     * name, which would be `imageDefinitions()`. Ours is `definitions()`, so
+     * without this the route fails with a 500.
      */
     protected function childRouteBindingRelationshipName($childType): string
     {
