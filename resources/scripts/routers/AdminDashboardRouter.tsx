@@ -72,6 +72,52 @@ export const routes: Route[] = [
                     )
                 ),
             },
+            {
+                path: 'settings',
+                element: lazyLoad(
+                    lazy(
+                        () =>
+                            import(
+                                '@/components/admin/settings/SettingsContainer'
+                            )
+                    )
+                ),
+                children: [
+                    {
+                        path: 'updates',
+                        element: lazyLoad(
+                            lazy(
+                                () =>
+                                    import(
+                                        '@/components/admin/settings/UpdatesContainer'
+                                    )
+                            )
+                        ),
+                    },
+                    {
+                        path: 'telemetry',
+                        element: lazyLoad(
+                            lazy(
+                                () =>
+                                    import(
+                                        '@/components/admin/settings/TelemetryContainer'
+                                    )
+                            )
+                        ),
+                    },
+                    {
+                        path: 'upgrade',
+                        element: lazyLoad(
+                            lazy(
+                                () =>
+                                    import(
+                                        '@/components/admin/settings/UpgradeContainer'
+                                    )
+                            )
+                        ),
+                    },
+                ],
+            },
         ],
     },
 ]
@@ -92,6 +138,8 @@ const AdminDashboardRouter = () => {
     const { setRoutes } = useContext(NavigationBarContext)
     const isDashboardArea = useMatch('/admin/:id/')
     const isDashboardArea2 = useMatch('/admin')
+    // Settings pages are nested a level deeper, but keep the admin navigation.
+    const isSettingsArea = useMatch('/admin/settings/*')
     const { t: tStrings } = useTranslation('strings')
 
     const navRoutes = [
@@ -128,13 +176,21 @@ const AdminDashboardRouter = () => {
             name: tStrings('token_other'),
             path: '/admin/tokens',
         },
+        {
+            name: tStrings('setting_other'),
+            path: '/admin/settings',
+        },
     ]
 
     useEffect(() => {
-        if (Boolean(isDashboardArea) || Boolean(isDashboardArea2)) {
+        if (
+            Boolean(isDashboardArea) ||
+            Boolean(isDashboardArea2) ||
+            Boolean(isSettingsArea)
+        ) {
             setRoutes(navRoutes)
         }
-    }, [isDashboardArea, isDashboardArea2])
+    }, [isDashboardArea, isDashboardArea2, Boolean(isSettingsArea)])
 
     return (
         <>

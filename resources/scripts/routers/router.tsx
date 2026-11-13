@@ -12,6 +12,7 @@ import { NotFound } from '@/components/elements/ScreenBlock'
 import NavigationBar from '@/components/elements/navigation/NavigationBar'
 
 import NavigationBarProvider from '@/components/NavigationBarProvider'
+import AdminNotices from '@/components/admin/announcements/AdminNotices'
 
 
 export type Route = {
@@ -49,6 +50,7 @@ const router = createBrowserRouter([
             <AuthenticatedRoutes>
                 <NavigationBarProvider>
                     <NavigationBar />
+                    <AdminNotices />
                     <Outlet />
                 </NavigationBarProvider>
             </AuthenticatedRoutes>
