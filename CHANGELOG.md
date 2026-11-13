@@ -5,6 +5,90 @@ This file is a running track of new features and fixes to each version of the pa
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 follows [Semantic Versioning](https://semver.org) guidelines.
 
+## Unreleased
+
+### Added
+
+- Once a day the panel sends an anonymous usage report to the Convoy console: counts of accounts, active accounts,
+  nodes, servers and other resources, which features are set up, page views by page, and the panel, PHP and database
+  versions. It never carries names, email or IP addresses, hostnames, URLs or keys. `docs/telemetry.md` lists every
+  field. **Admin → Settings → Telemetry** turns it off, which also asks the console to erase what it already holds, and
+  "View report" shows the exact JSON the next report sends. `CONVOY_TELEMETRY_ENABLED=false`, or an empty
+  `CONVOY_TELEMETRY_URL` for a panel without internet access, turns it off from the environment.
+
+### Removed
+
+- The Plausible analytics script. Every page loaded it from `beacon.performave.com` with `defer`, so whenever that host
+  was slow the browser held the page's `load` event until the request gave up, about 20 seconds while it answered
+  with Cloudflare 522 errors. The telemetry report above replaces it, and the panel loads no third-party scripts.
+
+### Security
+
+- Caddy no longer sends a `Via: 0.0 Caddy` header. Caddy 2.11, new in v4.7.0-rc.4, adds it to every response PHP
+  serves, so the panel still named its web server after the `Server` header was removed.
+- The bundle size report, `stats.html`, is no longer built into `public/`, where every panel served it to anyone. It
+  listed the frontend's dependencies and their versions.
+
+### Changed
+
+- Redis keeps its data in `dockerfiles/redis/data`, next to MySQL's. The `redis:7.0-alpine` image declared a volume for
+  it and `redis:8-alpine` doesn't, so since v4.7.0-rc.4 Redis started empty whenever its container was recreated: an
+  update signed every user out and dropped jobs still waiting in the queue, which could leave a server on "Installing"
+  for good. Data Redis held before this release isn't carried over, so this one update still signs everyone out.
+- An error from a node now says what went wrong instead of "Server Error". A node the panel can't reach at all says so
+  ("Couldn't connect to the node..."), without its address, and an error Proxmox answered with is shown as Proxmox
+  worded it ("Proxmox returned 500: ..."). Both respond with `502`.
+- Validation messages read as sentences: "This field is required." instead of "String must contain at least 1
+  character(s)".
+- The workers image installs the gmp extension, as the php image does.
+- ISO sizes are stored in bytes. They were stored in whole mebibytes, rounded down, so a 2.95 MiB ISO read "2 MiB" in
+  the library and "2.95 MiB" on a server's drive. A downloaded ISO also now takes its size from the file the node saved,
+  not from the link's metadata read before the download. A migration converts existing ISOs; what the rounding already
+  dropped can't be recovered.
+- Deleting a user or an ISO asks for confirmation first.
+- Saving a server's settings or hardware in the admin area says "Saved".
+- A server being deleted shows a "Deleting" screen to its owner instead of "Unusable".
+
+### Fixed
+
+- Fixed the "Installing", "Restoring Backup" and "Restoring Snapshot" screens polling forever once their server was
+  gone or the session had ended. A deleted or disconnected server now shows "Server not found", and a signed-out
+  browser goes to the sign-in page.
+- Fixed "Retry Installation" looking like it did nothing when the reinstall failed: the confirmation stayed open over
+  the error. It now closes, and the error shows on the card.
+- Fixed the error from a failed delete being squeezed into the Delete Server card's footer next to its buttons, and
+  touching the "Restore Access" button on the "Failed to Delete" screen.
+- Fixed the admin overview's Attention card reading "27 servers failed -- bulk-fail-27, bulk-fail-26, bulk-fail-2...
+  and 2 more": "more" counted only past the 25 records the card loads, while the names were cut off after two or
+  three. It now names two servers (one on a phone) and counts the rest.
+- Fixed MySQL and Redis never reporting healthy, and `docker compose up -d` failing, when their password contains a
+  space, as the install guide's example password does.
+- Fixed `laravel.log` being rotated only when the workers container started. supervisord ran logrotate as a
+  long-running program, gave up on it after it exited a few times, and never ran it again.
+- Fixed a signed-out request to the API without `Accept: application/json` failing with a 500 (`Route [login] not
+  defined`). It gets a `401` in JSON.
+- Fixed adopting an existing virtual machine (Create Server with "Should Create VM" off). The form demanded an OS
+  password it doesn't need, and the request then failed with a 500 ("Attempt to read property "name" on null") after
+  creating the server, which was left behind as Ready and never synced. Creating a server is now one transaction whose
+  jobs are queued once it commits, so a failure leaves nothing behind. The template rule also checked a field that
+  doesn't exist (`create_server`), so a new VM was accepted without a template.
+- Fixed a server's Overview showing "Running" after the server was deleted or suspended. It now switches to "Server not
+  found", or to the screen for the server's new status, and a signed-out browser goes to the sign-in page.
+- Fixed the admin "Deleting" screen never moving on. It now goes to "Failed to Delete" if the delete fails, and back to
+  the server list once the server is gone.
+- Fixed the backup list keeping a new backup's spinner and "0 Bytes" until the page was reloaded. It refreshes while a
+  backup is running.
+- Fixed Escape in an open multi-select, such as Create Pool's Nodes, closing the whole dialog and losing the form. It
+  closes the list; a second Escape closes the dialog.
+- Fixed the Create Server user picker not finding a user by email, and the user search matching an email only in full
+  and a name only when typed in lower case.
+- Fixed a new user not appearing in the admin user list until the page was reloaded.
+- Fixed IPAM pages requesting `/api/admin/address-pools/-1/attached-nodes` and getting a 404 on every load.
+- Fixed the IPAM pool page's breadcrumb linking to `/admin/ipam/undefined`.
+- Fixed uptime reading "1 minutes".
+- Fixed the "+" button that replaces "Create ..." on a phone, the row menus, the dark mode switch and the boot order's
+  add, remove and drag buttons having no name a screen reader could announce.
+
 ## v4.7.0-rc.4
 
 Everything in v4.6.2, the security release cut from v4.6.1:
