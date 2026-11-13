@@ -1,0 +1,25 @@
+name: CLI
+on:
+  push:
+    branches:
+      - '5.x'
+  pull_request:
+    paths:
+      - 'docker/**'
+      - 'tests/cli/**'
+      - '.github/workflows/cli.yml'
+
+jobs:
+  cli:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      # The installer and the convoy command run as root on operators' hosts;
+      # shellcheck is the cheapest review they get on every change.
+      - name: shellcheck
+        run: shellcheck -x docker/install.sh docker/convoy docker/entrypoint.d/*.sh tests/cli/*.sh
+
+      # What `convoy support` removes before a bundle leaves the host.
+      - name: Redaction fixtures
+        run: tests/cli/redact.sh

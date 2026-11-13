@@ -1,0 +1,23 @@
+[2026-11-13 04:59:58] production.ERROR: SQLSTATE[08006] [7] connection to server at "postgres" failed: FATAL:  password authentication failed for user "convoy" (password p4ss.w0rd+(re)[gex]{1}|^and/slash*?) {"exception":"[object] (PDOException(code: 7): SQLSTATE[08006] at /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connectors/Connector.php:66)"}
+[2026-11-13 05:00:01] production.INFO: config {"db":{"password":"p4ss.w0rd+(re)[gex]{1}|^and\/slash*?"}}
+2026-11-13T05:00:02.123456789Z Authorization: PVEAPIToken=root@pam!convoy=9f0c2e1a-3b4d-4e5f-8a9b-0c1d2e3f4a5b
+[2026-11-13 05:00:03] production.ERROR: Proxmox rejected root@pam!convoy=9f0c2e1a-3b4d-4e5f-8a9b-0c1d2e3f4a5b {"node":12}
+{"token_id":"root@pam!convoy","secret":"9f0c2e1a-3b4d-4e5f-8a9b-0c1d2e3f4a5b","fqdn":"pve1.example.com"}
+GET /api/client/servers HTTP/1.1 Authorization: Bearer 12|abcdefghijklmnopqrstuvwxyz0123456789
+"authorization":["bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIn0.c2lnbmF0dXJl"]
+Authorization: Basic dXNlcjpwYXNzd29yZA==
+headers: {"Authorization":"PVEAPIToken=apitoken-without-uuid","Accept":"application/json"}
+APP_KEY=base64:ZmFrZS1hcHAta2V5LWZvci10aGUtcmVkYWN0LXRlc3Q= and an old one base64:b2xkLWtleS1vbGQta2V5LW9sZC1rZXktb2xkLWtleS1vbGQ=
+Cookie: XSRF-TOKEN=eyJpdiI6IkFCQyIsInZhbHVlIjoiREVGIn0%3D; convoy_session=eyJpdiI6IkdISSIsInZhbHVlIjoiSktMIn0%3D; theme=dark
+[2026-11-13 05:00:04] production.INFO: Password reset link sent: https://panel.example.com/auth/password/reset?email=admin%40example.com&token=0123456789abcdef0123
+{"email":"admin@example.com","password":"Hunter2!Hunter2","password_confirmation":"Hunter2!Hunter2","remember":true,"current_password":"Old\"Pass","api_key":"k_9876543210"}
+{"job":"Convoy\\Jobs\\SendMail","data":"{\"password\":\"Hunter2!\",\"name\":\"x\"}"}
+LOAD DATABASE FROM mysql://pgloader:abc123def456@convoy-import-mysql/convoy INTO postgresql://convoy:hex0123456789@postgres/convoy
+GET /api/thing?api_token=abcdef123456&page=2 HTTP/1.1
+redis-cli -a redis-secret-value-1234 ping
+Expected response code 235 but got 535 for "quoted pass with spaces"
+s3 upload failed for AKIAFAKEFAKEFAKEFAKE/xyz and AKIAFAKEFAKEFAKEFAKE\/xyz
+token tok_1234567890abcdef was refused
+[2026-11-13 05:01:00] production.ERROR: Node pve1 timed out after 15 seconds; mail username null; see https://pve1.example.com:8006/api2/json {"exception":"[object] (GuzzleHttp\\Exception\\ConnectException(code: 0): cURL error 28 at /var/www/html/vendor/guzzlehttp/guzzle/src/Handler/CurlFactory.php:275)"}
+Horizon is running. Basic checks passed.
+PVEAPIToken=root@pam!convoy=abc-secret-not-uuid next

@@ -1,0 +1,23 @@
+[2026-11-13 04:59:58] production.ERROR: SQLSTATE[08006] [7] connection to server at "postgres" failed: FATAL:  password authentication failed for user "convoy" (password [redacted]) {"exception":"[object] (PDOException(code: 7): SQLSTATE[08006] at /var/www/html/vendor/laravel/framework/src/Illuminate/Database/Connectors/Connector.php:66)"}
+[2026-11-13 05:00:01] production.INFO: config {"db":{"password":"[redacted]"}}
+2026-11-13T05:00:02.123456789Z Authorization: PVEAPIToken=root@pam!convoy=[redacted]
+[2026-11-13 05:00:03] production.ERROR: Proxmox rejected root@pam!convoy=[redacted] {"node":12}
+{"token_id":"root@pam!convoy","secret":"[redacted]","fqdn":"pve1.example.com"}
+GET /api/client/servers HTTP/1.1 Authorization: Bearer [redacted]
+"authorization":["bearer [redacted]"]
+Authorization: Basic [redacted]
+headers: {"Authorization":"PVEAPIToken=[redacted]","Accept":"application/json"}
+APP_KEY=[redacted] and an old one [redacted]
+Cookie: XSRF-TOKEN=[redacted]; convoy_session=[redacted]; theme=dark
+[2026-11-13 05:00:04] production.INFO: Password reset link sent: https://panel.example.com/auth/password/reset?email=admin%40example.com&token=[redacted]
+{"email":"admin@example.com","password":"[redacted]","password_confirmation":"[redacted]","remember":true,"current_password":"[redacted]","api_key":"[redacted]"}
+{"job":"Convoy\\Jobs\\SendMail","data":"{\"password\":\"[redacted]\",\"name\":\"x\"}"}
+LOAD DATABASE FROM mysql://pgloader:[redacted]@convoy-import-mysql/convoy INTO postgresql://convoy:[redacted]@postgres/convoy
+GET /api/thing?api_token=[redacted]&page=2 HTTP/1.1
+redis-cli -a [redacted] ping
+Expected response code 235 but got 535 for "[redacted]"
+s3 upload failed for [redacted] and [redacted]
+token [redacted] was refused
+[2026-11-13 05:01:00] production.ERROR: Node pve1 timed out after 15 seconds; mail username null; see https://pve1.example.com:8006/api2/json {"exception":"[object] (GuzzleHttp\\Exception\\ConnectException(code: 0): cURL error 28 at /var/www/html/vendor/guzzlehttp/guzzle/src/Handler/CurlFactory.php:275)"}
+Horizon is running. Basic checks passed.
+PVEAPIToken=root@pam!convoy=[redacted] next
