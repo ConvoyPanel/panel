@@ -8,6 +8,7 @@ use Convoy\Http\Controllers\ApiController;
 use Convoy\Http\Requests\Admin\Servers\Settings\UpdateBuildRequest;
 use Convoy\Http\Requests\Admin\Servers\Settings\UpdateGeneralInfoRequest;
 use Convoy\Http\Requests\Admin\Servers\StoreServerRequest;
+use Convoy\Models\Filters\FiltersExactId;
 use Convoy\Models\Filters\FiltersServerByAddressPoolId;
 use Convoy\Models\Filters\FiltersServerWildcard;
 use Convoy\Models\Server;
@@ -52,8 +53,8 @@ class ServerController extends ApiController
                                            'address_pool_id',
                                            new FiltersServerByAddressPoolId(),
                                        ),
-                                       AllowedFilter::exact('node_id'),
-                                       AllowedFilter::exact('user_id'),
+                                       AllowedFilter::custom('node_id', new FiltersExactId()),
+                                       AllowedFilter::custom('user_id', new FiltersExactId()),
                                        'name',
                                    ],
                                )

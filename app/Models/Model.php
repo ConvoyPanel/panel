@@ -4,6 +4,7 @@ namespace Convoy\Models;
 
 use Carbon\CarbonImmutable;
 use Convoy\Exceptions\Model\DataValidationException;
+use Convoy\Rules\UniqueIgnoringCase;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Validation\Factory;
@@ -12,7 +13,6 @@ use Illuminate\Database\Eloquent\Model as IlluminateModel;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Validator;
 
@@ -98,8 +98,17 @@ abstract class Model extends IlluminateModel
     public static function getRules(): array
     {
         $rules = static::$validationRules;
-        foreach ($rules as &$rule) {
+        foreach ($rules as $key => &$rule) {
             $rule = is_array($rule) ? $rule : explode('|', $rule);
+
+            // `unique:table,column` compared case-insensitively, as it was on MySQL.
+            foreach ($rule as &$datum) {
+                if (is_string($datum) && Str::startsWith($datum, 'unique:')) {
+                    $args = explode(',', Str::after($datum, 'unique:'));
+                    $datum = new UniqueIgnoringCase($args[0], $args[1] ?? $key);
+                }
+            }
+            unset($datum);
         }
 
         return $rules;
@@ -132,15 +141,10 @@ abstract class Model extends IlluminateModel
             // is one for a unique field. If that is the case, append the ID of the current
             // working model, so we don't run into errors due to the way that field validation
             // works.
-            foreach ($data as &$datum) {
-                if (!is_string($datum) || !Str::startsWith($datum, 'unique')) {
-                    continue;
+            foreach ($data as $datum) {
+                if ($datum instanceof UniqueIgnoringCase) {
+                    $datum->ignore($id ?? $model, $column);
                 }
-
-                [, $args] = explode(':', $datum);
-                $args = explode(',', $args);
-
-                $datum = Rule::unique($args[0], $args[1] ?? $key)->ignore($id ?? $model, $column);
             }
         }
 

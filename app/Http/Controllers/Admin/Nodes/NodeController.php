@@ -5,6 +5,7 @@ namespace Convoy\Http\Controllers\Admin\Nodes;
 use Convoy\Http\Controllers\ApiController;
 use Convoy\Http\Requests\Admin\Nodes\StoreNodeRequest;
 use Convoy\Http\Requests\Admin\Nodes\UpdateNodeRequest;
+use Convoy\Models\Filters\FiltersExactId;
 use Convoy\Models\Filters\FiltersNodeWildcard;
 use Convoy\Models\Node;
 use Convoy\Transformers\Admin\NodeTransformer;
@@ -19,11 +20,14 @@ class NodeController extends ApiController
     {
         $nodes = QueryBuilder::for(Node::query())
                              ->withCount(['servers'])
+                             // MySQL handed rows back in id order without being asked;
+                             // Postgres doesn't, and pages would overlap.
+                             ->defaultSort('id')
                              ->allowedFilters(
-                                 [AllowedFilter::exact('id'), 'name', 'fqdn', AllowedFilter::exact(
-                                     'location_id',
-                                 ), AllowedFilter::exact(
-                                     'coterm_id',
+                                 [AllowedFilter::custom('id', new FiltersExactId()), 'name', 'fqdn', AllowedFilter::custom(
+                                     'location_id', new FiltersExactId(),
+                                 ), AllowedFilter::custom(
+                                     'coterm_id', new FiltersExactId(),
                                  )->nullable(), AllowedFilter::custom(
                                      '*',
                                      new FiltersNodeWildcard(),

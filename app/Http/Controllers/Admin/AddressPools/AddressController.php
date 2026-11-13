@@ -11,6 +11,8 @@ use Convoy\Jobs\Server\SyncNetworkSettings;
 use Convoy\Models\Address;
 use Convoy\Models\AddressPool;
 use Convoy\Models\Filters\FiltersAddressWildcard;
+use Convoy\Models\Filters\FiltersExactId;
+use Convoy\Models\Filters\FiltersExactIgnoringCase;
 use Convoy\Services\Activity\BulkAddressCreationService;
 use Convoy\Services\Servers\NetworkService;
 use Convoy\Transformers\Admin\AddressTransformer;
@@ -37,15 +39,15 @@ class AddressController extends ApiController
                                  ->defaultSort('-id')
                                  ->allowedFilters(
                                      [
-                                         AllowedFilter::exact('address'),
-                                         AllowedFilter::exact(
-                                             'type',
+                                         AllowedFilter::custom('address', new FiltersExactIgnoringCase()),
+                                         AllowedFilter::custom(
+                                             'type', new FiltersExactIgnoringCase(),
                                          ),
                                          AllowedFilter::custom(
                                              '*',
                                              new FiltersAddressWildcard(),
                                          ),
-                                         AllowedFilter::exact('server_id')->nullable(),
+                                         AllowedFilter::custom('server_id', new FiltersExactId())->nullable(),
                                      ],
                                  )
                                  ->paginate(min($request->query('per_page', 50), 999999))->appends(

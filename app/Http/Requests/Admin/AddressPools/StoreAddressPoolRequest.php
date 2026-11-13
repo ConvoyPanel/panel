@@ -13,7 +13,9 @@ class StoreAddressPoolRequest extends FormRequest
         return [
             ...$rules,
             'node_ids' => 'sometimes|array',
-            'node_ids.*' => 'exists:nodes,id|integer',
+            // `integer` first: Laravel then skips `exists` for a value that isn't one,
+            // which Postgres would refuse to compare with the bigint id.
+            'node_ids.*' => 'integer|exists:nodes,id',
         ];
     }
 }

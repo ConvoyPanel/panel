@@ -57,7 +57,11 @@ class Server extends Model
 
     public function addresses(): HasMany
     {
-        return $this->hasMany(Address::class);
+        // The first IPv4 and IPv6 here become the server's cloud-init ipconfig0 and
+        // give its NIC a MAC. MySQL returned them lowest id first by way of the
+        // foreign-key index; Postgres returns them in whatever order they sit on
+        // disk, which changes after an update.
+        return $this->hasMany(Address::class)->orderBy('ip_addresses.id');
     }
 
     public function template(): HasOne

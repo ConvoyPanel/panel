@@ -10,12 +10,14 @@ use Convoy\Http\Requests\Client\Servers\Backups\RestoreBackupRequest;
 use Convoy\Http\Requests\Client\Servers\Backups\StoreBackupRequest;
 use Convoy\Models\Backup;
 use Convoy\Models\Server;
+use Convoy\Models\Sorts\SortsNullsAsMySql;
 use Convoy\Repositories\Eloquent\BackupRepository;
 use Convoy\Services\Backups\BackupCreationService;
 use Convoy\Services\Backups\BackupDeletionService;
 use Convoy\Services\Backups\RestoreFromBackupService;
 use Convoy\Transformers\Client\BackupTransformer;
 use Illuminate\Http\Request;
+use Spatie\QueryBuilder\AllowedSort;
 use Spatie\QueryBuilder\QueryBuilder;
 
 class BackupController extends ApiController
@@ -35,7 +37,11 @@ class BackupController extends ApiController
                                ->where('backups.server_id', $server->id)
                                ->allowedFilters(['name'])
                                ->defaultSort('-created_at')
-                               ->allowedSorts('created_at', 'completed_at')
+                               ->allowedSorts(
+                                   'created_at',
+                                   // Unfinished backups have no completed_at.
+                                   AllowedSort::custom('completed_at', new SortsNullsAsMySql()),
+                               )
                                ->paginate(min($request->query('per_page') ?? 20, 50));
 
         return fractal($backups, new BackupTransformer())->addMeta([

@@ -64,7 +64,10 @@ class OverviewService
         return Node::query()
             ->select(['id', 'name', 'cluster', 'fqdn', 'memory', 'disk'])
             ->withCount('servers')
-            ->orderBy('name')
+            // Case-insensitively, as MySQL's collation sorted it. Postgres on Alpine
+            // (musl) sorts by byte, which puts every capital first.
+            ->orderByRaw('LOWER(name)')
+            ->orderBy('id')
             ->get();
     }
 

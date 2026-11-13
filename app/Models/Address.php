@@ -14,8 +14,10 @@ class Address extends Model
     protected $guarded = ['id', 'updated_at', 'created_at'];
 
     public static array $validationRules = [
-        'address_pool_id' => ['exists:address_pools,id', 'required'],
-        'server_id' => ['exists:servers,id', 'nullable'],
+        // `integer` before `exists`: Laravel skips `exists` once an earlier rule has
+        // failed, and Postgres refuses to compare a bigint id with text.
+        'address_pool_id' => ['required', 'integer', 'exists:address_pools,id'],
+        'server_id' => ['nullable', 'integer', 'exists:servers,id'],
         'type' => ['in:ipv4,ipv6', 'required'],
         'address' => ['ip'],
         'cidr' => ['numeric', 'min:0', 'max:128', 'required'],

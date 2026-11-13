@@ -9,6 +9,7 @@ use Convoy\Http\Requests\Admin\Coterms\UpdateAttachedNodesRequest;
 use Convoy\Http\Requests\Admin\Coterms\UpdateCotermRequest;
 use Convoy\Models\Coterm;
 use Convoy\Models\Filters\FiltersCotermWildcard;
+use Convoy\Models\Filters\FiltersExactId;
 use Convoy\Models\Filters\FiltersNodeWildcard;
 use Convoy\Models\Node;
 use Convoy\Services\Coterm\CotermTokenCreationService;
@@ -85,9 +86,12 @@ class CotermController extends ApiController
     {
         $nodes = QueryBuilder::for($coterm->nodes())
                              ->withCount('servers')
+                             // MySQL handed rows back in id order without being asked;
+                             // Postgres doesn't, and pages would overlap.
+                             ->defaultSort('id')
                              ->allowedFilters(
-                                 ['name', 'fqdn', AllowedFilter::exact(
-                                     'location_id',
+                                 ['name', 'fqdn', AllowedFilter::custom(
+                                     'location_id', new FiltersExactId(),
                                  ), AllowedFilter::custom('*', new FiltersNodeWildcard())],
                              )
                              ->paginate(min($request->query('per_page', 50), 100))->appends(

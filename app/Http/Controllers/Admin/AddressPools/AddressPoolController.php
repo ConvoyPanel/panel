@@ -7,6 +7,7 @@ use Convoy\Http\Requests\Admin\AddressPools\StoreAddressPoolRequest;
 use Convoy\Http\Requests\Admin\AddressPools\UpdateAddressPoolRequest;
 use Convoy\Models\AddressPool;
 use Convoy\Models\Filters\FiltersAddressPoolWildcard;
+use Convoy\Models\Filters\FiltersExactId;
 use Convoy\Models\Filters\FiltersNodeWildcard;
 use Convoy\Transformers\Admin\AddressPoolTransformer;
 use Convoy\Transformers\Admin\NodeTransformer;
@@ -45,9 +46,12 @@ class AddressPoolController extends ApiController
     {
         $nodes = QueryBuilder::for($addressPool->nodes())
                              ->withCount('servers')
+                             // MySQL handed rows back in id order without being asked;
+                             // Postgres doesn't, and pages would overlap.
+                             ->defaultSort('id')
                              ->allowedFilters(
-                                 ['name', 'fqdn', AllowedFilter::exact(
-                                     'location_id',
+                                 ['name', 'fqdn', AllowedFilter::custom(
+                                     'location_id', new FiltersExactId(),
                                  ), AllowedFilter::custom('*', new FiltersNodeWildcard())],
                              )
                              ->paginate(min($request->query('per_page', 50), 100))->appends(

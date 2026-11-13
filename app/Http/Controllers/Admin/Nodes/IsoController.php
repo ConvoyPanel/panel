@@ -29,6 +29,9 @@ class IsoController extends ApiController
     {
         $isos = QueryBuilder::for(ISO::query())
                             ->where('iso_library.node_id', $node->id)
+                            // MySQL handed rows back in id order without being asked;
+                            // Postgres doesn't, and pages would overlap.
+                            ->defaultSort('id')
                             ->allowedFilters(['name'])
                             ->paginate(min($request->query('per_page', 50), 100))->appends(
                 $request->query(),

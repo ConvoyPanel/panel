@@ -21,6 +21,9 @@ class IndexController extends ApiController
 
         $builder = QueryBuilder::for(Server::query())
                                ->with(['addresses'])
+                               // MySQL handed rows back in id order without being
+                               // asked; Postgres doesn't, and pages would overlap.
+                               ->defaultSort('id')
                                ->allowedFilters(['name']);
 
         $type = $request->input('type');

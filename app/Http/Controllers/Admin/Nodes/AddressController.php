@@ -4,6 +4,8 @@ namespace Convoy\Http\Controllers\Admin\Nodes;
 
 use Convoy\Http\Controllers\Controller;
 use Convoy\Models\Filters\FiltersAddressWildcard;
+use Convoy\Models\Filters\FiltersExactId;
+use Convoy\Models\Filters\FiltersExactIgnoringCase;
 use Convoy\Models\Node;
 use Convoy\Transformers\Admin\AddressTransformer;
 use Illuminate\Http\Request;
@@ -18,12 +20,12 @@ class AddressController extends Controller
                                  ->with('server')
                                  ->defaultSort('-id')
                                  ->allowedFilters(
-                                     ['address', AllowedFilter::exact(
-                                         'type',
+                                     ['address', AllowedFilter::custom(
+                                         'type', new FiltersExactIgnoringCase(),
                                      ), AllowedFilter::custom(
                                          '*',
                                          new FiltersAddressWildcard(),
-                                     ), AllowedFilter::exact('server_id')->nullable()],
+                                     ), AllowedFilter::custom('server_id', new FiltersExactId())->nullable()],
                                  )
                                  ->paginate(min($request->query('per_page', 50), 999999))->appends(
                 $request->query(),

@@ -6,6 +6,8 @@ use Carbon\CarbonImmutable;
 use Convoy\Http\Controllers\ApiController;
 use Convoy\Http\Requests\Admin\Users\StoreUserRequest;
 use Convoy\Http\Requests\Admin\Users\UpdateUserRequest;
+use Convoy\Models\Filters\FiltersExactId;
+use Convoy\Models\Filters\FiltersExactIgnoringCase;
 use Convoy\Models\Filters\FiltersUserWildcard;
 use Convoy\Models\User;
 use Convoy\Services\Api\JWTService;
@@ -32,9 +34,12 @@ class UserController extends ApiController
     {
         $users = QueryBuilder::for(User::query())
             ->withCount(['servers'])
+            // MySQL handed rows back in id order without being asked; Postgres
+            // doesn't, and pages would overlap.
+            ->defaultSort('id')
             ->allowedFilters(
-                [AllowedFilter::exact('id'), 'name', AllowedFilter::exact(
-                    'email',
+                [AllowedFilter::custom('id', new FiltersExactId()), 'name', AllowedFilter::custom(
+                    'email', new FiltersExactIgnoringCase(),
                 ), AllowedFilter::custom('*', new FiltersUserWildcard())],
             )
             ->paginate(min($request->query('per_page', 50), 100))->appends(

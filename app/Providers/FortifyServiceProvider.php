@@ -2,7 +2,10 @@
 
 namespace Convoy\Providers;
 
+use Convoy\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Laravel\Fortify\Fortify;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -32,6 +35,22 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::updateUserPasswordsUsing(UpdateUserPassword::class);
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
         //Fortify::ignoreRoutes();
+
+        // Signing in with "Bob@Example.com" found bob@example.com on MySQL, whose
+        // collation ignores case. Postgres compares exactly, so look the account up
+        // the way MySQL did: an exact match first, then one ignoring case.
+        Fortify::authenticateUsing(function (Request $request) {
+            $email = (string) $request->input(Fortify::username());
+
+            $user = User::query()->where('email', $email)->first()
+                ?? User::query()->whereRaw('LOWER(email) = ?', [Str::lower($email)])->orderBy('id')->first();
+
+            if ($user && Hash::check((string) $request->input('password'), $user->password)) {
+                return $user;
+            }
+
+            return null;
+        });
 
         RateLimiter::for('login', function (Request $request) {
             $email = (string) $request->email;

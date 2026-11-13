@@ -24,6 +24,14 @@ class RouteServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // These models bind by their bigint id. MySQL answered /nodes/abc with "no such
+        // row" and a 404; Postgres refuses to compare the id with text, which was a
+        // 500. A value that can't be an id now doesn't match the route, so it's a 404
+        // without a query.
+        foreach (['node', 'user', 'address_pool', 'address', 'coterm', 'location'] as $parameter) {
+            Route::pattern($parameter, '[0-9]{1,18}');
+        }
+
         Route::bind('server', function ($value) {
             return Server::query()->where(strlen($value) === 8 ? 'uuid_short' : 'uuid', $value)
                 ->firstOrFail();
