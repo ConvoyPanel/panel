@@ -9,8 +9,9 @@ import { Line } from 'react-chartjs-2'
 import { useTranslation } from 'react-i18next'
 import tw from 'twin.macro'
 
-import Card from '@/components/elements/Card'
+import { handlePollError } from '@/api/server/handlePollError'
 
+import Card from '@/components/elements/Card'
 
 export const StatRow = styled.div`
     ${tw`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 border border-[#eaeaea] dark:border-[#333333] shadow-light dark:shadow-none rounded bg-white dark:bg-black`}
@@ -52,6 +53,12 @@ const ServerDetailsBlock = () => {
     const getStatus = ServerContext.useStoreActions(
         actions => actions.status.getStatus
     )
+    const getServer = ServerContext.useStoreActions(
+        actions => actions.server.getServer
+    )
+    const markMissing = ServerContext.useStoreActions(
+        actions => actions.server.markMissing
+    )
     const isUpdating = useRef(true)
     const notify = useNotify()
 
@@ -63,7 +70,23 @@ const ServerDetailsBlock = () => {
 
             try {
                 await getStatus(uuid)
-            } catch {
+            } catch (error: any) {
+                if (handlePollError(error, markMissing)) {
+                    isUpdating.current = false
+                    return
+                }
+
+                // The server went into a status this page can't show, such as
+                // being deleted. Reloading it lets ServerRouter put up that
+                // status's screen, which takes this page down with it.
+                if (error?.response?.status === 409) {
+                    isUpdating.current = false
+                    getServer(uuid).catch((e: any) =>
+                        handlePollError(e, markMissing)
+                    )
+                    return
+                }
+
                 notify({
                     title: tStrings('error'),
                     message: t('poll_status_error'),

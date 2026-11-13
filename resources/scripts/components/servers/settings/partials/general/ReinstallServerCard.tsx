@@ -18,7 +18,6 @@ import TextInputForm from '@/components/elements/forms/TextInputForm'
 
 import TemplatesSelectForm from '@/components/servers/settings/TemplatesSelectForm'
 
-
 interface Props {
     title?: string
     description?: string
@@ -64,6 +63,10 @@ const ReinstallServerCard = ({ title, description, submitLabel }: Props) => {
             })
         } catch (error) {
             clearAndAddHttpError(error as any)
+        } finally {
+            // The error renders on the card, which the confirmation would
+            // otherwise keep covering: Confirm looked like it did nothing.
+            setIsModalOpen(false)
         }
     }
 
