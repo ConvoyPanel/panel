@@ -29,9 +29,12 @@ final class SearchTerm
         return mb_strtolower(trim((string) $value));
     }
 
-    /** A LIKE pattern matching columns that contain the value, for LOWER(column) LIKE ?. */
+    /**
+     * A LIKE pattern matching columns that contain the value, for LOWER(column) LIKE ?.
+     * % and _ in the value are escaped, so they match themselves.
+     */
     public static function contains(mixed $value): string
     {
-        return '%'.self::lower($value).'%';
+        return '%'.addcslashes(self::lower($value), '%_\\').'%';
     }
 }
