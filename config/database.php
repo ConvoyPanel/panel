@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'default' => env('DB_CONNECTION', 'mysql'),
+    'default' => env('DB_CONNECTION', 'pgsql'),
 
     /*
     |--------------------------------------------------------------------------
@@ -76,6 +76,10 @@ return [
             'prefix_indexes' => true,
             'search_path' => 'public',
             'sslmode' => 'prefer',
+            // Columns that default to CURRENT_TIMESTAMP (activity_logs.timestamp,
+            // failed_jobs.failed_at) are filled in by the database in its session time
+            // zone. Laravel writes UTC everywhere else, and MySQL's session was UTC.
+            'timezone' => 'UTC',
         ],
 
         'sqlsrv' => [

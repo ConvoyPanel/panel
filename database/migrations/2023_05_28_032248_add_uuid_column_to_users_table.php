@@ -4,6 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 
 return new class extends Migration
 {
@@ -16,7 +17,11 @@ return new class extends Migration
             $table->char('uuid', 36)->nullable()->after('id');
         });
 
-        DB::statement('UPDATE users SET uuid=(select UUID())');
+        // Was `UPDATE users SET uuid=(select UUID())`, and MySQL's UUID() doesn't exist
+        // on Postgres. Generated in PHP instead, which works on both.
+        DB::table('users')->whereNull('uuid')->lazyById()->each(
+            fn (object $user) => DB::table('users')->where('id', $user->id)->update(['uuid' => (string) Str::uuid()]),
+        );
     }
 
     /**

@@ -8,17 +8,26 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
+     *
+     * This used to be `ALTER TABLE ip_addresses MODIFY COLUMN type varchar(255) AFTER
+     * server_id`, MySQL-only SQL that only moved the column. MODIFY COLUMN also
+     * redefines it, and since that statement didn't say NOT NULL, MySQL made the
+     * column nullable on every install that ran it. Postgres can't reorder columns, so
+     * what's kept is the part that changed the schema.
      */
     public function up(): void
     {
-        DB::statement('ALTER TABLE ip_addresses MODIFY COLUMN type varchar(255) AFTER server_id');
+        Schema::table('ip_addresses', function (Blueprint $table) {
+            $table->string('type')->nullable()->change();
+        });
     }
 
     /**
-     * Reverse the migrations.
+     * Reverse the migrations. The original down() moved the column back and left it
+     * nullable as well, so there is nothing to undo.
      */
     public function down(): void
     {
-        DB::statement('ALTER TABLE ip_addresses MODIFY COLUMN type varchar(255) AFTER mac_address');
+        //
     }
 };
