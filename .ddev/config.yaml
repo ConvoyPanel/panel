@@ -1,38 +1,40 @@
-name: convoy4x
+name: convoy5x
 type: laravel
 docroot: public
-php_version: "8.2"
+php_version: "8.4"
 webserver_type: nginx-fpm
 
-# 4.x ships MySQL (docker-compose.yml pins mysql:8.0), unlike 5.x's Postgres.
+# Postgres 17, as in compose.yml.
 database:
-  type: mysql
-  version: "8.0"
+  type: postgres
+  version: "17"
 
 # Without this DDEV assigns a random ephemeral host port on every start, which
-# breaks saved connections in GUI clients (TablePlus, DataGrip, mysql aliases).
-host_db_port: "3306"
+# breaks saved connections in GUI clients (TablePlus, DataGrip, psql aliases).
+# 5436 because convoy (~/panel) holds 5432 and console 5435.
+host_db_port: "5436"
 
-# The release workflow builds on Node 20.
-nodejs_version: "20"
+# The Docker image builds the frontend on Node 22.
+nodejs_version: "22"
 corepack_enable: false
 
 # ext-gmp is required by composer.json. Without it `composer install` fails its
 # platform check -- and `ddev composer` still exits 0, so vendor/ silently stays
 # stale and every artisan call dies on the next platform_check.php.
 webimage_extra_packages:
-  - php8.2-gmp
+  - php8.4-gmp
 
-# MySQL + redis + mail overrides. These are real container env vars, so they
+# Database + redis + mail overrides. These are real container env vars, so they
 # take precedence over .env (Laravel's Dotenv does not overwrite existing env).
-# Note CACHE_DRIVER, not 5.x's CACHE_STORE: this branch is on Laravel 11 but
+# Note CACHE_DRIVER, not CACHE_STORE: this branch is on Laravel 11 but
 # still ships the pre-11 config/cache.php, which reads the old key.
 web_environment:
-  - APP_URL=https://convoy4x.ddev.site
-  - DB_CONNECTION=mysql
+  - APP_URL=https://convoy5x.ddev.site
+  - DB_CONNECTION=pgsql
   - DB_HOST=db
-  - DB_PORT=3306
+  - DB_PORT=5432
   - DB_DATABASE=db
+  - DB_TEST_DATABASE=db_test
   - DB_USERNAME=db
   - DB_PASSWORD=db
   - REDIS_HOST=redis
@@ -45,14 +47,15 @@ web_environment:
   - MAIL_HOST=localhost
   - MAIL_PORT=1025
 
-# Deliberately no `db_test` database, unlike 5.x. This branch's tests/Pest.php
-# uses DatabaseTransactions rather than RefreshDatabase, so they run against
-# whatever is in the dev database and roll their own writes back. That means
-# seeded dev data is visible to the suite and will fail any test asserting on a
-# fleet-wide aggregate (the overview endpoint's counts, most of all). Run
-# `ddev artisan migrate:fresh` before a full run, or scope to one file.
+# The test suite (RefreshDatabase) runs against a separate `db_test` database so
+# its migrate:fresh never touches dev data; tests/bootstrap.php points the suite
+# at DB_TEST_DATABASE. Postgres has no CREATE DATABASE IF NOT EXISTS, so
+# createdb is guarded to stay idempotent.
+hooks:
+  post-start:
+    - exec: "PGPASSWORD=db createdb -h db -U db db_test 2>/dev/null || true"
 
-# Replaces the compose `workers` service and its scheduler.
+# Replaces compose.yml's `worker` and `scheduler` services.
 web_extra_daemons:
   - name: horizon
     command: "php artisan horizon"
