@@ -2,7 +2,6 @@
 
 namespace Convoy\Models;
 
-use Convoy\Casts\MebibytesToAndFromBytes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
@@ -17,7 +16,10 @@ class ISO extends Model
 
     protected $casts = [
         'is_successful' => 'boolean',
-        'size' => MebibytesToAndFromBytes::class,
+        // Bytes, not the whole mebibytes servers and backups are stored in:
+        // that rounded every ISO down, so a 2.95 MiB file read as "2 MiB" in
+        // the library and 2.95 MiB on the server's drive.
+        'size' => 'integer',
         'hidden' => 'boolean',
     ];
 
