@@ -4,7 +4,7 @@ import { Sizes, convertTimeToSmallest, formatBytes } from '@/util/helpers'
 import useNotify from '@/util/useNotify'
 import styled from '@emotion/styled'
 import { Badge, RingProgress, Skeleton } from '@mantine/core'
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo } from 'react'
 import { Line } from 'react-chartjs-2'
 import { useTranslation } from 'react-i18next'
 import tw from 'twin.macro'
@@ -59,31 +59,33 @@ const ServerDetailsBlock = () => {
     const markMissing = ServerContext.useStoreActions(
         actions => actions.server.markMissing
     )
-    const isUpdating = useRef(true)
     const notify = useNotify()
 
     useEffect(() => {
-        isUpdating.current = true
+        let active = true
 
         const update = async () => {
-            if (!isUpdating.current) return
+            if (!active) return
 
             try {
                 await getStatus(uuid)
             } catch (error: any) {
-                if (handlePollError(error, markMissing)) {
-                    isUpdating.current = false
-                    return
-                }
+                if (handlePollError(error, markMissing)) return
 
                 // The server went into a status this page can't show, such as
                 // being deleted. Reloading it lets ServerRouter put up that
-                // status's screen, which takes this page down with it.
+                // status's screen, which takes this page down with it. If the
+                // reload finds nothing blocking (the status cleared in
+                // between), keep polling.
                 if (error?.response?.status === 409) {
-                    isUpdating.current = false
-                    getServer(uuid).catch((e: any) =>
-                        handlePollError(e, markMissing)
-                    )
+                    try {
+                        await getServer(uuid)
+                    } catch (e: any) {
+                        if (handlePollError(e, markMissing)) return
+                    }
+
+                    setTimeout(update, 5000)
+
                     return
                 }
 
@@ -104,7 +106,7 @@ const ServerDetailsBlock = () => {
         update()
 
         return () => {
-            isUpdating.current = false
+            active = false
         }
     }, [])
 
