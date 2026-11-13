@@ -16,6 +16,40 @@ Route::get('/overview', Admin\OverviewController::class);
 
 /*
 |--------------------------------------------------------------------------
+| Announcement Controller Routes
+|--------------------------------------------------------------------------
+|
+| Endpoint: /api/admin/announcements
+|
+*/
+Route::prefix('/announcements')->group(function () {
+    Route::get('/', [Admin\AnnouncementController::class, 'index']);
+    Route::post('/{announcementId}/dismiss', [Admin\AnnouncementController::class, 'dismiss'])
+        ->where('announcementId', '[a-z0-9]+(?:-[a-z0-9]+)*');
+});
+
+/*
+|--------------------------------------------------------------------------
+| Settings Controller Routes
+|--------------------------------------------------------------------------
+|
+| Endpoint: /api/admin/settings
+|
+*/
+Route::prefix('/settings')->group(function () {
+    Route::get('/updates', [Admin\Settings\UpdatesController::class, 'show']);
+    Route::post('/updates/check', [Admin\Settings\UpdatesController::class, 'check'])->middleware('throttle:6,1');
+
+    Route::get('/telemetry', [Admin\Settings\TelemetryController::class, 'show']);
+    Route::put('/telemetry', [Admin\Settings\TelemetryController::class, 'update']);
+    Route::get('/telemetry/report', [Admin\Settings\TelemetryController::class, 'report']);
+    Route::post('/telemetry/notice/dismiss', [Admin\Settings\TelemetryController::class, 'dismissNotice']);
+
+    Route::get('/upgrade', Admin\Settings\UpgradeController::class);
+});
+
+/*
+|--------------------------------------------------------------------------
 | Location Controller Routes
 |--------------------------------------------------------------------------
 |

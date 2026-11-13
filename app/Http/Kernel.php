@@ -8,6 +8,7 @@ use Convoy\Http\Middleware\PreventRequestsDuringMaintenance;
 use Convoy\Http\Middleware\RedirectIfAuthenticated;
 use Convoy\Http\Middleware\TrimStrings;
 use Convoy\Http\Middleware\TrustProxies;
+use Convoy\Http\Middleware\UpdateLastActiveAt;
 use Convoy\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Auth\Middleware\AuthenticateWithBasicAuth;
 use Illuminate\Auth\Middleware\Authorize;
@@ -58,6 +59,7 @@ class Kernel extends HttpKernel
             ShareErrorsFromSession::class,
             VerifyCsrfToken::class,
             SubstituteBindings::class,
+            UpdateLastActiveAt::class,
         ],
 
         'api' => [

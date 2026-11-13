@@ -21,6 +21,7 @@ import Card from '@/components/elements/Card'
 import MessageBox from '@/components/elements/MessageBox'
 import PageContentBlock from '@/components/elements/PageContentBlock'
 
+import AnnouncementsCard from '@/components/admin/announcements/AnnouncementsCard'
 import AttentionCard from '@/components/admin/overview/AttentionCard'
 
 interface IconProps {
@@ -161,6 +162,9 @@ const OverviewContainer = () => {
                     <p className='description-small mt-1'>{t('description')}</p>
                 </div>
             </div>
+
+            {/* Read from its own endpoint, so it shows even when the metrics fail to load. */}
+            <AnnouncementsCard className='mb-6' />
 
             {error && (
                 <MessageBox

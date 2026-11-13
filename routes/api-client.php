@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/servers', [Client\IndexController::class, 'index']);
 
+Route::post('/telemetry/views', [Client\TelemetryController::class, 'storeView']);
+
 Route::prefix('/servers/{server}')->middleware(
     [ServerSubject::class, AuthenticateServerAccess::class],
 )->group(function () {

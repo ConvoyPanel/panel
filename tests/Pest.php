@@ -1,5 +1,6 @@
 <?php
 
+use Convoy\Jobs\Telemetry\SendTelemetryReportJob;
 use Convoy\Models\Location;
 use Convoy\Models\Node;
 use Convoy\Models\Server;
@@ -88,4 +89,13 @@ function createServerModel(): array
         $node,
         $server,
     ];
+}
+
+/**
+ * Runs the daily telemetry job here and now. dispatchSync() would hand it to
+ * the faked queue instead.
+ */
+function runTelemetryReportJob(): void
+{
+    app()->call([new SendTelemetryReportJob, 'handle']);
 }
