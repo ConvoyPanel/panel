@@ -104,7 +104,7 @@ User-Agent: Convoy/<panel version> convoy-cli/<collector version>
 | Part | Value |
 |---|---|
 | `bundle` | The `.tar.gz`. |
-| `visibility` | `staff`, `password` or `public`. |
+| `visibility` | `staff`, `password` or `public`. Left out, it means `staff`. |
 | `password` | Only with `password`: 8 to 128 characters. |
 
 | Status | Body | Meaning |
@@ -146,6 +146,17 @@ with the upload response minus `manage_token`, `404` for an unknown code or a wr
 token can't be tested against codes), `422` for bad input. `convoy support visibility <code>
 <staff|password|public>` sends it, prompting for a password the same way as on upload.
 
+### Read who can open it
+
+```
+GET https://convoypanel.com/api/v1/support-bundles/{code}
+Authorization: Bearer <manage_token>
+```
+
+Answers `200` with the upload response minus `manage_token`, and `404` on the same terms as `PATCH`. The
+console's manage page uses it to show the current visibility before offering to change it; the CLI doesn't
+need it.
+
 ### Delete
 
 ```
@@ -153,19 +164,21 @@ DELETE https://convoypanel.com/api/v1/support-bundles/{code}
 Authorization: Bearer <manage_token>
 ```
 
-answers `204` whether or not the code exists, and erases the bundle and everything parsed from it.
-`convoy support delete <code>` sends it.
+answers `204` whether or not the code exists or the token matches, so neither can be tested this way, and
+erases the bundle and everything parsed from it when both do. `convoy support delete <code>` sends it.
 
 Codes are `CVY-` and two groups of four characters from Crockford's base32 alphabet
 (`0-9 A-H J K M N P-T V-Z`; no I, L, O or U), so they survive being read aloud or retyped. The console
-compares them case-insensitively.
+compares them case-insensitively and, as Crockford's decoding does, reads I and L as 1 and O as 0.
 
 Connect timeout 10 seconds, whole request 120.
 
 ## The archive
 
 A gzip-compressed tar. Regular files only, no links, no absolute paths, no `..`, at most 200 files and
-200 MiB unpacked. The console rejects anything outside this layout:
+200 MiB unpacked. Names may start with `./`, and the tar may hold directory entries for the layout's own
+directories, since that is what `tar -C <staging dir> .` writes; the console ignores both. It rejects
+anything else outside this layout:
 
 ```
 manifest.json
