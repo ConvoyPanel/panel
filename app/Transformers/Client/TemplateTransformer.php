@@ -12,7 +12,9 @@ class TemplateTransformer extends TransformerAbstract
         return [
             'uuid' => $template->uuid,
             'name' => $template->name,
-            'hidden' => $template->hidden,
+            // 0/1, as the API sent it from MySQL's tinyint. Postgres returns a real
+            // boolean, and integrations may compare with === 1.
+            'hidden' => (int) $template->hidden,
             'order_column' => $template->order_column,
         ];
     }

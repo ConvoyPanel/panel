@@ -21,7 +21,9 @@ class TemplateGroupTransformer extends TransformerAbstract
             'node_id' => $templateGroup->node_id,
             'uuid' => $templateGroup->uuid,
             'name' => $templateGroup->name,
-            'hidden' => $templateGroup->hidden,
+            // 0/1, as the API sent it from MySQL's tinyint. Postgres returns a real
+            // boolean, and integrations may compare with === 1.
+            'hidden' => (int) $templateGroup->hidden,
             'order_column' => $templateGroup->order_column,
         ];
     }

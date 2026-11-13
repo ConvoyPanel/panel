@@ -28,8 +28,10 @@ class BackupTransformer extends TransformerAbstract
     {
         return [
             'uuid' => $backup->uuid,
-            'is_successful' => $backup->is_successful,
-            'is_locked' => $backup->is_locked,
+            // 0/1, as the API sent them from MySQL's tinyint. Postgres returns a real
+            // boolean, and integrations may compare with === 1.
+            'is_successful' => (int) $backup->is_successful,
+            'is_locked' => (int) $backup->is_locked,
             'name' => $backup->name,
             'size' => $backup->size,
             'completed_at' => $backup->completed_at,
