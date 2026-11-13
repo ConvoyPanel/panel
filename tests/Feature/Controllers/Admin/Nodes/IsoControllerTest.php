@@ -112,8 +112,10 @@ it('can query link', function () {
         ),
     ]);
 
+    // This used to request /tools/query-remote-file, which isn't a route: the SPA's
+    // catch-all answered 200 and the endpoint was never called.
     $response = $this->actingAs($this->user)->getJson(
-        '/tools/query-remote-file?link=' . urlencode(
+        "/api/admin/nodes/{$this->node->id}/tools/query-remote-file?link=" . urlencode(
             'https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/stable-virtio/virtio-win.iso',
         ),
     );

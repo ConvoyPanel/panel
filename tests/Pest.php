@@ -4,7 +4,7 @@ use Convoy\Models\Location;
 use Convoy\Models\Node;
 use Convoy\Models\Server;
 use Convoy\Models\User;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
 
@@ -19,10 +19,12 @@ use Illuminate\Support\Facades\Queue;
 |
 */
 
+// RefreshDatabase on a database of its own (tests/bootstrap.php), not transactions
+// on the dev database: Postgres sequences advance even when a transaction rolls
+// back, and dev data showed up in every fleet-wide count the suite asserts on.
 uses(
     Tests\TestCase::class,
-    DatabaseTransactions::class,
-// Illuminate\Foundation\Testing\RefreshDatabase::class,
+    RefreshDatabase::class,
 )->beforeEach(function () {
     Http::preventStrayRequests();
     Queue::fake();
