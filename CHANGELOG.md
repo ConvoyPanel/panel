@@ -7,20 +7,37 @@ follows [Semantic Versioning](https://semver.org) guidelines.
 
 ## Unreleased
 
+### Added
+
+- Announcements from the Convoy team. Once an hour the panel fetches one signed file from convoypanel.com, sending
+  nothing about itself, and shows admins the security notices and news that apply to its Convoy and PHP versions. A
+  file whose signature doesn't verify against the key the panel ships with is refused, and so is any announcement that
+  links outside convoypanel.com and github.com/ConvoyPanel. A critical announcement is a banner on every page an admin
+  opens until the panel is no longer affected; the others are on the admin overview until each admin dismisses them. A
+  new critical or high announcement is emailed once to every admin, if the panel has mail set up. Setting
+  `CONVOY_ANNOUNCEMENTS_URL` to nothing turns the check off.
+- Admin → Settings, with three pages. **Updates** shows the panel's Convoy and PHP versions, the latest release on
+  GitHub, and every current announcement with the reason it does or doesn't apply. **Telemetry** has the switch
+  described below. **Upgrade to Convoy 6** goes through what upgrading to Convoy 6 will drop or change in this panel's
+  data (templates, ISOs, activity logs, Coterm and more), so nothing about the upgrade comes as a surprise.
+  `php artisan convoy:upgrade-check` prints the same.
+- `php artisan activity:export` writes the activity log as CSV, to keep a copy before upgrading to Convoy 6, which
+  starts a new audit log.
+
 ### Changed
 
 - Replaced Plausible with anonymous telemetry. Every page used to load Plausible's analytics script from
   beacon.performave.com in the visitor's browser; it's gone. Instead, once a day the panel sends the Convoy console a
   short report of numbers: how many accounts and admins there are and how many were active in the last day, week and 30
   days; the panel, PHP and database versions; each node's Proxmox version, CPU count, memory and number of servers; how
-  many locations, backups, ISOs, templates, address pools, SSH keys and API tokens there are; whether Coterm is in use;
-  and how many times each page was opened since the day before, counted by the panel itself rather than by a script in
-  the browser. It's filed under a random installation id and holds nothing that names a person or the panel -- no
-  license key, URL, hostname, name or email. The console looks up a country from the address the report comes from and
-  doesn't keep the address. `php artisan c:telemetry:show` prints the exact report. To turn it off, run
-  `php artisan c:telemetry:disable` or set `CONVOY_TELEMETRY_ENABLED=false`: either one also has the console erase the
-  reports it holds for the panel. Setting `CONVOY_TELEMETRY_URL` to nothing stops the panel contacting the console at
-  all.
+  many locations, backups, ISOs, templates, address pools, SSH keys and API tokens there are; whether Coterm and mail
+  are set up; and how many times each page was opened. It's filed under a random installation id and holds nothing that
+  names a person or the panel -- no license key, URL, hostname, name or email. The console looks up a country from the
+  address the report comes from and doesn't keep the address. `docs/telemetry.md` lists every field. Telemetry is on
+  after the upgrade, and each admin sees a notice saying so. Admin → Settings → Telemetry shows the exact report, and
+  turning it off there (or with `php artisan c:telemetry:disable`) also has the console erase every report it holds for
+  the panel. `CONVOY_TELEMETRY_ENABLED=false`, or setting `CONVOY_TELEMETRY_URL` to nothing, stops the reports without
+  contacting the console.
 
 ## v4.7.0-rc.4
 
