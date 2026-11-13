@@ -47,6 +47,22 @@ class ImageGroup extends Model
     }
 
     /**
+     * Names the relation Laravel uses to look up a definition from the URL, as in
+     * `/image-groups/{image_group}/images/{image_definition}`.
+     *
+     * The lookup goes through the group, so a definition that belongs to another
+     * group is a 404. Laravel finds the relation by pluralising the parameter
+     * name, which would be `imageDefinitions()`. Ours is `definitions()`, so
+     * without this the route fails with a 500.
+     */
+    protected function childRouteBindingRelationshipName($childType): string
+    {
+        return $childType === 'image_definition'
+            ? 'definitions'
+            : parent::childRouteBindingRelationshipName($childType);
+    }
+
+    /**
      * @return HasMany<ImageDefinition, $this>
      */
     public function definitions(): HasMany

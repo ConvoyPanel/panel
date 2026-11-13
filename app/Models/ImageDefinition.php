@@ -59,6 +59,22 @@ class ImageDefinition extends Model
     }
 
     /**
+     * Names the relation Laravel uses to look up a version from the URL, as in
+     * `/image-groups/{image_group}/images/{image_definition}/versions/{image_version}`.
+     *
+     * The lookup goes through the definition, so a version that belongs to another
+     * definition is a 404. Laravel would look for `imageVersions()`, from the
+     * parameter name. Ours is `versions()`, so without this the route fails with
+     * a 500.
+     */
+    protected function childRouteBindingRelationshipName($childType): string
+    {
+        return $childType === 'image_version'
+            ? 'versions'
+            : parent::childRouteBindingRelationshipName($childType);
+    }
+
+    /**
      * @return BelongsTo<ImageGroup, $this>
      */
     public function group(): BelongsTo
