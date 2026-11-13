@@ -13,6 +13,7 @@ use Tests\Support\TelemetryContract;
 beforeEach(function () {
     Cache::flush();
     config(['convoy.telemetry.enabled' => true, 'convoy.telemetry.url' => 'https://console.test/api/v1/telemetry']);
+    config(['convoy.announcements.url' => '']);
 
     $this->admin = User::factory()->create(['root_admin' => true]);
 });
@@ -79,4 +80,21 @@ it('shows the exact report without sending it or resetting the counters', functi
         ->and(app(PageViewCounter::class)->counts())->toBe(['admin.overview' => 1]);
 
     Http::assertNotSent(fn ($request) => str_contains($request->url(), 'console.test'));
+});
+
+it('shows each admin the notice that telemetry is on until they dismiss it', function () {
+    $other = User::factory()->create(['root_admin' => true]);
+
+    $this->actingAs($this->admin)->getJson('/api/admin/announcements')->assertJsonPath('data.telemetry_notice', true);
+
+    $this->actingAs($this->admin)->postJson('/api/admin/settings/telemetry/notice/dismiss')->assertNoContent();
+
+    $this->actingAs($this->admin)->getJson('/api/admin/announcements')->assertJsonPath('data.telemetry_notice', false);
+    $this->actingAs($other)->getJson('/api/admin/announcements')->assertJsonPath('data.telemetry_notice', true);
+});
+
+it('drops the notice once telemetry is off', function () {
+    app(TelemetryService::class)->disable();
+
+    $this->actingAs($this->admin)->getJson('/api/admin/announcements')->assertJsonPath('data.telemetry_notice', false);
 });

@@ -5,6 +5,7 @@ namespace Convoy\Console;
 use Carbon\CarbonImmutable;
 use Convoy\Models\ActivityLog;
 use Illuminate\Console\Scheduling\Schedule;
+use Convoy\Console\Commands\Announcements\CheckAnnouncementsCommand;
 use Illuminate\Database\Console\PruneCommand;
 use Convoy\Services\Telemetry\TelemetryService;
 use Convoy\Jobs\Telemetry\SendTelemetryReportJob;
@@ -37,6 +38,9 @@ class Kernel extends ConsoleKernel
         $schedule->command(PruneUsersCommand::class)->daily();
         $schedule->command(UpdateUsagesCommand::class)->everyFiveMinutes();
         $schedule->command(UpdateRateLimitsCommand::class)->everyTenMinutes();
+
+        // The announcements feed and the latest release on GitHub (Settings → Updates).
+        $schedule->command(CheckAnnouncementsCommand::class)->hourly()->withoutOverlapping();
 
         // The anonymous daily report (docs/telemetry.md). Checked every minute, but due in only one
         // of them: each install takes its own minute of the UTC day from its random id, which

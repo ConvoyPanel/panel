@@ -3,6 +3,7 @@
 namespace Convoy\Http\Controllers\Admin\Settings;
 
 use Convoy\Http\Controllers\ApiController;
+use Convoy\Services\Announcements\AnnouncementService;
 use Convoy\Services\Telemetry\TelemetryReportService;
 use Convoy\Services\Telemetry\TelemetryService;
 use Illuminate\Http\JsonResponse;
@@ -44,6 +45,14 @@ class TelemetryController extends ApiController
     public function report(TelemetryService $telemetry, TelemetryReportService $reports): JsonResponse
     {
         return new JsonResponse(['data' => $reports->build($telemetry->installationId())]);
+    }
+
+    /** The admin has seen the notice that telemetry is on. */
+    public function dismissNotice(Request $request, AnnouncementService $announcements): JsonResponse
+    {
+        $announcements->dismiss($request->user(), AnnouncementService::TELEMETRY_NOTICE);
+
+        return $this->returnNoContent();
     }
 
     private function present(TelemetryService $telemetry): JsonResponse
