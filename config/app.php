@@ -149,8 +149,13 @@ return [
     */
 
     'maintenance' => [
-        'driver' => 'file',
-        // 'store'  => 'redis',
+        // `file` only marks down the process that ran `artisan down`. The Docker
+        // install runs web, worker and scheduler in separate containers and sets
+        // APP_MAINTENANCE_DRIVER=cache so the command takes all three down.
+        'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
+        // Redis rather than Laravel's default `database` store: Convoy has no
+        // `cache` table, so that store fails on every request.
+        'store' => env('APP_MAINTENANCE_STORE', 'redis'),
     ],
 
     /*

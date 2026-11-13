@@ -1,0 +1,172 @@
+name: Docker
+
+on:
+  push:
+    branches:
+      - '5.x'
+    tags:
+      - 'v5.*.*'
+  pull_request:
+    paths:
+      - 'Dockerfile'
+      - '.dockerignore'
+      - 'compose*.yml'
+      - 'docker/**'
+      - '.github/workflows/docker.yml'
+
+env:
+  REGISTRY: ghcr.io
+  # Spelled out rather than derived from ${{ github.repository_owner }}, which is
+  # "ConvoyPanel". A Docker reference has to be lowercase, so every build in this
+  # workflow failed to parse its own image name before it could push anything.
+  # Actions expressions have no lower-casing function, so the literal is the fix,
+  # and it is the same name compose.yml and the installer already hardcode.
+  IMAGE_NAME: convoypanel/panel
+
+jobs:
+  # Each architecture is built on a runner of that architecture and pushed by
+  # digest; the manifest list is assembled afterwards. Building arm64 under QEMU
+  # on an amd64 runner works, but every PHP extension in the runtime stage is
+  # compiled from source, and emulating that turns a three-minute job into a
+  # thirty-minute one.
+  build:
+    name: build (${{ matrix.platform }})
+    runs-on: ${{ matrix.runner }}
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux/amd64
+            runner: ubuntu-24.04
+          - platform: linux/arm64
+            runner: ubuntu-24.04-arm
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare platform pair
+        env:
+          PLATFORM: ${{ matrix.platform }}
+        run: echo "PLATFORM_PAIR=${PLATFORM//\//-}" >> "$GITHUB_ENV"
+        shell: bash
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/metadata-action@v5
+        id: meta
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      - uses: docker/login-action@v3
+        if: github.event_name != 'pull_request'
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push by digest
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: ${{ matrix.platform }}
+          build-args: |
+            CONVOY_VERSION=${{ steps.meta.outputs.version }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=${{ matrix.platform }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.platform }}
+          # Attestations make the image verifiable in the supply-chain sense,
+          # which matters more than usual for something operators run as root
+          # on a hypervisor control node.
+          provenance: mode=max
+          sbom: true
+          outputs: type=image,name=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }},push-by-digest=true,name-canonical=true,push=${{ github.event_name != 'pull_request' }}
+
+      - name: Export digest
+        if: github.event_name != 'pull_request'
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          mkdir -p /tmp/digests
+          touch "/tmp/digests/${DIGEST#sha256:}"
+        shell: bash
+
+      - uses: actions/upload-artifact@v4
+        if: github.event_name != 'pull_request'
+        with:
+          name: digests-${{ env.PLATFORM_PAIR }}
+          path: /tmp/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  merge:
+    name: publish manifest
+    runs-on: ubuntu-24.04
+    needs: [build]
+    if: github.event_name != 'pull_request'
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: /tmp/digests
+          pattern: digests-*
+          merge-multiple: true
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/metadata-action@v5
+        id: meta
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          # The default, `latest=auto`, hands `latest` to any non-prerelease
+          # semver tag on its own, which would quietly outvote the rule spelled
+          # out below rather than defer to it. Every tag is assigned here.
+          flavor: latest=false
+          # `latest` and a moving major tag let an operator choose between
+          # "always current" and "current within a major I have already
+          # validated"; the full semver tag is there to pin against.
+          #
+          # Branch builds are named after the branch, so this line publishes
+          # `5.x`. That name is doing more work than it looks: an operator puts
+          # it in CONVOY_VERSION, which compose.yml reads as an image tag *and*
+          # docker/install.sh feeds to raw.githubusercontent as a git ref to
+          # fetch the matching compose.yml. It also matches the version stamped
+          # into the image, which the build job derives from the same ref.
+          #
+          # `5` is what installs track (CONVOY_VERSION=5): every 5.x release
+          # moves it, and nothing from 6.0 ever will. Pre-releases get only
+          # their exact version; metadata-action leaves them out of the major
+          # and minor patterns.
+          #
+          # `latest` is the newest release of the newest major. A 5.x patch
+          # shipped after 6.0 must not take it back, so it is only applied
+          # while the repository variable CONVOY_LATEST_MAJOR is `5`; set it
+          # to `6` when 6.0 ships.
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/v5.') && !contains(github.ref_name, '-') && vars.CONVOY_LATEST_MAJOR == '5' }}
+            type=ref,event=branch
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create manifest list
+        working-directory: /tmp/digests
+        run: |
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            $(printf '${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@sha256:%s ' *)
+        shell: bash
+
+      - name: Inspect
+        run: docker buildx imagetools inspect ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}
