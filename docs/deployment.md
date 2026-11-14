@@ -89,7 +89,7 @@ such as a backup, to finish.
 ```
 convoy ps                    status of every container
 convoy logs web              follow the panel's logs
-convoy upgrade               back up, pull new images, restart, verify
+convoy upgrade               update this command, let running jobs finish, back up, upgrade, verify
 convoy backup                dump the database to /opt/convoy/backups
 convoy artisan <cmd>         run an Artisan command
 convoy shell                 open a shell in the panel container
@@ -107,9 +107,33 @@ Nothing here is magic. If you know Docker, `cd /opt/convoy` and use
 convoy upgrade
 ```
 
-This takes a database backup, pulls the new images, restarts the stack, and
-waits for the panel to report healthy. Migrations run automatically when the web
-container starts.
+There is nothing to check first. In order, it:
+
+1. pulls the new images and replaces `convoy` with the copy in the new image,
+   then carries on with that one, so a release's upgrade steps apply to the
+   upgrade that installs it;
+2. replaces `compose.yml` with the new release's, unless you have edited it (see
+   below);
+3. stops the scheduler and lets the worker finish the jobs it is running, for
+   up to ten minutes (`CONVOY_UPGRADE_DRAIN_TIMEOUT=1200 convoy upgrade` allows
+   twenty). Jobs that wait on Proxmox re-queue themselves, so they carry on
+   afterwards;
+4. backs up the database;
+5. starts the web container alone and waits for it to be healthy, which means
+   migrations have run, then starts the worker and scheduler.
+
+If a step before 5 fails, nothing has been replaced and the worker and scheduler
+are started again. If the new release doesn't become healthy, they stay stopped
+so no job runs against a half-migrated database: read `convoy logs web`, fix
+the cause, and run `convoy up`.
+
+5.0.0-alpha.1's `convoy` can't replace itself. Install the newer one once, from
+the release you are upgrading to, before running `convoy upgrade`:
+
+```bash
+curl -fsSL https://github.com/ConvoyPanel/panel/releases/download/v5.0.0-alpha.2/convoy -o /usr/local/bin/convoy
+chmod 755 /usr/local/bin/convoy
+```
 
 ## What is actually running
 
@@ -140,9 +164,9 @@ cd /opt/convoy
 docker compose up -d --remove-orphans
 ```
 
-The image is identical either way. Your edits to `compose.yml` survive upgrades,
-which only pull new images, but they are yours to re-apply if a future release
-changes the file.
+The image is identical either way. `convoy upgrade` leaves an edited
+`compose.yml` alone and writes the new release's next to it as
+`compose.yml.new`; compare the two and carry over what changed.
 
 `convoy backup` only handles the bundled database; with an external one, back
 it up with your provider's tooling.
