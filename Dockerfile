@@ -124,9 +124,14 @@ COPY --from=assets --chown=www-data:www-data /build/public/build /var/www/html/p
 # Stamped the same way the release workflow stamps a tarball build. The pattern
 # matches whatever version is currently committed rather than a literal
 # 'canary', so the stamp cannot silently no-op when that value is changed.
+# docker/convoy is stamped too: `convoy upgrade` installs the host's convoy
+# command from the image it is upgrading to, so the command always matches the
+# panel it runs.
 ARG CONVOY_VERSION=canary
 RUN sed -i "s/'version' => '[^']*',/'version' => '${CONVOY_VERSION}',/" config/app.php \
-    && grep -q "'version' => '${CONVOY_VERSION}'," config/app.php
+    && grep -q "'version' => '${CONVOY_VERSION}'," config/app.php \
+    && sed -i "s/^CONVOY_CLI_VERSION=\"[^\"]*\"/CONVOY_CLI_VERSION=\"${CONVOY_VERSION}\"/" docker/convoy \
+    && grep -q "^CONVOY_CLI_VERSION=\"${CONVOY_VERSION}\"" docker/convoy
 
 LABEL org.opencontainers.image.title="Convoy" \
       org.opencontainers.image.description="KVM server management panel for hosting businesses." \

@@ -51,10 +51,10 @@ CHANGELOG.md
 AGENTS.md
 CLAUDE.md
 
-# The deployment tooling itself is delivered next to the compose file on the
-# host, not baked into the image -- except docker/entrypoint.d, copied explicitly.
+# The installer runs on the host and is never needed inside the image.
+# docker/convoy is kept: `convoy upgrade` installs the host's convoy command from
+# the image it upgrades to (/var/www/html/docker/convoy).
 docker/install.sh
-docker/convoy
 
 **/.DS_Store
 **/._.DS_Store

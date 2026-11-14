@@ -241,24 +241,153 @@ cmd_backup() {
     printf '%s\n' "$file"
 }
 
+##########################################################################
+# Upgrading
+##########################################################################
+
+# Where a release's image keeps the files the host takes from it: compose.yml
+# and this command (docker/convoy). 5.0.0-alpha.1 has compose.yml but not the
+# command.
+IMAGE_APP_DIR=/var/www/html
+
+# How long the worker gets to finish the jobs it is running before an upgrade
+# replaces it. Jobs that wait on Proxmox re-queue themselves every few seconds,
+# so this only bounds the odd slow API call or disk resize.
+UPGRADE_DRAIN_TIMEOUT="${CONVOY_UPGRADE_DRAIN_TIMEOUT:-600}"
+
+# Prints FILE (relative to IMAGE_APP_DIR) from the image the web service is
+# configured to run, which after a pull is the new release. Fails when that
+# image doesn't carry the file.
+new_release_file() {
+    compose run --rm --no-deps -T --entrypoint cat web "$IMAGE_APP_DIR/$1" 2>/dev/null
+}
+
+# The ID of the image the web container was created from, or nothing when there
+# is no web container. Until the stack is recreated, that is the release the
+# install is on.
+running_image() {
+    local id
+    id="$(compose ps -a -q web 2>/dev/null | head -n1)"
+    [[ -n "$id" ]] || return 1
+    docker inspect -f '{{.Image}}' "$id" 2>/dev/null
+}
+
+# Replaces this command with the copy in the new release's image. Succeeds only
+# when it replaced it; an image without a copy, an identical copy, or a copy
+# that doesn't parse leaves this one in place.
+update_self() {
+    local self new version
+    self="$(readlink -f "${BASH_SOURCE[0]}")"
+    new="$(mktemp)"
+    if ! new_release_file docker/convoy > "$new" || [[ ! -s "$new" ]] || cmp -s "$new" "$self"; then
+        rm -f "$new"
+        return 1
+    fi
+    if ! bash -n "$new" 2>/dev/null; then
+        rm -f "$new"
+        warn "the convoy command in the new release does not parse; keeping this one."
+        return 1
+    fi
+    if [[ ! -w "$(dirname "$self")" ]]; then
+        rm -f "$new"
+        warn "cannot replace $self (run 'sudo convoy upgrade' to update the convoy command too)."
+        return 1
+    fi
+    version="$(sed -n 's/^CONVOY_CLI_VERSION="\([^"]*\)"$/\1/p' "$new")"
+    # A rename, not a write: bash reads a script as it runs, and this one is
+    # still running.
+    install -m 755 "$new" "$self.new"
+    mv -f "$self.new" "$self"
+    rm -f "$new"
+    info "updated the convoy command: $CONVOY_CLI_VERSION -> ${version:-unknown}"
+}
+
+# Brings compose.yml up to the new release's, unless it has been edited: then
+# the new one is written next to it as compose.yml.new. "Edited" means it
+# differs from the compose.yml in the image the install runs now; with no
+# container to tell, any difference counts as an edit.
+update_compose_file() {
+    local old_image="$1" new shipped
+    new="$(mktemp)"
+    if ! new_release_file compose.yml > "$new" || [[ ! -s "$new" ]] || cmp -s "$new" compose.yml; then
+        rm -f "$new"
+        return 0
+    fi
+    shipped="$(mktemp)"
+    if [[ -n "$old_image" ]] \
+        && docker run --rm --network none --entrypoint cat "$old_image" "$IMAGE_APP_DIR/compose.yml" > "$shipped" 2>/dev/null \
+        && [[ -s "$shipped" ]] && cmp -s "$shipped" compose.yml; then
+        install -m 644 "$new" compose.yml
+        info "updated compose.yml to this release's"
+    else
+        install -m 644 "$new" compose.yml.new
+        warn "compose.yml has local changes, so it was left alone. This release's is in compose.yml.new;"
+        warn "compare them with 'diff $INSTALL_DIR/compose.yml $INSTALL_DIR/compose.yml.new' and bring over what you need."
+    fi
+    rm -f "$new" "$shipped"
+}
+
+# Set while the worker and scheduler are stopped and nothing has been replaced
+# yet, so a failure in that window can put them back as they were.
+UPGRADE_DRAINED=0
+
+resume_after_failed_upgrade() {
+    if (( UPGRADE_DRAINED )); then
+        warn "the upgrade stopped before anything was replaced; starting the worker and scheduler again."
+        compose start worker scheduler >/dev/null 2>&1 || true
+    fi
+}
+
+# The order matters more than any single step. The command updates itself
+# first, so a release's own upgrade steps apply to the upgrade that installs it.
+# The worker finishes what it is running and the scheduler stops before the
+# backup, so nothing changes under it. The web container starts alone and
+# migrates the database before any worker runs the new code.
 cmd_upgrade() {
+    local old_image
+
+    # Once per upgrade: the updated command carries on from here, with the
+    # images already pulled, and must not update itself again.
+    if [[ -z "${CONVOY_UPGRADE_UPDATED_SELF:-}" ]]; then
+        info "pulling images"
+        compose pull
+        if update_self; then
+            CONVOY_UPGRADE_UPDATED_SELF=1 exec "$(readlink -f "${BASH_SOURCE[0]}")" upgrade
+        fi
+    fi
+
+    old_image="$(running_image || true)"
+    update_compose_file "$old_image"
+    # A new compose.yml can name new images.
+    compose pull --quiet
+
+    trap resume_after_failed_upgrade EXIT
+
+    info "stopping the scheduler, so it starts no new jobs"
+    compose stop scheduler >/dev/null
+    UPGRADE_DRAINED=1
+    info "waiting for the worker to finish the jobs it is running (at most $(( UPGRADE_DRAIN_TIMEOUT / 60 )) minutes)"
+    compose stop --timeout "$UPGRADE_DRAIN_TIMEOUT" worker >/dev/null
+
     if bundled_postgres; then
-        info "taking a database backup first"
+        info "backing up the database"
         cmd_backup >/dev/null
     else
         warn "external database in use -- take your own backup before continuing."
     fi
 
-    info "pulling images"
-    compose pull
-
-    # Migrations run automatically when the web container starts (AUTORUN).
-    info "restarting the stack"
-    compose up -d --remove-orphans
-
+    # Migrations run when the web container starts (AUTORUN).
+    info "starting the new release"
+    UPGRADE_DRAINED=0
+    compose up -d web
     info "waiting for the panel to report healthy"
-    wait_healthy web 300 || die "panel did not become healthy within 5 minutes. Check 'convoy logs web'."
+    wait_healthy web 300 || die "the panel did not become healthy within 5 minutes, so the worker and scheduler are still stopped. Check 'convoy logs web', then run 'convoy up'."
 
+    info "starting the worker and scheduler"
+    compose up -d --remove-orphans
+    wait_healthy worker 120 || warn "the worker is not healthy yet. Check 'convoy logs worker'; queued jobs wait until it is."
+
+    trap - EXIT
     info "upgrade complete: $(run_artisan --version 2>/dev/null | tail -1)"
 }
 
@@ -1423,7 +1552,8 @@ convoy -- manage a Convoy installation
   convoy restart [service]     Restart everything, or one service
   convoy ps                    Show container status
   convoy logs [service]        Follow logs
-  convoy upgrade               Back up, pull new images, restart, verify
+  convoy upgrade               Update this command, let running jobs finish,
+                               back up, upgrade, verify
   convoy backup                Dump the bundled database to ./backups
   convoy artisan <args>        Run an Artisan command
   convoy shell [service]       Open a shell (default: web)
