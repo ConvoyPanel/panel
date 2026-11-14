@@ -11,6 +11,7 @@ import deleteTemplate from '@/api/admin/nodes/templateGroups/templates/deleteTem
 import useTemplateGroupsSWR from '@/api/admin/nodes/templateGroups/useTemplateGroupsSWR'
 import useNodeSWR from '@/api/admin/nodes/useNodeSWR'
 
+import ConfirmationModal from '@/components/elements/ConfirmationModal'
 import DottedButton from '@/components/elements/DottedButton'
 import Menu from '@/components/elements/Menu'
 import SortableItem, {
@@ -28,12 +29,15 @@ interface Props {
 
 const TemplateCard = ({ template, group, className }: Props) => {
     const [showEditModal, setShowEditModal] = useState(false)
+    const [confirming, setConfirming] = useState(false)
+    const [deleting, setDeleting] = useState(false)
     const { data: node } = useNodeSWR()
     const { mutate } = useTemplateGroupsSWR(node.id)
     const { clearFlashes, clearAndAddHttpError } = useFlash()
 
     const handleDelete = async () => {
         clearFlashes('admin:node:template-groups')
+        setDeleting(true)
 
         try {
             await deleteTemplate(node.id, group!.uuid, template.uuid)
@@ -58,6 +62,8 @@ const TemplateCard = ({ template, group, className }: Props) => {
         } catch (error) {
             clearAndAddHttpError({ key: 'admin:node:template-groups', error })
         }
+        setDeleting(false)
+        setConfirming(false)
     }
 
     return (
@@ -79,6 +85,15 @@ const TemplateCard = ({ template, group, className }: Props) => {
                         template={template}
                         open={showEditModal}
                         onClose={() => setShowEditModal(false)}
+                    />
+                    <ConfirmationModal
+                        open={confirming}
+                        title={`Delete ${template.name}?`}
+                        description={`${template.name} is removed from Convoy, so servers can no longer be built or reinstalled from it. The template on the Proxmox node isn't touched.`}
+                        confirmLabel='Delete'
+                        loading={deleting}
+                        onConfirm={handleDelete}
+                        onClose={() => setConfirming(false)}
                     />
                     <div
                         className={classNames(
@@ -119,7 +134,10 @@ const TemplateCard = ({ template, group, className }: Props) => {
                                 Edit
                             </Menu.Item>
                             <Menu.Divider />
-                            <Menu.Item color='red' onClick={handleDelete}>
+                            <Menu.Item
+                                color='red'
+                                onClick={() => setConfirming(true)}
+                            >
                                 Delete
                             </Menu.Item>
                         </Menu.Dropdown>

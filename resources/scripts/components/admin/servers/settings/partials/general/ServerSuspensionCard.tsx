@@ -7,6 +7,7 @@ import suspendServer from '@/api/admin/servers/suspendServer'
 import unsuspendServer from '@/api/admin/servers/unsuspendServer'
 
 import Button from '@/components/elements/Button'
+import ConfirmationModal from '@/components/elements/ConfirmationModal'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import FormCard from '@/components/elements/FormCard'
 import MessageBox from '@/components/elements/MessageBox'
@@ -23,6 +24,7 @@ const ServerSuspensionCard = () => {
     const { t } = useTranslation('admin.servers.settings')
     const { t: tStrings } = useTranslation('strings')
     const [loading, setLoading] = useState(false)
+    const [confirming, setConfirming] = useState(false)
 
     const handle = async () => {
         clearFlashes()
@@ -45,10 +47,24 @@ const ServerSuspensionCard = () => {
             clearAndAddHttpError(error as any)
         }
         setLoading(false)
+        setConfirming(false)
     }
 
     return (
         <FormCard className='w-full'>
+            <ConfirmationModal
+                open={confirming}
+                title={t('suspension.confirmation.title', {
+                    name: server.name,
+                })}
+                description={t('suspension.confirmation.description', {
+                    name: server.name,
+                })}
+                confirmLabel={t('suspension.suspend')}
+                loading={loading}
+                onConfirm={handle}
+                onClose={() => setConfirming(false)}
+            />
             <FormCard.Body>
                 <FormCard.Title>{t('suspension.title')}</FormCard.Title>
                 <div className='space-y-3 mt-3'>
@@ -74,7 +90,11 @@ const ServerSuspensionCard = () => {
             <FormCard.Footer>
                 <Button
                     loading={loading}
-                    onClick={handle}
+                    onClick={() =>
+                        server.status === 'suspended'
+                            ? handle()
+                            : setConfirming(true)
+                    }
                     variant='filled'
                     color='success'
                     size='sm'
