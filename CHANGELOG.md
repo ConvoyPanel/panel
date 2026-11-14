@@ -5,6 +5,16 @@ This file is a running track of new features and fixes to each version of the pa
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 follows [Semantic Versioning](https://semver.org) guidelines.
 
+## Unreleased
+
+### Fixed
+
+- `convoy import-v4` imports panels running v4.7.0. Convoy 5's migrations stopped on "column last_active_at of
+  relation users already exists", and past that, every ISO would have shown 1,048,576 times its size: v4.7.0 stores
+  ISO sizes in bytes, and 5.x read them as mebibytes.
+- ISO sizes are stored in bytes, as on v4.7.0, so a 2.95 MiB ISO no longer reads "2 MiB" in the library. When a
+  download finishes, the size recorded is the size of the file the node saved.
+
 ## v5.0.0-alpha.2
 
 Still an alpha: use it for test installs and to rehearse the upgrade from v4, and keep production panels on v4 until
