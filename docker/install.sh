@@ -45,7 +45,8 @@ Convoy installer
 
   --domain <host>     Hostname or IP the panel will be reached on
   --email <address>   Email address for the first administrator
-  --version <tag>     5 (the newest 5.x, default), 5.1, or an exact release such as 5.0.1
+  --version <tag>     5 (the newest 5.x, default), 5.1, or an exact release such as 5.0.1;
+                      5-canary for unreleased builds of the 5.x branch
   --dir <path>        Install directory (default: /opt/convoy)
   --import <dir>      Upgrade the v4 install in <dir> (usually /var/www/convoy)
                       instead of starting a fresh one
@@ -184,9 +185,12 @@ else
         latest|5)
             ref="$(newest_release v5.)"
             image_tag=5 ;;
-        5.x)
+        5-canary)
+            # The 5.x branch as it stands: unreleased, rebuilt on every push.
             ref=5.x
-            image_tag=5.x ;;
+            image_tag=5-canary ;;
+        5.x)
+            die "5.x is the development branch, not a release. Use --version 5 for the newest 5.x release, or --version 5-canary for unreleased builds of the branch." ;;
         5.[0-9]*.[0-9]*)
             ref="v$version"
             image_tag="$version" ;;

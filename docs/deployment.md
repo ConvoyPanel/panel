@@ -34,6 +34,10 @@ within it and never moves a 5.x install to 6.0 on its own.
 `5.0.0-alpha.1` is installed only when named exactly, and stays pinned until
 `CONVOY_VERSION` is changed.
 
+`5-canary` is the 5.x branch as it stands, rebuilt on every push and never
+released. It is for trying a fix before it ships, not for a panel anyone
+depends on; the panel reports its version as `canary`.
+
 ### Requirements
 
 - Debian 12/13, Ubuntu 22.04/24.04, AlmaLinux 9/10 or Rocky Linux 9/10
