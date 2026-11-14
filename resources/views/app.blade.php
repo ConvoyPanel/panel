@@ -18,22 +18,6 @@
     <!-- Scripts -->
     @viteReactRefresh
     @vite('resources/scripts/app.tsx')
-
-    <!-- Analytics -->
-    <script defer data-domain="hosted.convoypanel.com"
-            src="https://beacon.performave.com/js/script.local.js"></script>
-    <script>
-        window.plausible = window.plausible || function() {
-            (window.plausible.q = window.plausible.q || []).push(arguments)
-        }
-    </script>
-    <script>
-        plausible('meta', {
-            props: {
-                version: '{{ config('app.version') }}',
-            },
-        })
-    </script>
 </head>
 <body class="font-sans antialiased">
 <div id="root"></div>
