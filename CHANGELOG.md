@@ -5,6 +5,14 @@ This file is a running track of new features and fixes to each version of the pa
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 follows [Semantic Versioning](https://semver.org) guidelines.
 
+## Unreleased
+
+### Fixed
+
+- A server's memory, disk or bandwidth, or a node's memory or disk, above 2,147,483,647 MiB (just under 2 PiB) is
+  rejected with a validation error. It used to fail with a server error, or be saved where 5.x can't import it.
+- Sizes of 1 PiB and more read "PiB" or "EiB" instead of "undefined".
+
 ## v4.7.0
 
 Includes everything in [v4.6.2](https://github.com/ConvoyPanel/panel/releases/tag/v4.6.2), the security release cut
