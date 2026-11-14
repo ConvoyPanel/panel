@@ -11,6 +11,7 @@ import deleteTemplate from '@/api/admin/nodes/templateGroups/templates/deleteTem
 import useTemplateGroupsSWR from '@/api/admin/nodes/templateGroups/useTemplateGroupsSWR'
 import useNodeSWR from '@/api/admin/nodes/useNodeSWR'
 
+import ConfirmationModal from '@/components/elements/ConfirmationModal'
 import DottedButton from '@/components/elements/DottedButton'
 import Menu from '@/components/elements/Menu'
 import SortableItem, {
@@ -28,6 +29,7 @@ interface Props {
 
 const TemplateCard = ({ template, group, className }: Props) => {
     const [showEditModal, setShowEditModal] = useState(false)
+    const [confirming, setConfirming] = useState(false)
     const { data: node } = useNodeSWR()
     const { mutate } = useTemplateGroupsSWR(node.id)
     const { clearFlashes, clearAndAddHttpError } = useFlash()
@@ -80,6 +82,14 @@ const TemplateCard = ({ template, group, className }: Props) => {
                         open={showEditModal}
                         onClose={() => setShowEditModal(false)}
                     />
+                    <ConfirmationModal
+                        open={confirming}
+                        title={`Delete ${template.name}?`}
+                        description="Deleting this template only removes it from Convoy and keeps it on the Proxmox node, but servers can no longer be built or reinstalled from it."
+                        confirmLabel='Delete'
+                        onConfirm={handleDelete}
+                        onClose={() => setConfirming(false)}
+                    />
                     <div
                         className={classNames(
                             'grow',
@@ -119,7 +129,10 @@ const TemplateCard = ({ template, group, className }: Props) => {
                                 Edit
                             </Menu.Item>
                             <Menu.Divider />
-                            <Menu.Item color='red' onClick={handleDelete}>
+                            <Menu.Item
+                                color='red'
+                                onClick={() => setConfirming(true)}
+                            >
                                 Delete
                             </Menu.Item>
                         </Menu.Dropdown>

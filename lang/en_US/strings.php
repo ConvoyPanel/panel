@@ -32,6 +32,8 @@ return [
     'setting_one' => 'Setting',
     'setting_other' => 'Settings',
     'search' => 'Search',
+    'dark_mode' => 'Dark mode',
+    'more_actions' => 'More actions',
     'admin_cp' => 'Admin Control Panel',
     'exit_admin_cp' => 'Exit Admin Control Panel',
     'suspended' => 'Suspended',

@@ -7,6 +7,10 @@ return [
         'kill' => 'Kill',
         'shutdown' => 'Shutdown',
     ],
+    'kill_confirmation' => [
+        'title' => 'Kill :name?',
+        'description' => 'Killing :name cuts its power at once, like pulling the plug, so anything it hasn\'t written to disk is lost. Shutdown asks it to stop cleanly instead.',
+    ],
     'notices' => [
         'power_action_sent_success' => 'Successfully sent power action. It may take a moment to process.',
         'power_action_sent_fail' => 'Failed to send power action.',

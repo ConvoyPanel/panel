@@ -10,6 +10,8 @@ import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import FormCard from '@/components/elements/FormCard'
 import MessageBox from '@/components/elements/MessageBox'
 
+import DeleteNodeModal from '@/components/admin/nodes/DeleteNodeModal'
+
 
 const DeleteNodeCard = () => {
     const { data: node } = useNodeSWR()
@@ -17,11 +19,10 @@ const DeleteNodeCard = () => {
         `admin.nodes.${node.id}.settings.general.delete`
     )
     const navigate = useNavigate()
-    const [loading, setLoading] = useState(false)
+    const [confirming, setConfirming] = useState(false)
 
     const handleDelete = async () => {
         clearFlashes()
-        setLoading(true)
         try {
             await deleteNode(node.id)
 
@@ -29,11 +30,16 @@ const DeleteNodeCard = () => {
         } catch (error) {
             clearAndAddHttpError(error as Error)
         }
-        setLoading(false)
     }
 
     return (
         <FormCard className='w-full border-error'>
+            <DeleteNodeModal
+                open={confirming}
+                name={node.name}
+                onConfirm={handleDelete}
+                onClose={() => setConfirming(false)}
+            />
             <FormCard.Body>
                 <FormCard.Title>Delete Node</FormCard.Title>
                 <div className='space-y-3 mt-3'>
@@ -56,8 +62,7 @@ const DeleteNodeCard = () => {
             </FormCard.Body>
             <FormCard.Footer>
                 <Button
-                    onClick={handleDelete}
-                    loading={loading}
+                    onClick={() => setConfirming(true)}
                     disabled={node.serversCount > 0}
                     type='submit'
                     variant='filled'
