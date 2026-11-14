@@ -129,7 +129,9 @@ newest_release() {
 
 if [[ -e "$CONVOY_DIR/.env" ]]; then
     if [[ -n "$IMPORT_DIR" ]]; then
-        die "$CONVOY_DIR is already set up. Run the import with: convoy import-v4 $IMPORT_DIR$( ((DRY_RUN)) && printf ' --dry-run' || true)"
+        dry_run_flag=""
+        if (( DRY_RUN )); then dry_run_flag=" --dry-run"; fi
+        die "$CONVOY_DIR is already set up. Run the import with: convoy import-v4 $IMPORT_DIR$dry_run_flag"
     fi
     die "a Convoy install already exists at $CONVOY_DIR. Use 'convoy upgrade' to update it, or pass --dir to install elsewhere."
 fi
