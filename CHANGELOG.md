@@ -7,8 +7,39 @@ follows [Semantic Versioning](https://semver.org) guidelines.
 
 ## Unreleased
 
+Convoy 5 is the 4.x panel on a new footing: Postgres instead of MySQL, and a container image run by Docker Compose
+instead of a build from source in `/var/www/convoy`. The panel itself works as v4.7 does, with the same pages, the same
+API and the same data, so the risky part of moving to Convoy 6 (a new database engine and a new layout on disk) happens
+while the application is still the one you know. Convoy 6, the rewritten panel, will upgrade from Convoy 5.
+
+Everything in v4.7.0-rc.4, plus:
+
+### Upgrading from v4
+
+- A v4 install (v4.6.2 or later) moves onto Convoy 5 with one command, `convoy import-v4`. It keeps v4's `APP_KEY`
+  (which decrypts node credentials and two-factor secrets), URL and mail settings; dumps the MySQL database to
+  `/opt/convoy/backups`; converts it to Postgres with pgloader; compares every table's row count; starts Convoy 5; and
+  checks the result with `php artisan import:verify`, which decrypts every encrypted column, loads every record and
+  makes requests with an existing API token. `--dry-run` does all of that on a throwaway copy while v4 keeps serving,
+  so you can rehearse on your own data first. v4's directory and its MySQL data are only ever read, and the import
+  prints the commands that bring v4 back. It needs an `x86_64` host: pgloader crashes under arm64 emulation.
+  `docs/deployment.md` walks through it.
+
 ### Added
 
+- A container image, `ghcr.io/convoypanel/panel`, and a `compose.yml` that runs it as the panel, its queue worker and
+  its scheduler, beside Postgres 17 and Redis 8. An installer sets up `/opt/convoy`, starts the stack and creates the
+  first administrator. The image tag `5` follows the newest 5.x release, so updating never moves a panel to Convoy 6
+  on its own.
+- The `convoy` command for day-to-day work: `convoy upgrade` (back up, pull, restart, wait for the panel to answer),
+  `convoy backup`, `convoy logs`, `convoy artisan`, `convoy horizon` and more. It wraps `docker compose`, so it can be
+  ignored by anyone who knows Docker.
+- `convoy support` collects the container logs, a few diagnostics and details about the host, removes secrets from
+  them, and uploads them to the Convoy team. Before uploading it shows what it collected and asks who may open it:
+  only the Convoy team (the default), anyone with the link and a password, or anyone with the link. It prints a link
+  to share and keeps a token for changing who can open the upload or deleting it later. If an upgrade from v4 fails,
+  the upload includes the import's log. It replaces the old log collector, which posted unredacted logs to a public
+  paste site. `docs/support-bundle.md` lists everything it collects and removes.
 - Announcements from the Convoy team. Once an hour the panel fetches one signed file from convoypanel.com, sending
   nothing about itself, and shows admins the security notices and news that apply to its Convoy and PHP versions. A
   file whose signature doesn't verify against the key the panel ships with is refused, and so is any announcement that
@@ -21,11 +52,27 @@ follows [Semantic Versioning](https://semver.org) guidelines.
   described below. **Upgrade to Convoy 6** goes through what upgrading to Convoy 6 will drop or change in this panel's
   data (templates, ISOs, activity logs, Coterm and more), so nothing about the upgrade comes as a surprise.
   `php artisan convoy:upgrade-check` prints the same.
-- `php artisan activity:export` writes the activity log as CSV, to keep a copy before upgrading to Convoy 6, which
-  starts a new audit log.
+- `php artisan activity:export` (`convoy export-activity`) writes the activity log as CSV, to keep a copy before
+  upgrading to Convoy 6, which starts a new audit log.
+- `APP_MAINTENANCE_DRIVER` and `APP_MAINTENANCE_STORE` choose where maintenance mode is kept. The container install
+  keeps it in Redis, so `artisan down` takes the panel, worker and scheduler down together instead of only the
+  container it ran in.
 
 ### Changed
 
+- Postgres 17 is the panel's database, in place of MySQL. Everything that MySQL did implicitly and Postgres doesn't is
+  now done explicitly, so the panel behaves as it did:
+    - Signing in and the admin search match email addresses ignoring case, and an email address or
+      location short code that differs from an existing one only in case is refused as taken.
+    - The API keeps sending `0` and `1` for a backup's `is_successful` and `is_locked` and a template's or template
+      group's `hidden`. Postgres has real booleans, which would have turned them into `true` and `false` and broken
+      integrations comparing with `=== 1`.
+    - A server's addresses come back in the order they were added, so the first IPv4 and IPv6 address stay the ones
+      cloud-init configures and the MAC address comes from. Paginated lists are sorted by id, so pages can't overlap,
+      and sorting backups by completion time still lists unfinished ones first.
+- The container image runs PHP 8.4. The release archive is still published for anyone building their own setup, but
+  the image is the supported install.
+- `php artisan c:user:make` is now `users:create`. The old name still works.
 - Replaced Plausible with anonymous telemetry. Every page used to load Plausible's analytics script from
   beacon.performave.com in the visitor's browser; it's gone. Instead, once a day the panel sends the Convoy console a
   short report of numbers: how many accounts and admins there are and how many were active in the last day, week and 30
@@ -38,6 +85,21 @@ follows [Semantic Versioning](https://semver.org) guidelines.
   turning it off there (or with `php artisan c:telemetry:disable`) also has the console erase every report it holds for
   the panel. `CONVOY_TELEMETRY_ENABLED=false`, or setting `CONVOY_TELEMETRY_URL` to nothing, stops the reports without
   contacting the console.
+
+### Fixed
+
+- Fixed `/up` answering 200 however broken the panel was: the catch-all route for the web app answered it. It now
+  checks Postgres and Redis and answers 503 naming whichever is down, so the container healthcheck means something.
+- Fixed `TRUSTED_PROXIES` being ignored. Behind a load balancer, every client looked like the balancer, in the
+  activity log and to the rate limiter.
+- Fixed `c:user:make --admin=false` creating an administrator. The option was cast with `(bool)`, and `(bool) "false"`
+  is true.
+- Fixed searching a node's addresses or an address pool's nodes also returning matches from other nodes and pools.
+
+### Removed
+
+- `docker-compose.yml` and `dockerfiles/`, v4's build-from-source setup. `convoy import-v4` moves an install off it.
+- MySQL. Convoy 5 runs on Postgres only.
 
 ## v4.7.0-rc.4
 
