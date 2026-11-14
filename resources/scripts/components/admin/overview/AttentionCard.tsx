@@ -64,11 +64,23 @@ const SubjectRow = ({
  * one string, `truncate` cuts from the end, so "and 3 more" -- the only part the
  * count does not already say -- was the first thing to go. They are returned
  * separately so the row can let the names shrink around a pinned suffix.
+ *
+ * Two names are spelled out, one on a phone, and "more" counts everything past
+ * the names shown. Joining every record the endpoint sent (up to 25) and
+ * counting only past that cap read as nonsense once the line truncated: "27
+ * servers failed -- bulk-fail-27, bulk-fail-26, bulk-fail-2... and 2 more".
  */
-const preview = (group: AttentionGroup) => ({
-    names: group.subjects.map(subject => subject.label).join(', '),
-    hidden: group.total - group.subjects.length,
-})
+const preview = (group: AttentionGroup) => {
+    const [first, second] = group.subjects
+
+    return {
+        first: first.label,
+        second: second?.label,
+        // Past the names shown on a phone (one) and from `sm` up (two).
+        hiddenNarrow: group.total - 1,
+        hiddenWide: group.total - (second ? 2 : 1),
+    }
+}
 
 /**
  * One group. A single record is named outright and links straight at itself --
@@ -87,7 +99,7 @@ const GroupRow = ({ group }: { group: AttentionGroup }) => {
     const { t } = useTranslation('admin.overview')
     const Icon = group.icon
     const truncated = group.total > group.subjects.length
-    const { names, hidden } = preview(group)
+    const { first, second, hiddenNarrow, hiddenWide } = preview(group)
 
     const icon = (
         <div className={`shrink-0 rounded-md border p-2 ${iconClasses}`}>
@@ -137,10 +149,26 @@ const GroupRow = ({ group }: { group: AttentionGroup }) => {
                         {group.title}
                     </p>
                     <p className='description-small flex min-w-0 gap-1'>
-                        <span className='truncate'>{names}</span>
-                        {hidden > 0 && (
-                            <span className='shrink-0'>
-                                {t('attention_and_more', { count: hidden })}
+                        <span className='truncate'>
+                            {first}
+                            {second && (
+                                <span className='hidden sm:inline'>
+                                    , {second}
+                                </span>
+                            )}
+                        </span>
+                        {hiddenNarrow > 0 && (
+                            <span className='shrink-0 sm:hidden'>
+                                {t('attention_and_more', {
+                                    count: hiddenNarrow,
+                                })}
+                            </span>
+                        )}
+                        {hiddenWide > 0 && (
+                            <span className='hidden shrink-0 sm:inline'>
+                                {t('attention_and_more', {
+                                    count: hiddenWide,
+                                })}
                             </span>
                         )}
                     </p>

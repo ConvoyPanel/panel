@@ -20,7 +20,6 @@ import NodesSelectForm from '@/components/admin/servers/NodesSelectForm'
 import TemplatesSelectForm from '@/components/admin/servers/TemplatesSelectForm'
 import UsersSelectForm from '@/components/admin/servers/UsersSelectForm'
 
-
 interface Props {
     nodeId?: number
     userId?: number
@@ -99,7 +98,12 @@ const CreateServerModal = ({ nodeId, userId, open, onClose }: Props) => {
             z.literal(''),
             z.preprocess(Number, z.number().min(0)),
         ]),
-        accountPassword: password(usKeyboardCharacters()).optional(),
+        // Optional when adopting a VM, but the field still holds '' when left
+        // empty, which the password rule alone refused.
+        accountPassword: z.union([
+            z.literal(''),
+            password(usKeyboardCharacters()),
+        ]),
         shouldCreateServer: z.literal(false),
         startOnCompletion: z.boolean(),
         templateUuid: z.string(),

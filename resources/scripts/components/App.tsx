@@ -1,3 +1,4 @@
+import trackPageViews from '@/lib/telemetry/pageViews'
 import router from '@/routers/router'
 import { store } from '@/state'
 import { NavigationProgress } from '@mantine/nprogress'
@@ -7,7 +8,6 @@ import { RouterProvider } from 'react-router-dom'
 import Spinner from '@/components/elements/Spinner'
 
 import ThemeProvider from '@/components/ThemeProvider'
-
 
 interface ExtendedWindow extends Window {
     ConvoyUser?: {
@@ -19,8 +19,19 @@ interface ExtendedWindow extends Window {
     }
     SiteConfiguration?: {
         version: string
+        telemetry: boolean
     }
 }
+
+trackPageViews(
+    router,
+    (window as ExtendedWindow).SiteConfiguration?.telemetry ?? false,
+    // The store is filled from ConvoyUser only once App renders, after the first page is counted.
+    () =>
+        Boolean(
+            store.getState().user.data ?? (window as ExtendedWindow).ConvoyUser
+        )
+)
 
 const App = () => {
     const { ConvoyUser, SiteConfiguration } = window as ExtendedWindow

@@ -2,7 +2,10 @@
 
 namespace Convoy\Console;
 
+use Carbon\CarbonImmutable;
+use Convoy\Jobs\Telemetry\SendTelemetryReportJob;
 use Convoy\Models\ActivityLog;
+use Convoy\Services\Telemetry\TelemetryService;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Database\Console\PruneCommand;
 use Convoy\Console\Commands\Server\ResetUsagesCommand;
@@ -34,6 +37,17 @@ class Kernel extends ConsoleKernel
         $schedule->command(PruneUsersCommand::class)->daily();
         $schedule->command(UpdateUsagesCommand::class)->everyFiveMinutes();
         $schedule->command(UpdateRateLimitsCommand::class)->everyTenMinutes();
+
+        // The anonymous daily report (docs/telemetry.md). Checked every minute, but due only from
+        // this panel's own minute of the UTC day until a report has gone out that day, which
+        // spreads the console's load over 24 hours. Not registered at all when the environment
+        // turns telemetry off.
+        if (config('convoy.telemetry.enabled') && filled(config('convoy.telemetry.url'))) {
+            $schedule->job(new SendTelemetryReportJob)
+                ->everyMinute()
+                ->name('telemetry:report')
+                ->when(fn (TelemetryService $telemetry) => $telemetry->isDue(CarbonImmutable::now()));
+        }
     }
 
     /**

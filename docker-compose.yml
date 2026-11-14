@@ -66,10 +66,16 @@ services:
     image: redis:8-alpine
     restart: unless-stopped
     command: redis-server --save 60 1 --loglevel notice --requirepass '${REDIS_PASSWORD}'
+    # Sessions and queued jobs survive `docker compose down` and an image
+    # change. redis:7.0-alpine declared /data as a volume and redis:8-alpine
+    # doesn't, so without this every update logged everyone out and dropped
+    # jobs still waiting in the queue.
+    volumes:
+      - ./dockerfiles/redis/data:/data
     environment:
       REDIS_PASSWORD: ${REDIS_PASSWORD}
     healthcheck:
-      test: redis-cli -a $$REDIS_PASSWORD ping | grep PONG
+      test: redis-cli -a "$$REDIS_PASSWORD" --no-auth-warning ping | grep PONG
       interval: 5s
       timeout: 5s
       retries: 20
@@ -86,7 +92,9 @@ services:
     ports:
       - "127.0.0.1:3306:3306"
     healthcheck:
-      test: mysqladmin ping -u$$MYSQL_USER -p$$MYSQL_PASSWORD
+      # Quoted, or a password with a space (like the install guide's own
+      # example) splits in two and the database never reports healthy.
+      test: mysqladmin ping -u"$$MYSQL_USER" -p"$$MYSQL_PASSWORD"
       interval: 5s
       timeout: 5s
       retries: 20

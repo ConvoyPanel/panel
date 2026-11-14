@@ -4,13 +4,14 @@ import { Sizes, convertTimeToSmallest, formatBytes } from '@/util/helpers'
 import useNotify from '@/util/useNotify'
 import styled from '@emotion/styled'
 import { Badge, RingProgress, Skeleton } from '@mantine/core'
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo } from 'react'
 import { Line } from 'react-chartjs-2'
 import { useTranslation } from 'react-i18next'
 import tw from 'twin.macro'
 
-import Card from '@/components/elements/Card'
+import { handlePollError } from '@/api/server/handlePollError'
 
+import Card from '@/components/elements/Card'
 
 export const StatRow = styled.div`
     ${tw`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 border border-[#eaeaea] dark:border-[#333333] shadow-light dark:shadow-none rounded bg-white dark:bg-black`}
@@ -52,18 +53,42 @@ const ServerDetailsBlock = () => {
     const getStatus = ServerContext.useStoreActions(
         actions => actions.status.getStatus
     )
-    const isUpdating = useRef(true)
+    const getServer = ServerContext.useStoreActions(
+        actions => actions.server.getServer
+    )
+    const markMissing = ServerContext.useStoreActions(
+        actions => actions.server.markMissing
+    )
     const notify = useNotify()
 
     useEffect(() => {
-        isUpdating.current = true
+        let active = true
 
         const update = async () => {
-            if (!isUpdating.current) return
+            if (!active) return
 
             try {
                 await getStatus(uuid)
-            } catch {
+            } catch (error: any) {
+                if (handlePollError(error, markMissing)) return
+
+                // The server went into a status this page can't show, such as
+                // being deleted. Reloading it lets ServerRouter put up that
+                // status's screen, which takes this page down with it. If the
+                // reload finds nothing blocking (the status cleared in
+                // between), keep polling.
+                if (error?.response?.status === 409) {
+                    try {
+                        await getServer(uuid)
+                    } catch (e: any) {
+                        if (handlePollError(e, markMissing)) return
+                    }
+
+                    setTimeout(update, 5000)
+
+                    return
+                }
+
                 notify({
                     title: tStrings('error'),
                     message: t('poll_status_error'),
@@ -81,7 +106,7 @@ const ServerDetailsBlock = () => {
         update()
 
         return () => {
-            isUpdating.current = false
+            active = false
         }
     }, [])
 

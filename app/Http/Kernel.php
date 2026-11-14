@@ -5,6 +5,7 @@ namespace Convoy\Http;
 use Convoy\Http\Middleware\Authenticate;
 use Convoy\Http\Middleware\EncryptCookies;
 use Convoy\Http\Middleware\PreventRequestsDuringMaintenance;
+use Convoy\Http\Middleware\RecordUserActivity;
 use Convoy\Http\Middleware\RedirectIfAuthenticated;
 use Convoy\Http\Middleware\TrimStrings;
 use Convoy\Http\Middleware\TrustProxies;
@@ -58,6 +59,7 @@ class Kernel extends HttpKernel
             ShareErrorsFromSession::class,
             VerifyCsrfToken::class,
             SubstituteBindings::class,
+            RecordUserActivity::class,
         ],
 
         'api' => [

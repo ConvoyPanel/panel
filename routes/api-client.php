@@ -7,6 +7,11 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/servers', [Client\IndexController::class, 'index']);
 
+// Page views for the telemetry report, batched by the browser (docs/telemetry.md). A tab sends
+// every few minutes and when it is hidden, so ten a minute leaves room for someone switching tabs
+// and little for a script.
+Route::post('/telemetry/page-views', Client\PageViewController::class)->middleware('throttle:10,1');
+
 Route::prefix('/servers/{server}')->middleware(
     [ServerSubject::class, AuthenticateServerAccess::class],
 )->group(function () {

@@ -9,8 +9,10 @@ export default defineConfig({
         react(),
         laravel(['resources/scripts/main.tsx']),
         macrosPlugin(),
+        // Outside public/, so the bundle report isn't served by the panel; the
+        // release workflow deletes ./stats.html before packing the archive.
         visualizer({
-            filename: './public/stats.html',
+            filename: './stats.html',
         }),
     ],
     build: {

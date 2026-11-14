@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next'
 import { Outlet, useMatches, useNavigate } from 'react-router-dom'
 
 import { httpErrorToHuman, isNotFoundError } from '@/api/http'
+import { handlePollError } from '@/api/server/handlePollError'
 import { EloquentStatus } from '@/api/server/types'
 
 import ScreenBlock, {
@@ -21,7 +22,6 @@ import Spinner from '@/components/elements/Spinner'
 import { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
 
 import InstallFailedScreen from '@/components/servers/InstallFailedScreen'
-
 
 export const routes: Route[] = [
     {
@@ -136,6 +136,10 @@ const ServerRouter = () => {
     const [notFound, setNotFound] = useState(false)
     const navigate = useNavigate()
     const server = ServerContext.useStoreState(state => state.server.data)
+    const missing = ServerContext.useStoreState(state => state.server.missing)
+    const markMissing = ServerContext.useStoreActions(
+        actions => actions.server.markMissing
+    )
     const getServer = ServerContext.useStoreActions(
         actions => actions.server.getServer
     )
@@ -178,19 +182,24 @@ const ServerRouter = () => {
 
     // These statuses are only ever cleared by a queued job in the background, so
     // poll while the server is in one and let the screen move on by itself
-    // instead of waiting for the user to refresh.
+    // instead of waiting for the user to refresh. A server being deleted ends
+    // in a 404, which shows "Server not found".
     const isBusy =
-        server?.status === 'installing' ||
-        server?.status === 'restoring_backup' ||
-        server?.status === 'restoring_snapshot'
+        !missing &&
+        (server?.status === 'installing' ||
+            server?.status === 'restoring_backup' ||
+            server?.status === 'restoring_snapshot' ||
+            server?.status === 'deleting')
 
     useEffect(() => {
         if (!isBusy) return
 
         const interval = setInterval(() => {
-            // A failed poll is retried on the next tick; the screen keeps
-            // showing the last known status meanwhile.
-            getServer(id as string).catch(() => {})
+            getServer(id as string).catch((error: any) =>
+                // A failed poll otherwise keeps the last known status and is
+                // retried on the next tick.
+                handlePollError(error, markMissing)
+            )
         }, 5000)
 
         return () => clearInterval(interval)
@@ -237,6 +246,16 @@ const ServerRouter = () => {
                         title='Restoring Snapshot'
                     />
                 )
+            case 'deleting':
+                return (
+                    <ScreenBlock
+                        center
+                        icon={ArrowPathIcon}
+                        spin
+                        message='Your server is being deleted.'
+                        title='Deleting'
+                    />
+                )
             case 'install_failed':
                 return <InstallFailedScreen />
             case null:
@@ -267,14 +286,16 @@ const ServerRouter = () => {
 
     return (
         <>
-            {!server ? (
-                notFound ? (
-                    <NotFound
-                        title='Server not found'
-                        message="This server doesn't exist, or it has been deleted."
-                        onBack={() => navigate('/')}
-                    />
-                ) : error ? (
+            {/* missing comes first: the server's stale data is still in the
+                store when a poll finds it gone. */}
+            {missing || (!server && notFound) ? (
+                <NotFound
+                    title='Server not found'
+                    message="This server doesn't exist, or it has been deleted."
+                    onBack={() => navigate('/')}
+                />
+            ) : !server ? (
+                error ? (
                     <ErrorMessage message={error} />
                 ) : (
                     <Spinner />

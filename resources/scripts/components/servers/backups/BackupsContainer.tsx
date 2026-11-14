@@ -12,16 +12,23 @@ import ServerContentBlock from '@/components/servers/ServerContentBlock'
 import BackupRow from '@/components/servers/backups/BackupRow'
 import CreateBackupButton from '@/components/servers/backups/CreateBackupButton'
 
-
 const BackupsContainer = () => {
     const uuid = ServerContext.useStoreState(state => state.server.data!.uuid)
 
     const [page, setPage] = usePagination()
 
-    const { data, mutate } = useSWR(['server:backups', uuid, page], () =>
-        getBackups(uuid, {
-            page,
-        })
+    const { data, mutate } = useSWR(
+        ['server:backups', uuid, page],
+        () =>
+            getBackups(uuid, {
+                page,
+            }),
+        {
+            // A backup runs as a queued job and the list only learned it had
+            // finished on a reload. Poll while one is still running.
+            refreshInterval: latest =>
+                latest?.items.some(backup => !backup.completedAt) ? 5000 : 0,
+        }
     )
 
     return (

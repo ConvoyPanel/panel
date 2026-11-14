@@ -96,9 +96,13 @@ export const convertTimeToSmallest = (seconds: number) => {
         }
     }
 
+    const time = seconds / (bestUnit[0] as number)
+    const unit = bestUnit[1] as string
+
     return {
-        time: seconds / (bestUnit[0] as number),
-        unit: bestUnit[1] as string,
+        time,
+        // "1 minute", not "1 minutes": the caller shows the time floored.
+        unit: Math.floor(time) === 1 ? unit.slice(0, -1) : unit,
     }
 }
 

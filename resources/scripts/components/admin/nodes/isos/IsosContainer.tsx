@@ -15,6 +15,7 @@ import useIsosSWR from '@/api/admin/nodes/isos/useIsosSWR'
 import useNodeSWR from '@/api/admin/nodes/useNodeSWR'
 
 import Button from '@/components/elements/Button'
+import ConfirmationModal from '@/components/elements/ConfirmationModal'
 import Menu from '@/components/elements/Menu'
 import Pagination from '@/components/elements/Pagination'
 import Spinner from '@/components/elements/Spinner'
@@ -27,7 +28,6 @@ import Table, {
 import NodeContentBlock from '@/components/admin/nodes/NodeContentBlock'
 import CreateIsoModal from '@/components/admin/nodes/isos/CreateIsoModal'
 import EditIsoModal from '@/components/admin/nodes/isos/EditIsoModal'
-
 
 const columns: ColumnArray<ISO> = [
     {
@@ -88,20 +88,28 @@ const IsosContainer = () => {
 
     const rowActions = ({ row: iso }: RowActionsProps<ISO>) => {
         const [open, setOpen] = useState(false)
+        const [confirming, setConfirming] = useState(false)
+        const [deleting, setDeleting] = useState(false)
 
         const handleDelete = () => {
-            deleteIso(node.id, iso.uuid).then(() => {
-                mutate(
-                    mutateData =>
-                        ({
-                            ...mutateData,
-                            items: mutateData!.items.filter(
-                                datum => datum.uuid !== iso.uuid
-                            ),
-                        }) as IsoResponse,
-                    false
-                )
-            })
+            setDeleting(true)
+            deleteIso(node.id, iso.uuid)
+                .then(() => {
+                    mutate(
+                        mutateData =>
+                            ({
+                                ...mutateData,
+                                items: mutateData!.items.filter(
+                                    datum => datum.uuid !== iso.uuid
+                                ),
+                            }) as IsoResponse,
+                        false
+                    )
+                })
+                .finally(() => {
+                    setDeleting(false)
+                    setConfirming(false)
+                })
         }
         return (
             <>
@@ -110,10 +118,19 @@ const IsosContainer = () => {
                     onClose={() => setOpen(false)}
                     iso={iso}
                 />
+                <ConfirmationModal
+                    open={confirming}
+                    title={`Delete ${iso.name}?`}
+                    description="The ISO file is deleted from the node's storage and removed from the library. This can't be undone."
+                    confirmLabel='Delete'
+                    loading={deleting}
+                    onConfirm={handleDelete}
+                    onClose={() => setConfirming(false)}
+                />
                 <Actions>
                     <Menu.Item onClick={() => setOpen(true)}>Edit</Menu.Item>
                     <Menu.Divider />
-                    <Menu.Item color='red' onClick={handleDelete}>
+                    <Menu.Item color='red' onClick={() => setConfirming(true)}>
                         Delete
                     </Menu.Item>
                 </Actions>

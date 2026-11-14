@@ -14,7 +14,6 @@ import { Link, Outlet, useMatch } from 'react-router-dom'
 import ContentContainer from '@/components/elements/ContentContainer'
 import { NavigationBarContext } from '@/components/elements/navigation/NavigationBar'
 
-
 export const routes: Route[] = [
     {
         path: '/admin',
@@ -69,6 +68,17 @@ export const routes: Route[] = [
                     lazy(
                         () =>
                             import('@/components/admin/tokens/TokensContainer')
+                    )
+                ),
+            },
+            {
+                path: 'settings',
+                element: lazyLoad(
+                    lazy(
+                        () =>
+                            import(
+                                '@/components/admin/settings/SettingsContainer'
+                            )
                     )
                 ),
             },
@@ -127,6 +137,10 @@ const AdminDashboardRouter = () => {
         {
             name: tStrings('token_other'),
             path: '/admin/tokens',
+        },
+        {
+            name: tStrings('setting_other'),
+            path: '/admin/settings',
         },
     ]
 

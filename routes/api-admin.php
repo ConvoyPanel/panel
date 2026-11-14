@@ -224,3 +224,18 @@ Route::prefix('/coterms')->group(function () {
 */
 Route::resource('tokens', Admin\TokenController::class)
      ->only(['index', 'store', 'destroy']);
+
+/*
+|--------------------------------------------------------------------------
+| Telemetry Controller Routes
+|--------------------------------------------------------------------------
+|
+| Endpoint: /api/admin/settings/telemetry
+|
+*/
+Route::prefix('/settings/telemetry')->group(function () {
+    Route::get('/', [Admin\TelemetryController::class, 'show']);
+    Route::put('/', [Admin\TelemetryController::class, 'update']);
+    // The exact report the daily job would send now. Read-only: nothing is reset by viewing it.
+    Route::get('/report', [Admin\TelemetryController::class, 'report']);
+});

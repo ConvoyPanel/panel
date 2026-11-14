@@ -1,5 +1,6 @@
 import { AdminServerContext } from '@/state/admin/server'
 import { useFlashKey } from '@/util/useFlash'
+import useNotify from '@/util/useNotify'
 import { hostname } from '@/util/validation'
 import { zodResolver } from '@hookform/resolvers/zod'
 import React from 'react'
@@ -28,6 +29,7 @@ const ServerInformationCard = () => {
         `admin.servers.${server.uuid}.settings.general.info`
     )
     const { t: tStrings } = useTranslation('strings')
+    const notify = useNotify()
     const { t } = useTranslation('admin.servers.settings')
 
     const schema = z.object({
@@ -72,6 +74,9 @@ const ServerInformationCard = () => {
                 userId: data.userId.toString(),
                 status: status ?? 'ready',
             })
+
+            // Nothing on the page changes visibly after a save, so say so.
+            notify({ message: tStrings('saved'), color: 'green' })
         } catch (error) {
             clearAndAddHttpError(error as any)
         }

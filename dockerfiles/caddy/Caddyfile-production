@@ -10,8 +10,10 @@
     }
     header @static Cache-Control max-age=5184000
 
+    # Via is what Caddy 2.11's php_fastcgi adds to every PHP response.
     header {
         -Server
+        -Via
         -X-Powered-By
     }
 }

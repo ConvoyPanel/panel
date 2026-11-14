@@ -34,7 +34,6 @@ import SortableItem, {
     ChildrenPropsWithHandle,
 } from '@/components/elements/dnd/SortableItem'
 
-
 const BootOrderCard = () => {
     const uuid = ServerContext.useStoreState(state => state.server.data!.uuid)
     const { data, mutate } = useBootOrderSWR(uuid)
@@ -172,6 +171,15 @@ const BootOrderCard = () => {
                                         action={
                                             <button
                                                 onClick={() => removeDisk(disk)}
+                                                aria-label={t(
+                                                    'device_config.remove_device',
+                                                    {
+                                                        device: getLabel(
+                                                            disk,
+                                                            tStrings
+                                                        ),
+                                                    }
+                                                )}
                                                 className='bg-transparent p-1'
                                             >
                                                 <XMarkIcon className='h-6 w-6 text-accent-500' />
@@ -198,6 +206,15 @@ const BootOrderCard = () => {
                                 action={
                                     <button
                                         onClick={() => addDisk(device)}
+                                        aria-label={t(
+                                            'device_config.add_device',
+                                            {
+                                                device: getLabel(
+                                                    device,
+                                                    tStrings
+                                                ),
+                                            }
+                                        )}
                                         className='bg-transparent p-1'
                                     >
                                         <PlusIcon className='h-6 w-6 text-accent-500' />
@@ -235,45 +252,64 @@ const StaticDiskRow = ({ disk, action }: DiskRowProps) => (
     </div>
 )
 
-const DraggableDiskRow = ({ disk, action }: DiskRowProps) => (
-    <SortableItem
-        handle
-        className='select-none flex items-center space-x-3 p-2 border border-accent-200 sm:dark:hover:border-foreground dark:active:border-foreground dark:shadow-none dark:hover:shadow-none bg-background shadow-light hover:shadow-lg rounded'
-        id={disk.interface}
-    >
-        {({ attributes, listeners }: ChildrenPropsWithHandle) => (
-            <>
-                <button
-                    className='bg-transparent touch-none p-1'
-                    {...attributes}
-                    {...listeners}
-                >
-                    <img
-                        src={DragVerticalIcon}
-                        className='h-6 w-6 dark:invert'
-                        alt='Drag button icon'
-                    />
-                </button>
-                <div className='flex justify-between w-full items-center'>
-                    <div className={'flex flex-col'}>
-                        <div className={'flex space-x-3'}>
-                            <span className='text-foreground'>
-                                {getName(disk)}
+const DraggableDiskRow = ({ disk, action }: DiskRowProps) => {
+    const { t } = useTranslation('server.settings')
+    const { t: tStrings } = useTranslation('strings')
+
+    return (
+        <SortableItem
+            handle
+            className='select-none flex items-center space-x-3 p-2 border border-accent-200 sm:dark:hover:border-foreground dark:active:border-foreground dark:shadow-none dark:hover:shadow-none bg-background shadow-light hover:shadow-lg rounded'
+            id={disk.interface}
+        >
+            {({ attributes, listeners }: ChildrenPropsWithHandle) => (
+                <>
+                    <button
+                        className='bg-transparent touch-none p-1'
+                        {...attributes}
+                        {...listeners}
+                        aria-label={t('device_config.reorder_device', {
+                            device: getLabel(disk, tStrings),
+                        })}
+                    >
+                        <img
+                            src={DragVerticalIcon}
+                            className='h-6 w-6 dark:invert'
+                            alt=''
+                        />
+                    </button>
+                    <div className='flex justify-between w-full items-center'>
+                        <div className={'flex flex-col'}>
+                            <div className={'flex space-x-3'}>
+                                <span className='text-foreground'>
+                                    {getName(disk)}
+                                </span>
+                                {getBadge(disk)}
+                            </div>
+
+                            <span className='description-small'>
+                                {getDescription(disk)}
                             </span>
-                            {getBadge(disk)}
                         </div>
 
-                        <span className='description-small'>
-                            {getDescription(disk)}
-                        </span>
+                        {action}
                     </div>
+                </>
+            )}
+        </SortableItem>
+    )
+}
 
-                    {action}
-                </div>
-            </>
-        )}
-    </SortableItem>
-)
+// Plain text for an accessible name, where getName's <Translate> can't go.
+const getLabel = (disk: Disk, tStrings: (key: string) => string) => {
+    if (disk.isPrimaryDisk) {
+        return tStrings('primary_disk')
+    }
+    if (disk.isMedia) {
+        return disk.mediaName
+    }
+    return disk.interface
+}
 
 const getName = (disk: Disk) => {
     if (disk.isPrimaryDisk) {
