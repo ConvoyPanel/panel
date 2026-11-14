@@ -33,6 +33,7 @@ import useNodeSWR from '@/api/admin/nodes/useNodeSWR'
 import { httpErrorToHuman } from '@/api/http'
 
 import Card from '@/components/elements/Card'
+import ConfirmationModal from '@/components/elements/ConfirmationModal'
 import Menu from '@/components/elements/Menu'
 import SortableItem, {
     ChildrenPropsWithHandle,
@@ -51,6 +52,7 @@ interface Props {
 const TemplateGroupCard = ({ group, className }: Props) => {
     const [showEditModal, setShowEditModal] = useState(false)
     const [showCreateModal, setShowCreateModal] = useState(false)
+    const [confirming, setConfirming] = useState(false)
     const { data: node } = useNodeSWR()
     const { clearFlashes, clearAndAddHttpError } = useFlash()
     const { mutate } = useTemplateGroupsSWR(node.id)
@@ -61,19 +63,16 @@ const TemplateGroupCard = ({ group, className }: Props) => {
     const keyboardSensor = useSensor(KeyboardSensor)
     const sensors = useSensors(mouseSensor, keyboardSensor)
 
-    const handleDelete = () => {
+    const handleDelete = async () => {
         clearFlashes('admin:node:template-groups')
 
-        deleteTemplateGroup(node.id, group.uuid)
-            .then(() => {
-                mutate(groups => groups!.filter(g => g.id !== group.id), false)
-            })
-            .catch(error => {
-                clearAndAddHttpError({
-                    key: 'admin:node:template-groups',
-                    error,
-                })
-            })
+        try {
+            await deleteTemplateGroup(node.id, group.uuid)
+
+            mutate(groups => groups!.filter(g => g.id !== group.id), false)
+        } catch (error) {
+            clearAndAddHttpError({ key: 'admin:node:template-groups', error })
+        }
     }
 
     const updateTemplateOrder = (templates: number[]) => {
@@ -179,6 +178,14 @@ const TemplateGroupCard = ({ group, className }: Props) => {
                         open={showEditModal}
                         onClose={() => setShowEditModal(false)}
                     />
+                    <ConfirmationModal
+                        open={confirming}
+                        title={`Delete ${group.name}?`}
+                        description="Deleting this template group only removes it and its templates from Convoy and keeps the templates on the Proxmox node, but servers can no longer be built or reinstalled from them."
+                        confirmLabel='Delete'
+                        onConfirm={handleDelete}
+                        onClose={() => setConfirming(false)}
+                    />
                     {isDragging || active ? (
                         <div
                             className={classNames(
@@ -227,7 +234,10 @@ const TemplateGroupCard = ({ group, className }: Props) => {
                                     Edit
                                 </Menu.Item>
                                 <Menu.Divider />
-                                <Menu.Item color='red' onClick={handleDelete}>
+                                <Menu.Item
+                                    color='red'
+                                    onClick={() => setConfirming(true)}
+                                >
                                     Delete
                                 </Menu.Item>
                             </Menu.Dropdown>
