@@ -11,6 +11,20 @@ const baseURL =
     process.env.DDEV_PRIMARY_URL ??
     'https://convoy-pr168.ddev.site'
 
+/**
+ * The only hosts Chromium may resolve: the panel, and the node when the @live
+ * specs run. Any other host fails at DNS straight away, so a third-party
+ * script can't hold a page's load event open while its server times out.
+ */
+const allowedHosts = [new URL(baseURL).hostname, 'localhost', '127.0.0.1']
+if (process.env.PROXMOX_FQDN) {
+    allowedHosts.push(new URL(`https://${process.env.PROXMOX_FQDN}`).hostname)
+}
+const hostResolverRules = [
+    'MAP * ~NOTFOUND',
+    ...allowedHosts.map(host => `EXCLUDE ${host}`),
+].join(', ')
+
 export default defineConfig({
     testDir: './tests/e2e',
     outputDir: './tests/e2e/.results',
@@ -35,6 +49,9 @@ export default defineConfig({
         ignoreHTTPSErrors: true,
         trace: 'retain-on-failure',
         screenshot: 'only-on-failure',
+        launchOptions: {
+            args: [`--host-resolver-rules=${hostResolverRules}`],
+        },
     },
     // The image catalogue fixture, read by the panel through IMAGE_REGISTRY_URL.
     webServer: {

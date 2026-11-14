@@ -167,8 +167,9 @@ jobs:
         run: npx playwright install --with-deps --only-shell chromium
 
       - name: Start the panel
+        # Without --no-reload, artisan serve ignores PHP_CLI_SERVER_WORKERS and runs a single worker.
         run: |
-          PHP_CLI_SERVER_WORKERS=4 php artisan serve --host=127.0.0.1 --port=8000 > storage/logs/serve.log 2>&1 &
+          PHP_CLI_SERVER_WORKERS=4 php artisan serve --no-reload --host=127.0.0.1 --port=8000 > storage/logs/serve.log 2>&1 &
           timeout 30 sh -c 'until curl -sf -o /dev/null "$E2E_BASE_URL/auth/login"; do sleep 1; done'
 
       - name: Run end-to-end tests
@@ -179,6 +180,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
+          # .report and .results are dot-directories, which upload-artifact skips by default.
+          include-hidden-files: true
           path: |
             tests/e2e/.report
             tests/e2e/.results

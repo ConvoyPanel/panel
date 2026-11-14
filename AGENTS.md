@@ -155,6 +155,9 @@ ddev npm run test:e2e -- --grep @live         # needs PROXMOX_* exported, see be
   `E2E_SKIP_SEED=1` to point the suite at a panel you've seeded yourself.
 - **Isolation.** The specs share one database and one global guest switch, so they run with one
   worker.
+- **No outside hosts.** Chromium can resolve only the base URL's host, `localhost`/`127.0.0.1`,
+  and `PROXMOX_FQDN` when it is set. A request to any other host fails at once, so a spec never
+  waits on a third-party server.
 - **`@live` specs.** Specs that need a real node are in `tests/e2e/live/`, tagged `@live`. They skip
   unless `PROXMOX_FQDN`, `PROXMOX_TOKEN_ID` and `PROXMOX_TOKEN_SECRET` are set in the runner's
   environment, not just in `.env` (see Live End-to-End Testing).
