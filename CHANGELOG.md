@@ -7,8 +7,26 @@ follows [Semantic Versioning](https://semver.org) guidelines.
 
 ## Unreleased
 
+### Changed
+
+- Deleting a node, a location, a template, a template group, a user or an ISO asks for confirmation first, as do Kill
+  on a server's overview and Suspend in its admin settings. Each used to act on the first click, and Kill and Suspend
+  both cut the server's power without a clean shutdown.
+
 ### Fixed
 
+- A failed ISO or location delete now shows the error. It used to be dropped, so nothing seemed to happen and the row
+  stayed put.
+- `convoy import-v4` imports panels running v4.7.0. Convoy 5's migrations stopped on "column last_active_at of
+  relation users already exists", and past that, every ISO would have shown 1,048,576 times its size: v4.7.0 stores
+  ISO sizes in bytes, and 5.x read them as mebibytes.
+- Importing a v4.7.0 panel keeps its telemetry switch and installation id. Telemetry an admin turned off on v4.7.0
+  came back on.
+- ISO sizes are stored in bytes, as on v4.7.0, so a 2.95 MiB ISO no longer reads "2 MiB" in the library. When a
+  download finishes, the size recorded is the size of the file the node saved.
+- `convoy import-v4` checks, before it touches v4, that every number in v4's unsigned columns fits Postgres, and names
+  the ones that don't. Postgres holds half as much in the same column type, so one too large stopped the import
+  partway, with v4 already stopped.
 - A server's memory, disk or bandwidth, or a node's memory or disk, above 2,147,483,647 MiB (just under 2 PiB) is
   rejected with a validation error instead of failing with a server error.
 - Sizes of 1 PiB and more read "PiB" or "EiB" instead of "undefined".
