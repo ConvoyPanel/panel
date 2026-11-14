@@ -127,6 +127,9 @@ first time the panel starts and can't be undone, so back up before updating.
   space, as the install guide's example password does.
 - Fixed `laravel.log` being rotated only when the workers container started. supervisord ran logrotate as a
   long-running program, gave up on it after it exited a few times, and never ran it again.
+- Fixed the `failed_jobs` table growing forever. Every job that failed for good stayed in the database, each row
+  holding the job and its full stack trace, while Horizon stopped listing it after a week. Failed jobs older than a
+  week are now pruned once a day.
 - Fixed a signed-out request to the API without `Accept: application/json` failing with a 500 (`Route [login] not
   defined`). It gets a `401` in JSON.
 - Fixed the backup list keeping a new backup's spinner and "0 Bytes" until the page was reloaded. It refreshes while a

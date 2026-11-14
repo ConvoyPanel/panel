@@ -23,6 +23,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         $schedule->command('queue:prune-batches')->daily();
+        $schedule->command('queue:prune-failed', ['--hours' => 168])->daily();
 
         if (config('backups.prune_age')) {
             // Every 30 minutes, run the backup pruning command so that any abandoned backups can be deleted.
