@@ -276,7 +276,7 @@ it('reports no bandwidth ceiling once a server is unmetered', function () {
     $target = User::factory()->create();
 
     Server::factory()->for($target)->create(['bandwidth_limit' => 1024 * 1024 * 1024]);
-    // -1 is the unmetered sentinel. Summed naively it would take a mebibyte off the total and
+    // -1 is the unmetered sentinel. Summed naively it would take a byte off the total and
     // read as a ceiling the account cannot actually hit.
     Server::factory()->for($target)->create(['bandwidth_limit' => -1]);
 

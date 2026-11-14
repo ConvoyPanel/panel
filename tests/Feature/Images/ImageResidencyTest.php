@@ -116,9 +116,7 @@ it('says what to fix when no storage accepts images', function () {
         ->toThrow(ConflictHttpException::class, 'Add `Import` to a storage');
 });
 
-it('stores a version size in mebibytes and reads it back in bytes', function () {
-    // The convention every size column follows: MiB on disk, bytes through the
-    // model. Worth pinning, because this column briefly opted out of it.
+it('stores a version size in exact bytes', function () {
     $group = ImageGroup::create(['name' => 'Sized']);
     $definition = ImageDefinition::create([
         'image_group_id' => $group->id,
@@ -142,10 +140,8 @@ it('stores a version size in mebibytes and reads it back in bytes', function () 
 
     $version = $definition->versions()->sole();
 
-    // 594 whole mebibytes on disk, and the same figure back in bytes. The lost
-    // fraction of a mebibyte only ever feeds a progress bar's total.
-    expect($version->getRawOriginal('size'))->toBe(594)
-        ->and($version->size)->toBe(594 * 1048576);
+    expect($version->getRawOriginal('size'))->toBe(623145472)
+        ->and($version->size)->toBe(623145472);
 });
 
 it('keeps the plan floor exact rather than rounding it to whole mebibytes', function () {

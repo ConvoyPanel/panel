@@ -212,6 +212,9 @@ which leaves less to do here.
 - **Root passwords** are set through cloud-init on every OS, Windows included. The 4.x path that set them live through
   the QEMU guest agent is gone.
 - **Storage sizes** are shown in IEC units (MiB, GiB).
+- **Sizes are stored in exact bytes.** Memory, disks, bandwidth, storages, backups, ISOs and image versions used to be
+  stored in whole mebibytes, rounded down, so a 4,233,187-byte backup read "4 MiB". The upgrade converts existing
+  values.
 
 #### Networking and IPAM
 

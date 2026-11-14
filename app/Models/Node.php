@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Casts\OveragePenaltyCast;
-use App\Casts\StorageSizeCast;
 use App\Data\Server\OveragePenaltyData;
 use App\Enums\Anchor\AnchorMode;
 use App\Enums\Node\ConnectionErrorCode;
@@ -127,7 +126,7 @@ class Node extends Model
             'agent_protocol_max' => 'integer',
             'agent_capabilities' => 'array',
             'agent_reported_facts' => 'array',
-            'memory' => StorageSizeCast::class,
+            'memory' => 'integer',
             'token_secret' => 'encrypted',
             'overage_penalty' => OveragePenaltyCast::class,
             'status' => NodeStatus::class,

@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Casts\StorageSizeCast;
 use App\Enums\Server\Backup\BackupErrorCode;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
@@ -48,7 +47,7 @@ class Backup extends Model
     {
         return [
             'completed_at' => 'datetime',
-            'size' => StorageSizeCast::class,
+            'size' => 'integer',
             'error_code' => BackupErrorCode::class,
         ];
     }

@@ -2,9 +2,7 @@
 
 namespace App\Models;
 
-use App\Casts\StorageSizeCast;
 use App\Enums\Node\Storage\StorageContentType;
-use App\Support\ByteUnit;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -70,8 +68,8 @@ class Storage extends Model
     protected function casts(): array
     {
         return [
-            'size' => StorageSizeCast::class,
-            'reserved_bytes' => StorageSizeCast::class,
+            'size' => 'integer',
+            'reserved_bytes' => 'integer',
             'pve_shared' => 'boolean',
         ];
     }
@@ -207,12 +205,9 @@ class Storage extends Model
      */
     private function getUsageAttributeValue(string $relationshipName, string $sumColumn, string $preloadedSumAttribute): int
     {
-        // withSum() sums the raw column, which is MiB, and never runs the cast
-        // that would have made it bytes -- so the scaling below is not a
-        // convenience, it is the cast being applied by hand. See StorageSizeCast.
         if (array_key_exists($preloadedSumAttribute, $this->attributes)) {
             // Return the preloaded value, defaulting to 0 if null
-            return ByteUnit::Mebibytes->toBytes((int) ($this->attributes[$preloadedSumAttribute] ?? 0)); // convert from MiB to bytes
+            return (int) ($this->attributes[$preloadedSumAttribute] ?? 0);
         }
 
         // Fallback: Calculate on the fly using the relationship method
@@ -220,7 +215,7 @@ class Storage extends Model
         // Use Str::camel to call the relationship method dynamically (e.g., 'servers' -> $this->servers())
         $relationshipMethod = Str::camel($relationshipName);
         if (method_exists($this, $relationshipMethod)) {
-            return ByteUnit::Mebibytes->toBytes((int) ($this->$relationshipMethod()->sum($sumColumn) ?? 0)); // convert from MiB to bytes
+            return (int) ($this->$relationshipMethod()->sum($sumColumn) ?? 0);
         }
 
         // Return 0 if the relationship method doesn't exist (should not happen with the correct usage)

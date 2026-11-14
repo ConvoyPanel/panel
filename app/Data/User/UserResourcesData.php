@@ -2,7 +2,6 @@
 
 namespace App\Data\User;
 
-use App\Casts\StorageSizeCast;
 use App\Enums\Server\ServerLifecycle;
 use App\Models\Server;
 use App\Models\User;
@@ -20,14 +19,6 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
 #[MapInputName(SnakeCaseMapper::class)]
 class UserResourcesData extends Data
 {
-    /**
-     * `memory`, `disk`, `bandwidth_usage` and `bandwidth_limit` are stored in mebibytes and read
-     * back as bytes by {@see StorageSizeCast}. Aggregating in SQL bypasses the cast, so
-     * the conversion happens here instead — and every sum has to skip the `-1` sentinel rows, which
-     * would otherwise quietly subtract a mebibyte each.
-     */
-    private const BYTES_PER_MIB = 1048576;
-
     public function __construct(
         public int $serversCount,
         public int $suspendedCount,
@@ -65,6 +56,7 @@ class UserResourcesData extends Data
                 'SUM(CASE WHEN lifecycle <> ? THEN 1 ELSE 0 END) AS unbuilt_count',
                 [ServerLifecycle::READY->value],
             )
+            // -1 is the "unlimited" sentinel, which would take a byte off each total.
             ->selectRaw('SUM(CASE WHEN cpu >= 0 THEN cpu ELSE 0 END) AS cpu_total')
             ->selectRaw('SUM(CASE WHEN memory >= 0 THEN memory ELSE 0 END) AS memory_total')
             ->selectRaw('SUM(CASE WHEN disk >= 0 THEN disk ELSE 0 END) AS disk_total')
@@ -89,12 +81,12 @@ class UserResourcesData extends Data
             unbuiltCount: (int) ($totals['unbuilt_count'] ?? 0),
             nodesCount: (int) ($totals['nodes_count'] ?? 0),
             cpu: (int) ($totals['cpu_total'] ?? 0),
-            memory: (int) ($totals['memory_total'] ?? 0) * self::BYTES_PER_MIB,
-            disk: (int) ($totals['disk_total'] ?? 0) * self::BYTES_PER_MIB,
-            bandwidthUsage: (int) ($totals['bandwidth_usage_total'] ?? 0) * self::BYTES_PER_MIB,
+            memory: (int) ($totals['memory_total'] ?? 0),
+            disk: (int) ($totals['disk_total'] ?? 0),
+            bandwidthUsage: (int) ($totals['bandwidth_usage_total'] ?? 0),
             bandwidthLimit: $unmetered > 0
                 ? null
-                : (int) ($totals['bandwidth_limit_total'] ?? 0) * self::BYTES_PER_MIB,
+                : (int) ($totals['bandwidth_limit_total'] ?? 0),
         );
     }
 }

@@ -14,9 +14,7 @@ use Spatie\LaravelData\DataCollection;
  * What is occupying a storage, so an operator can act on it rather than just
  * read a percentage.
  *
- * Sizes come straight off the models. All three carry `StorageSizeCast`, which
- * already returns bytes -- the MiB in the column is a storage detail, and
- * converting again here was how the first version reported everything as zero.
+ * Sizes come straight off the models, in bytes.
  *
  * Largest first in each group: the reason anyone opens this is to find what to
  * remove.
