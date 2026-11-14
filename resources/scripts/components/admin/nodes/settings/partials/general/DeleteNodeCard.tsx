@@ -6,10 +6,11 @@ import deleteNode from '@/api/admin/nodes/deleteNode'
 import useNodeSWR from '@/api/admin/nodes/useNodeSWR'
 
 import Button from '@/components/elements/Button'
-import ConfirmationModal from '@/components/elements/ConfirmationModal'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import FormCard from '@/components/elements/FormCard'
 import MessageBox from '@/components/elements/MessageBox'
+
+import DeleteNodeModal from '@/components/admin/nodes/DeleteNodeModal'
 
 
 const DeleteNodeCard = () => {
@@ -18,31 +19,24 @@ const DeleteNodeCard = () => {
         `admin.nodes.${node.id}.settings.general.delete`
     )
     const navigate = useNavigate()
-    const [loading, setLoading] = useState(false)
     const [confirming, setConfirming] = useState(false)
 
     const handleDelete = async () => {
         clearFlashes()
-        setLoading(true)
         try {
             await deleteNode(node.id)
 
             navigate('/admin/nodes')
         } catch (error) {
             clearAndAddHttpError(error as Error)
-            setConfirming(false)
         }
-        setLoading(false)
     }
 
     return (
         <FormCard className='w-full border-error'>
-            <ConfirmationModal
+            <DeleteNodeModal
                 open={confirming}
-                title={`Delete ${node.name}?`}
-                description={`${node.name}, its ISO library and its templates are removed from Convoy. Nothing changes on the Proxmox node itself. This can't be undone.`}
-                confirmLabel='Delete'
-                loading={loading}
+                name={node.name}
                 onConfirm={handleDelete}
                 onClose={() => setConfirming(false)}
             />
@@ -69,7 +63,6 @@ const DeleteNodeCard = () => {
             <FormCard.Footer>
                 <Button
                     onClick={() => setConfirming(true)}
-                    loading={loading}
                     disabled={node.serversCount > 0}
                     type='submit'
                     variant='filled'

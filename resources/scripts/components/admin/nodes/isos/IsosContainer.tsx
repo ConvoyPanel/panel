@@ -1,4 +1,5 @@
 import { bytesToString } from '@/util/helpers'
+import { useFlashKey } from '@/util/useFlash'
 import usePagination from '@/util/usePagination'
 import {
     ExclamationCircleIcon,
@@ -84,33 +85,43 @@ const IsosContainer = () => {
     const [page, setPage] = usePagination()
     const { data, mutate } = useIsosSWR({ nodeId: node.id })
     const [showCreateModal, setShowCreateModal] = useState(false)
+    const [isoToDelete, setIsoToDelete] = useState<ISO | null>(null)
+    const [confirmingDelete, setConfirmingDelete] = useState(false)
     const { t } = useTranslation('admin.nodes.isos')
+    const { clearFlashes, clearAndAddHttpError } = useFlashKey(
+        `admin.nodes.${node.id}.isos`
+    )
+
+    const confirmDelete = (iso: ISO) => {
+        setIsoToDelete(iso)
+        setConfirmingDelete(true)
+    }
+
+    const handleDelete = async () => {
+        const iso = isoToDelete!
+        clearFlashes()
+
+        try {
+            await deleteIso(node.id, iso.uuid)
+
+            mutate(
+                mutateData =>
+                    ({
+                        ...mutateData,
+                        items: mutateData!.items.filter(
+                            datum => datum.uuid !== iso.uuid
+                        ),
+                    }) as IsoResponse,
+                false
+            )
+        } catch (error) {
+            clearAndAddHttpError(error as Error)
+        }
+    }
 
     const rowActions = ({ row: iso }: RowActionsProps<ISO>) => {
         const [open, setOpen] = useState(false)
-        const [confirming, setConfirming] = useState(false)
-        const [deleting, setDeleting] = useState(false)
 
-        const handleDelete = () => {
-            setDeleting(true)
-            deleteIso(node.id, iso.uuid)
-                .then(() => {
-                    mutate(
-                        mutateData =>
-                            ({
-                                ...mutateData,
-                                items: mutateData!.items.filter(
-                                    datum => datum.uuid !== iso.uuid
-                                ),
-                            }) as IsoResponse,
-                        false
-                    )
-                })
-                .finally(() => {
-                    setDeleting(false)
-                    setConfirming(false)
-                })
-        }
         return (
             <>
                 <EditIsoModal
@@ -118,19 +129,10 @@ const IsosContainer = () => {
                     onClose={() => setOpen(false)}
                     iso={iso}
                 />
-                <ConfirmationModal
-                    open={confirming}
-                    title={`Delete ${iso.name}?`}
-                    description="The ISO file is deleted from the node's storage and removed from the library. This can't be undone."
-                    confirmLabel='Delete'
-                    loading={deleting}
-                    onConfirm={handleDelete}
-                    onClose={() => setConfirming(false)}
-                />
                 <Actions>
                     <Menu.Item onClick={() => setOpen(true)}>Edit</Menu.Item>
                     <Menu.Divider />
-                    <Menu.Item color='red' onClick={() => setConfirming(true)}>
+                    <Menu.Item color='red' onClick={() => confirmDelete(iso)}>
                         Delete
                     </Menu.Item>
                 </Actions>
@@ -140,7 +142,18 @@ const IsosContainer = () => {
 
     return (
         <div className='bg-background min-h-screen'>
-            <NodeContentBlock title='ISO Library'>
+            <NodeContentBlock
+                title='ISO Library'
+                showFlashKey={`admin.nodes.${node.id}.isos`}
+            >
+                <ConfirmationModal
+                    open={confirmingDelete}
+                    title={`Delete ${isoToDelete?.name}?`}
+                    description="The ISO file is deleted from the node's storage and removed from the library. This can't be undone."
+                    confirmLabel='Delete'
+                    onConfirm={handleDelete}
+                    onClose={() => setConfirmingDelete(false)}
+                />
                 <CreateIsoModal
                     open={showCreateModal}
                     onClose={() => setShowCreateModal(false)}

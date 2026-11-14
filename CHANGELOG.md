@@ -13,6 +13,13 @@ follows [Semantic Versioning](https://semver.org) guidelines.
   overview and Suspend in its admin settings. Each used to act on the first click, and Kill and Suspend both cut the
   server's power without a clean shutdown.
 
+### Fixed
+
+- A failed ISO or location delete now shows the error. It used to be dropped, so nothing seemed to happen and the row
+  stayed put.
+- The user and ISO delete confirmations can no longer be dismissed once Delete is clicked. Cancel used to close them
+  while the delete still went ahead.
+
 ## v4.7.0
 
 Includes everything in [v4.6.2](https://github.com/ConvoyPanel/panel/releases/tag/v4.6.2), the security release cut
