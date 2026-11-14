@@ -6,4 +6,8 @@ set -e
 for dir in /var/www/storage /var/www/bootstrap/cache; do
     [ -d "$dir" ] && chown -R www-data:www-data "$dir"
 done
+# Earlier releases shipped the bundle size report as public/stats.html, and an
+# update extracts the new archive over the old one, which deletes nothing, so
+# Caddy kept serving it to anyone.
+rm -f /var/www/public/stats.html
 exec docker-php-entrypoint "$@"
