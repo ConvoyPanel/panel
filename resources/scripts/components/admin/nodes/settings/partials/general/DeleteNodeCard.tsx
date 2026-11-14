@@ -6,6 +6,7 @@ import deleteNode from '@/api/admin/nodes/deleteNode'
 import useNodeSWR from '@/api/admin/nodes/useNodeSWR'
 
 import Button from '@/components/elements/Button'
+import ConfirmationModal from '@/components/elements/ConfirmationModal'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import FormCard from '@/components/elements/FormCard'
 import MessageBox from '@/components/elements/MessageBox'
@@ -18,6 +19,7 @@ const DeleteNodeCard = () => {
     )
     const navigate = useNavigate()
     const [loading, setLoading] = useState(false)
+    const [confirming, setConfirming] = useState(false)
 
     const handleDelete = async () => {
         clearFlashes()
@@ -28,12 +30,22 @@ const DeleteNodeCard = () => {
             navigate('/admin/nodes')
         } catch (error) {
             clearAndAddHttpError(error as Error)
+            setConfirming(false)
         }
         setLoading(false)
     }
 
     return (
         <FormCard className='w-full border-error'>
+            <ConfirmationModal
+                open={confirming}
+                title={`Delete ${node.name}?`}
+                description={`${node.name}, its ISO library and its templates are removed from Convoy. Nothing changes on the Proxmox node itself. This can't be undone.`}
+                confirmLabel='Delete'
+                loading={loading}
+                onConfirm={handleDelete}
+                onClose={() => setConfirming(false)}
+            />
             <FormCard.Body>
                 <FormCard.Title>Delete Node</FormCard.Title>
                 <div className='space-y-3 mt-3'>
@@ -56,7 +68,7 @@ const DeleteNodeCard = () => {
             </FormCard.Body>
             <FormCard.Footer>
                 <Button
-                    onClick={handleDelete}
+                    onClick={() => setConfirming(true)}
                     loading={loading}
                     disabled={node.serversCount > 0}
                     type='submit'

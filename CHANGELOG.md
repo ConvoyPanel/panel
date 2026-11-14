@@ -5,6 +5,14 @@ This file is a running track of new features and fixes to each version of the pa
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 follows [Semantic Versioning](https://semver.org) guidelines.
 
+## Unreleased
+
+### Changed
+
+- Deleting a node, a location, a template, a template group, a user or an ISO asks for confirmation first, as do Kill
+  on a server's overview and Suspend in its admin settings. Each used to act on the first click, and Kill and Suspend
+  both cut the server's power without a clean shutdown.
+
 ## v5.0.0-alpha.2
 
 Still an alpha: use it for test installs and to rehearse the upgrade from v4, and keep production panels on v4 until
