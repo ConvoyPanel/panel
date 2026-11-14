@@ -36,12 +36,12 @@ class Server extends Model
         'hostname' => 'required|string|min:1|max:191',
         'status' => ['sometimes', 'nullable', 'string', 'in:installing,install_failed,suspended,restoring_backup,restoring_snapshot,deleting,deletion_failed'],
         'cpu' => 'required|numeric|min:1',
-        'memory' => 'required|numeric|min:16777216',
-        'disk' => 'required|numeric|min:1',
-        'bandwidth_usage' => 'sometimes|numeric|min:0',
+        'memory' => 'required|numeric|min:16777216|max:'.MebibytesToAndFromBytes::MAX_BYTES,
+        'disk' => 'required|numeric|min:1|max:'.MebibytesToAndFromBytes::MAX_BYTES,
+        'bandwidth_usage' => 'sometimes|numeric|min:0|max:'.MebibytesToAndFromBytes::MAX_BYTES,
         'snapshot_limit' => 'present|nullable|integer|min:0',
         'backup_limit' => 'present|nullable|integer|min:0',
-        'bandwidth_limit' => 'present|nullable|integer|min:0',
+        'bandwidth_limit' => 'present|nullable|integer|min:0|max:'.MebibytesToAndFromBytes::MAX_BYTES,
         'hydrated_at' => 'nullable|date',
     ];
 

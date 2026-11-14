@@ -15,6 +15,9 @@ follows [Semantic Versioning](https://semver.org) guidelines.
 
 ### Fixed
 
+- A server's memory, disk or bandwidth, or a node's memory or disk, above 2,147,483,647 MiB (just under 2 PiB) is
+  rejected with a validation error. It used to fail with a server error, or be saved where 5.x can't import it.
+- Sizes of 1 PiB and more read "PiB" or "EiB" instead of "undefined".
 - A failed ISO or location delete now shows the error. It used to be dropped, so nothing seemed to happen and the row
   stayed put.
 - The user and ISO delete confirmations can no longer be dismissed once Delete is clicked. Cancel used to close them
