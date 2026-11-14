@@ -227,11 +227,15 @@ cmd_backup() {
 
     info "dumping database to $file"
     # --clean --if-exists so the dump can be replayed over an existing database.
-    ( umask 077; compose exec -T postgres pg_dump \
+    # A failed dump leaves no file: a truncated one would pass for a backup.
+    if ! ( umask 077; compose exec -T postgres pg_dump \
         --username "$DB_USERNAME" \
         --dbname "$DB_DATABASE" \
         --clean --if-exists \
-        | gzip > "$file" )
+        | gzip > "$file" ); then
+        rm -f "$file"
+        die "the database backup failed. Check 'convoy logs postgres'."
+    fi
 
     info "backup complete ($(du -h "$file" | cut -f1))"
     printf '%s\n' "$file"
