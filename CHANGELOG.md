@@ -7,11 +7,21 @@ follows [Semantic Versioning](https://semver.org) guidelines.
 
 ## Unreleased
 
+### Changed
+
+- Deleting a node, a location, a template or a template group asks for confirmation first, as do Kill on a server's
+  overview and Suspend in its admin settings. Each used to act on the first click, and Kill and Suspend both cut the
+  server's power without a clean shutdown.
+
 ### Fixed
 
 - A server's memory, disk or bandwidth, or a node's memory or disk, above 2,147,483,647 MiB (just under 2 PiB) is
   rejected with a validation error. It used to fail with a server error, or be saved where 5.x can't import it.
 - Sizes of 1 PiB and more read "PiB" or "EiB" instead of "undefined".
+- A failed ISO or location delete now shows the error. It used to be dropped, so nothing seemed to happen and the row
+  stayed put.
+- The user and ISO delete confirmations can no longer be dismissed once Delete is clicked. Cancel used to close them
+  while the delete still went ahead.
 
 ## v4.7.0
 

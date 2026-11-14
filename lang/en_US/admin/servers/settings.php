@@ -21,6 +21,10 @@ return [
         ],
         'suspend' => 'Suspend',
         'unsuspend' => 'Unsuspend',
+        'confirmation' => [
+            'title' => 'Suspend :name?',
+            'description' => 'Suspending :name powers off its virtual machine at once, without a clean shutdown, and its owner can\'t manage it until you unsuspend it.',
+        ],
     ],
     'deletion' => [
         'title' => 'Delete Server',

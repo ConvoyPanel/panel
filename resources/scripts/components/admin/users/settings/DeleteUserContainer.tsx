@@ -13,7 +13,6 @@ import MessageBox from '@/components/elements/MessageBox'
 
 const DeleteUserContainer = () => {
     const { data: user } = useUserSWR()
-    const [loading, setLoading] = useState(false)
     const [confirming, setConfirming] = useState(false)
     const { clearFlashes, clearAndAddHttpError } = useFlashKey(
         'admin:user:settings:delete'
@@ -22,16 +21,13 @@ const DeleteUserContainer = () => {
 
     const handleDelete = async () => {
         clearFlashes()
-        setLoading(true)
         try {
             await deleteUser(user!.id)
 
             navigate('/admin/users')
         } catch (e) {
             clearAndAddHttpError(e as Error)
-            setConfirming(false)
         }
-        setLoading(false)
     }
 
     return (
@@ -41,7 +37,6 @@ const DeleteUserContainer = () => {
                 title={`Delete ${user.name}?`}
                 description={`${user.name} (${user.email}) and their data will be deleted. This can't be undone.`}
                 confirmLabel='Delete'
-                loading={loading}
                 onConfirm={handleDelete}
                 onClose={() => setConfirming(false)}
             />
@@ -63,7 +58,6 @@ const DeleteUserContainer = () => {
             </FormCard.Body>
             <FormCard.Footer>
                 <Button
-                    loading={loading}
                     disabled={user.serversCount > 0}
                     onClick={() => setConfirming(true)}
                     variant='filled'
