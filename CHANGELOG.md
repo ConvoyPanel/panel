@@ -5,6 +5,14 @@ This file is a running track of new features and fixes to each version of the pa
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 follows [Semantic Versioning](https://semver.org) guidelines.
 
+## Unreleased
+
+### Changed
+
+- Deleting a node, a location, a template or a template group asks for confirmation first, as do Kill on a server's
+  overview and Suspend in its admin settings. Each used to act on the first click, and Kill and Suspend both cut the
+  server's power without a clean shutdown.
+
 ## v4.7.0
 
 Includes everything in [v4.6.2](https://github.com/ConvoyPanel/panel/releases/tag/v4.6.2), the security release cut

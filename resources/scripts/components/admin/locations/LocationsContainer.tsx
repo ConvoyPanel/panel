@@ -8,6 +8,7 @@ import deleteLocation from '@/api/admin/locations/deleteLocation'
 import { Location, LocationResponse } from '@/api/admin/locations/getLocations'
 import useLocationsSWR from '@/api/admin/locations/useLocationsSWR'
 
+import ConfirmationModal from '@/components/elements/ConfirmationModal'
 import Menu from '@/components/elements/Menu'
 import PageContentBlock from '@/components/elements/PageContentBlock'
 import Pagination from '@/components/elements/Pagination'
@@ -59,8 +60,12 @@ const LocationsContainer = () => {
 
     const rowActions = ({ row: loc }: RowActionsProps<Location>) => {
         const [isEditing, setIsEditing] = useState(false)
+        const [confirming, setConfirming] = useState(false)
+        const [deleting, setDeleting] = useState(false)
+
         const handleDelete = () => {
             clearFlashes()
+            setDeleting(true)
 
             deleteLocation(loc.id)
                 .then(() => {
@@ -78,6 +83,10 @@ const LocationsContainer = () => {
                 .catch(error => {
                     clearAndAddHttpError(error)
                 })
+                .finally(() => {
+                    setDeleting(false)
+                    setConfirming(false)
+                })
         }
 
         return (
@@ -88,6 +97,15 @@ const LocationsContainer = () => {
                     open={isEditing}
                     onClose={() => setIsEditing(false)}
                 />
+                <ConfirmationModal
+                    open={confirming}
+                    title={`Delete ${loc.shortCode}?`}
+                    description={`The ${loc.shortCode} location is removed from Convoy. This can't be undone.`}
+                    confirmLabel={tStrings('delete')}
+                    loading={deleting}
+                    onConfirm={handleDelete}
+                    onClose={() => setConfirming(false)}
+                />
                 <Actions>
                     <Menu.Item onClick={() => setIsEditing(true)}>
                         {tStrings('edit')}
@@ -96,7 +114,7 @@ const LocationsContainer = () => {
                     <Menu.Item
                         color='red'
                         disabled={loc.nodesCount > 0}
-                        onClick={handleDelete}
+                        onClick={() => setConfirming(true)}
                     >
                         {tStrings('delete')}
                     </Menu.Item>

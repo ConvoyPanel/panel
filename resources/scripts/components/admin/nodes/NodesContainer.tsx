@@ -10,6 +10,7 @@ import deleteNode from '@/api/admin/nodes/deleteNode'
 import { Node, NodeResponse } from '@/api/admin/nodes/getNodes'
 import useNodesSWR from '@/api/admin/nodes/useNodesSWR'
 
+import ConfirmationModal from '@/components/elements/ConfirmationModal'
 import Menu from '@/components/elements/Menu'
 import PageContentBlock from '@/components/elements/PageContentBlock'
 import Pagination from '@/components/elements/Pagination'
@@ -71,8 +72,12 @@ const NodesContainer = () => {
     ]
 
     const rowActions = ({ row: node }: RowActionsProps<Node>) => {
+        const [confirming, setConfirming] = useState(false)
+        const [deleting, setDeleting] = useState(false)
+
         const handleDelete = async () => {
             clearFlashes()
+            setDeleting(true)
 
             try {
                 await deleteNode(node.id)
@@ -90,24 +95,37 @@ const NodesContainer = () => {
             } catch (error) {
                 clearAndAddHttpError(error as Error)
             }
+            setDeleting(false)
+            setConfirming(false)
         }
 
         return (
-            <Actions>
-                <Menu.Item
-                    onClick={() => navigator.clipboard.writeText(node.id)}
-                >
-                    Copy ID
-                </Menu.Item>
-                <Menu.Divider />
-                <Menu.Item
-                    color='red'
-                    disabled={node.serversCount > 0}
-                    onClick={handleDelete}
-                >
-                    {tStrings('delete')}
-                </Menu.Item>
-            </Actions>
+            <>
+                <ConfirmationModal
+                    open={confirming}
+                    title={`Delete ${node.name}?`}
+                    description={`${node.name}, its ISO library and its templates are removed from Convoy. Nothing changes on the Proxmox node itself. This can't be undone.`}
+                    confirmLabel={tStrings('delete')}
+                    loading={deleting}
+                    onConfirm={handleDelete}
+                    onClose={() => setConfirming(false)}
+                />
+                <Actions>
+                    <Menu.Item
+                        onClick={() => navigator.clipboard.writeText(node.id)}
+                    >
+                        Copy ID
+                    </Menu.Item>
+                    <Menu.Divider />
+                    <Menu.Item
+                        color='red'
+                        disabled={node.serversCount > 0}
+                        onClick={() => setConfirming(true)}
+                    >
+                        {tStrings('delete')}
+                    </Menu.Item>
+                </Actions>
+            </>
         )
     }
 
