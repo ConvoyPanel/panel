@@ -11,7 +11,7 @@ const DeleteNodeModal = ({ open, name, onConfirm, onClose }: Props) => (
     <ConfirmationModal
         open={open}
         title={`Delete ${name}?`}
-        description={`${name}, its ISO library and its templates are removed from Convoy, and it's detached from its address pools. Nothing changes on the Proxmox node itself. This can't be undone.`}
+        description="Deleting this node only removes it from Convoy, along with its ISO library and templates, and detaches it from its address pools. Everything on the Proxmox node stays as it is."
         confirmLabel='Delete'
         onConfirm={onConfirm}
         onClose={onClose}

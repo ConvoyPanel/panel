@@ -85,7 +85,7 @@ const TemplateCard = ({ template, group, className }: Props) => {
                     <ConfirmationModal
                         open={confirming}
                         title={`Delete ${template.name}?`}
-                        description={`${template.name} is removed from Convoy, so servers can no longer be built or reinstalled from it. The template on the Proxmox node isn't touched.`}
+                        description="Deleting this template only removes it from Convoy and keeps it on the Proxmox node, but servers can no longer be built or reinstalled from it."
                         confirmLabel='Delete'
                         onConfirm={handleDelete}
                         onClose={() => setConfirming(false)}
