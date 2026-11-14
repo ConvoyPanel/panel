@@ -181,7 +181,7 @@ const TemplateGroupCard = ({ group, className }: Props) => {
                     <ConfirmationModal
                         open={confirming}
                         title={`Delete ${group.name}?`}
-                        description={`${group.name} and its templates are removed from Convoy, so servers can no longer be built or reinstalled from them. The templates on the Proxmox node aren't touched.`}
+                        description="Deleting this template group only removes it and its templates from Convoy and keeps the templates on the Proxmox node, but servers can no longer be built or reinstalled from them."
                         confirmLabel='Delete'
                         onConfirm={handleDelete}
                         onClose={() => setConfirming(false)}
