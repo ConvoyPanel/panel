@@ -309,11 +309,13 @@ specials='!@#%^&*'
 admin_password="${admin_password:0:10}${specials:RANDOM % ${#specials}:1}${admin_password:10}"
 
 info "creating the administrator account"
+# Under curl | bash the rest of this script is still waiting on stdin, and exec
+# would read it, ending the script here without printing the password.
 docker compose exec -T web php artisan users:create \
     --email "$ADMIN_EMAIL" \
     --name "Administrator" \
     --password "$admin_password" \
-    --admin true >/dev/null || die "could not create the administrator. The panel is running; create one with: convoy artisan users:create"
+    --admin true </dev/null >/dev/null || die "could not create the administrator. The panel is running; create one with: convoy artisan users:create"
 
 cat <<EOF
 
