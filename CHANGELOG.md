@@ -5,6 +5,53 @@ This file is a running track of new features and fixes to each version of the pa
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 follows [Semantic Versioning](https://semver.org) guidelines.
 
+## v5.0.0-alpha.2
+
+Still an alpha: use it for test installs and to rehearse the upgrade from v4, and keep production panels on v4 until
+5.0 is released. The installer only picks up full releases by default, so name this one:
+
+```bash
+curl -fsSL https://install.convoypanel.com/5 | sudo bash -s -- --version 5.0.0-alpha.2
+```
+
+### Updating from 5.0.0-alpha.1
+
+5.0.0-alpha.1's `convoy` command can't replace itself, and it restarts everything at once. Install this release's
+once, then point the install at 5.0.0-alpha.2 and upgrade:
+
+```bash
+curl -fsSL https://github.com/ConvoyPanel/panel/releases/download/v5.0.0-alpha.2/convoy -o /usr/local/bin/convoy
+chmod 755 /usr/local/bin/convoy
+sed -i 's/^CONVOY_VERSION=.*/CONVOY_VERSION=5.0.0-alpha.2/' /opt/convoy/.env
+convoy upgrade
+```
+
+From then on, `convoy upgrade` keeps the command up to date itself.
+
+### Changed
+
+- `convoy upgrade` needs nothing checked first. It stops the scheduler, lets the queue worker finish the jobs it is
+  running (for up to ten minutes; `CONVOY_UPGRADE_DRAIN_TIMEOUT` sets a different limit in seconds), backs up the
+  database, then starts the web container alone and waits for it to be healthy, so migrations have run before the
+  worker and scheduler start on the new code. If a step fails before the new release starts, the worker and scheduler
+  start again. If the new release doesn't become healthy, they stay stopped until it's fixed and `convoy up` is run.
+- `convoy upgrade` replaces `convoy` with the copy in the image it upgrades to and carries on with that one, so the
+  command always matches the panel it manages.
+- `convoy upgrade` replaces `/opt/convoy/compose.yml` with the new release's, unless it has been edited. An edited one
+  is left alone, and the new release's is saved beside it as `compose.yml.new` to compare.
+- Builds of the 5.x branch are published as the image tag `5-canary`, not `5.x`, which read like "any 5.x release",
+  and report their version as `canary`. `install.sh --version 5-canary` installs one, and `--version 5.x` is turned
+  away with a pointer to `5`.
+
+### Fixed
+
+- Every `convoy` command refused to run on an install that uses its own database, because it looked for the bundled
+  `postgres` service, which such an install removes.
+- `convoy backup` reported success when the database dump failed partway, and left the truncated file in
+  `/opt/convoy/backups`. It now deletes the file and fails, and `convoy upgrade` stops before replacing anything.
+- The 5.0.0-alpha.1 image reported its version as `v5.0.0-alpha.1`, while its tarball and `convoy` command said
+  `5.0.0-alpha.1`.
+
 ## v5.0.0-alpha.1
 
 Convoy 5 is the 4.x panel on a new footing: Postgres instead of MySQL, and a container image run by Docker Compose
