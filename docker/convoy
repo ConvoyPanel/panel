@@ -1105,6 +1105,28 @@ v4_queue_size() {
         | tr -d '\r' | grep -E '^[0-9]+$' | tail -1 || true
 }
 
+# Runs SQL against v4's own database, with the container's MYSQL_* variables
+# like the dump in step 3.
+v4_mysql() {
+    # shellcheck disable=SC2016 # expanded inside the container
+    v4_compose exec -T database sh -c 'MYSQL_PWD="$MYSQL_PASSWORD" exec mysql -N -B -u"$MYSQL_USER" "$MYSQL_DATABASE" "$@"' sh "$@" < /dev/null
+}
+
+# v4's unsigned int and bigint columns holding a value larger than Postgres's
+# signed type of the same width, which is what v4-to-5.load casts them to, as
+# "table.column<TAB>value" lines. pgloader would stop on the first such row.
+v4_oversized_integers() {
+    local columns table column type limit query=""
+    columns="$(v4_mysql -e "SELECT table_name, column_name, data_type FROM information_schema.columns WHERE table_schema = DATABASE() AND data_type IN ('int', 'bigint') AND column_type LIKE '%unsigned%' ORDER BY table_name, ordinal_position")" || return 1
+    while IFS=$'\t' read -r table column type; do
+        [[ -n "$table" ]] || continue
+        limit=2147483647
+        [[ "$type" == bigint ]] && limit=9223372036854775807
+        query+="${query:+ UNION ALL }SELECT '$table.$column', MAX(\`$column\`) FROM \`$table\` HAVING MAX(\`$column\`) > $limit"
+    done <<< "$columns"
+    [[ -z "$query" ]] || v4_mysql -e "$query"
+}
+
 # Percent-encodes everything but unreserved characters, for credentials inside
 # a connection URL (and so nothing in them can upset a sed replacement).
 urlencode() {
@@ -1298,6 +1320,18 @@ EOF
         info "starting v4's database container to read from it"
         v4_compose up -d --wait database
     fi
+
+    local oversized
+    oversized="$(v4_oversized_integers)" || die "could not read v4's database to check its numbers."
+    if [[ -n "$oversized" ]]; then
+        (( v4_db_running )) || v4_compose stop database
+        die "these v4 columns hold numbers larger than Postgres can store in them, so the import would fail. Nothing was changed.
+
+$(printf '%s\n' "$oversized" | sed 's/\t/: /; s/^/  /')
+
+Lower them in v4 (a server's memory, disk or bandwidth above 2,147,483,647 MiB is the likely case), or ask for help in Discord."
+    fi
+    echo "numbers: every value fits Postgres"
 
     if (( ! dry_run )) && [[ -n "$(v4_compose ps -q --status running php 2>/dev/null)" ]]; then
         # Jobs still queued in v4's Redis do not come across, so the queue has

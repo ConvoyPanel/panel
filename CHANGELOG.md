@@ -5,6 +5,14 @@ This file is a running track of new features and fixes to each version of the pa
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 follows [Semantic Versioning](https://semver.org) guidelines.
 
+## Unreleased
+
+### Fixed
+
+- `convoy import-v4` checks, before it touches v4, that every number in v4's unsigned columns fits Postgres, and names
+  the ones that don't. Postgres holds half as much in the same column type, so one too large stopped the import
+  partway, with v4 already stopped.
+
 ## v5.0.0-alpha.2
 
 Still an alpha: use it for test installs and to rehearse the upgrade from v4, and keep production panels on v4 until
