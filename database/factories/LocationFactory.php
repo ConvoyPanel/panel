@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use Convoy\Models\Location;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
  * @extends Factory<Location>
@@ -25,7 +26,9 @@ class LocationFactory extends Factory
     public function definition(): array
     {
         return [
-            'short_code' => $this->faker->word(),
+            // Unique in the database, and faker's word list is short enough
+            // that two locations in one test sometimes drew the same word.
+            'short_code' => $this->faker->word().'-'.Str::lower(Str::random(6)),
             'description' => $this->faker->sentence(),
         ];
     }
