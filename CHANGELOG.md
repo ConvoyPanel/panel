@@ -27,7 +27,9 @@ follows [Semantic Versioning](https://semver.org) guidelines.
 - Caddy no longer sends a `Via: 0.0 Caddy` header. Caddy 2.11, new in v4.7.0-rc.4, adds it to every response PHP
   serves, so the panel still named its web server after the `Server` header was removed.
 - The bundle size report, `stats.html`, is no longer built into `public/`, where every panel served it to anyone. It
-  listed the frontend's dependencies and their versions.
+  listed the frontend's dependencies and their versions. Every release since v2.0.0 shipped it, and updating extracts
+  the new archive over the old one without deleting anything, so the php container now deletes `public/stats.html`
+  when it starts.
 
 ### Changed
 
