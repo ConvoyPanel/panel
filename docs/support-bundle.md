@@ -229,7 +229,7 @@ upgrade/import-v4.log
 | `schema` | `1`. |
 | `collector` | Version of the `convoy` script that made the bundle. |
 | `panel` | `config('app.version')` if a diagnostic could read it, else the image tag, else `null`. |
-| `layout` | Always `5.x` (compose.yml with `web`, `worker`, `scheduler`, `postgres`, `redis`). `convoy support` refuses a v4 install; v4 upgrades first. |
+| `layout` | Always `5.x` (a compose.yml with `web` and `worker`). `convoy support` refuses a v4 install; v4 upgrades first. |
 | `collected_at` | UTC, when collection started. |
 | `since` | The window the container logs cover, as passed to `docker compose logs --since`. |
 | `host` | As above. Any field may be `null` when it can't be read. No hostname or IP addresses. |

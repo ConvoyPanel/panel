@@ -119,12 +119,13 @@ env_set() {
 # Finding the install
 ##########################################################################
 
-# Which kind of install DIR holds: "5.x" (compose.yml with web and postgres),
+# Which kind of install DIR holds: "5.x" (compose.yml with web and worker),
 # "v4" (docker-compose.yml with php and database), or nothing. Read from the
 # file rather than `docker compose config`, which fails on an incomplete .env.
+# Not postgres: an install on an external database removes that service.
 layout_of() {
     local dir="$1"
-    if [[ -f "$dir/compose.yml" ]] && grep -qE '^  web:' "$dir/compose.yml" && grep -qE '^  postgres:' "$dir/compose.yml"; then
+    if [[ -f "$dir/compose.yml" ]] && grep -qE '^  web:' "$dir/compose.yml" && grep -qE '^  worker:' "$dir/compose.yml"; then
         echo "5.x"
     elif [[ -f "$dir/docker-compose.yml" ]] && grep -qE '^  php:' "$dir/docker-compose.yml" && grep -qE '^  database:' "$dir/docker-compose.yml"; then
         echo "v4"
