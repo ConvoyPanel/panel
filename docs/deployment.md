@@ -30,6 +30,10 @@ release, `5.1` the newest 5.1.x, and `5.0.1` exactly that release. The choice is
 written to `CONVOY_VERSION` in `/opt/convoy/.env`, so `convoy upgrade` stays
 within it and never moves a 5.x install to 6.0 on its own.
 
+`5` and `5.1` only follow full releases. A pre-release such as
+`5.0.0-alpha.1` is installed only when named exactly, and stays pinned until
+`CONVOY_VERSION` is changed.
+
 ### Requirements
 
 - Debian 12/13, Ubuntu 22.04/24.04, AlmaLinux 9/10 or Rocky Linux 9/10

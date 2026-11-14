@@ -5,12 +5,20 @@ This file is a running track of new features and fixes to each version of the pa
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 follows [Semantic Versioning](https://semver.org) guidelines.
 
-## Unreleased
+## v5.0.0-alpha.1
 
 Convoy 5 is the 4.x panel on a new footing: Postgres instead of MySQL, and a container image run by Docker Compose
 instead of a build from source in `/var/www/convoy`. The panel itself works as v4.7 does, with the same pages, the same
 API and the same data, so the risky part of moving to Convoy 6 (a new database engine and a new layout on disk) happens
 while the application is still the one you know. Convoy 6, the rewritten panel, will upgrade from Convoy 5.
+
+This is an alpha. Use it for test installs and to rehearse the upgrade from v4 on a copy of your data
+(`--import --dry-run`); keep production panels on v4 until 5.0 is released. The installer only picks up full releases
+by default, so name this one:
+
+```bash
+curl -fsSL https://install.convoypanel.com/5 | sudo bash -s -- --version 5.0.0-alpha.1
+```
 
 Everything in v4.7.0-rc.4, plus:
 
