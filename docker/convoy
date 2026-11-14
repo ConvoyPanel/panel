@@ -1563,8 +1563,6 @@ convoy -- manage a Convoy installation
   convoy support               Send logs and diagnostics to the Convoy team
   convoy version               Show this script's version
 
-The install is /opt/convoy unless CONVOY_DIR says otherwise.
-
 EOF
 }
 
