@@ -20,13 +20,11 @@ corepack_enable: false
 # ext-gmp is required by composer.json. Without it `composer install` fails its
 # platform check -- and `ddev composer` still exits 0, so vendor/ silently stays
 # stale and every artisan call dies on the next platform_check.php.
-#
-# The rest are the shared libraries Playwright's headless Chromium needs, so the
-# e2e specs and screenshots run in this container (Node lives here, not on the
-# host). The browser itself comes from
-# `ddev exec npx playwright install --only-shell chromium`.
 webimage_extra_packages:
   - php8.2-gmp
+  # Shared libraries for Playwright's headless Chromium, so the e2e specs run the
+  # browser in this container (Node lives here, not on the host). The browser
+  # binary itself is installed by `ddev npm run test:e2e:install`.
   - fonts-liberation
   - libasound2t64
   - libatk-bridge2.0-0t64
@@ -71,7 +69,7 @@ web_environment:
   - MAIL_MAILER=smtp
   - MAIL_HOST=localhost
   - MAIL_PORT=1025
-  # Inside the mounted project so the Playwright browser survives `ddev restart`
+  # Inside the mounted project, so the Playwright browser survives `ddev restart`
   # (the container's home directory does not). `npm ci` clears it with node_modules.
   - PLAYWRIGHT_BROWSERS_PATH=/var/www/html/node_modules/.cache/ms-playwright
 
