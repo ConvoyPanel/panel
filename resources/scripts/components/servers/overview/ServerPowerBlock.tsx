@@ -1,20 +1,23 @@
 import { ServerContext } from '@/state/server'
 import useNotify from '@/util/useNotify'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import updateStatus, { PowerAction } from '@/api/server/updateState'
 
 import Button from '@/components/elements/Button'
+import ConfirmationModal from '@/components/elements/ConfirmationModal'
 
 
 const ServerPowerBlock = () => {
     const { t } = useTranslation('server.overview')
-    const { t: tStrings } = useTranslation('strings')
     const uuid = ServerContext.useStoreState(state => state.server.data?.uuid)
+    const name = ServerContext.useStoreState(state => state.server.data?.name)
     const state = ServerContext.useStoreState(state => state.status.data?.state)
     const notify = useNotify()
+    const [confirmingKill, setConfirmingKill] = useState(false)
 
-    const update = (state: PowerAction) => {
+    const update = (state: PowerAction) =>
         updateStatus(uuid!, state)
             .then(() =>
                 notify({
@@ -28,7 +31,6 @@ const ServerPowerBlock = () => {
                     color: 'red',
                 })
             )
-    }
 
     return (
         <div className='grid grid-cols-2 gap-3 xs:gap-0 xs:flex justify-end xs:space-x-3 mb-3'>
@@ -51,7 +53,7 @@ const ServerPowerBlock = () => {
                 color='danger'
                 variant='outline'
                 disabled={!state || state === 'stopped'}
-                onClick={() => update('kill')}
+                onClick={() => setConfirmingKill(true)}
             >
                 {t('power_actions.kill')}
             </Button>
@@ -64,6 +66,14 @@ const ServerPowerBlock = () => {
             >
                 {t('power_actions.shutdown')}
             </Button>
+            <ConfirmationModal
+                open={confirmingKill}
+                title={t('kill_confirmation.title', { name })}
+                description={t('kill_confirmation.description', { name })}
+                confirmLabel={t('power_actions.kill')}
+                onConfirm={() => update('kill')}
+                onClose={() => setConfirmingKill(false)}
+            />
         </div>
     )
 }

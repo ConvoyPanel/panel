@@ -6,14 +6,14 @@ import deleteUser from '@/api/admin/users/deleteUser'
 import useUserSWR from '@/api/admin/users/useUserSWR'
 
 import Button from '@/components/elements/Button'
+import ConfirmationModal from '@/components/elements/ConfirmationModal'
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import FormCard from '@/components/elements/FormCard'
 import MessageBox from '@/components/elements/MessageBox'
 
-
 const DeleteUserContainer = () => {
     const { data: user } = useUserSWR()
-    const [loading, setLoading] = useState(false)
+    const [confirming, setConfirming] = useState(false)
     const { clearFlashes, clearAndAddHttpError } = useFlashKey(
         'admin:user:settings:delete'
     )
@@ -21,7 +21,6 @@ const DeleteUserContainer = () => {
 
     const handleDelete = async () => {
         clearFlashes()
-        setLoading(true)
         try {
             await deleteUser(user!.id)
 
@@ -29,11 +28,18 @@ const DeleteUserContainer = () => {
         } catch (e) {
             clearAndAddHttpError(e as Error)
         }
-        setLoading(false)
     }
 
     return (
         <FormCard className='w-full border-error'>
+            <ConfirmationModal
+                open={confirming}
+                title={`Delete ${user.name}?`}
+                description={`${user.name} (${user.email}) and their data will be deleted. This can't be undone.`}
+                confirmLabel='Delete'
+                onConfirm={handleDelete}
+                onClose={() => setConfirming(false)}
+            />
             <FormCard.Body>
                 <FormCard.Title>Delete User</FormCard.Title>
                 <div className='space-y-3 mt-3'>
@@ -52,9 +58,8 @@ const DeleteUserContainer = () => {
             </FormCard.Body>
             <FormCard.Footer>
                 <Button
-                    loading={loading}
                     disabled={user.serversCount > 0}
-                    onClick={handleDelete}
+                    onClick={() => setConfirming(true)}
                     variant='filled'
                     color='danger'
                     size='sm'
