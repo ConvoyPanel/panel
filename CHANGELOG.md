@@ -13,6 +13,11 @@ follows [Semantic Versioning](https://semver.org) guidelines.
   on a server's overview and Suspend in its admin settings. Each used to act on the first click, and Kill and Suspend
   both cut the server's power without a clean shutdown.
 
+### Fixed
+
+- A failed ISO or location delete now shows the error. It used to be dropped, so nothing seemed to happen and the row
+  stayed put.
+
 ## v5.0.0-alpha.2
 
 Still an alpha: use it for test installs and to rehearse the upgrade from v4, and keep production panels on v4 until

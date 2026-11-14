@@ -29,6 +29,10 @@ const LocationsContainer = () => {
     const { t: tStrings } = useTranslation('strings')
     const [page, setPage] = usePagination()
     const [isCreating, setIsCreating] = useState(false)
+    const [locationToDelete, setLocationToDelete] = useState<Location | null>(
+        null
+    )
+    const [confirmingDelete, setConfirmingDelete] = useState(false)
     const { clearFlashes, clearAndAddHttpError } =
         useFlashKey('admin.locations')
 
@@ -58,36 +62,33 @@ const LocationsContainer = () => {
         },
     ]
 
+    const confirmDelete = (loc: Location) => {
+        setLocationToDelete(loc)
+        setConfirmingDelete(true)
+    }
+
+    const handleDelete = async () => {
+        const loc = locationToDelete!
+        clearFlashes()
+
+        try {
+            await deleteLocation(loc.id)
+
+            mutate(
+                mutateData =>
+                    ({
+                        ...mutateData,
+                        items: mutateData!.items.filter(l => l.id !== loc.id),
+                    }) as LocationResponse,
+                false
+            )
+        } catch (error) {
+            clearAndAddHttpError(error as Error)
+        }
+    }
+
     const rowActions = ({ row: loc }: RowActionsProps<Location>) => {
         const [isEditing, setIsEditing] = useState(false)
-        const [confirming, setConfirming] = useState(false)
-        const [deleting, setDeleting] = useState(false)
-
-        const handleDelete = () => {
-            clearFlashes()
-            setDeleting(true)
-
-            deleteLocation(loc.id)
-                .then(() => {
-                    mutate(
-                        mutateData =>
-                            ({
-                                ...mutateData,
-                                items: mutateData!.items.filter(
-                                    l => l.id !== loc.id
-                                ),
-                            }) as LocationResponse,
-                        false
-                    )
-                })
-                .catch(error => {
-                    clearAndAddHttpError(error)
-                })
-                .finally(() => {
-                    setDeleting(false)
-                    setConfirming(false)
-                })
-        }
 
         return (
             <>
@@ -97,15 +98,6 @@ const LocationsContainer = () => {
                     open={isEditing}
                     onClose={() => setIsEditing(false)}
                 />
-                <ConfirmationModal
-                    open={confirming}
-                    title={`Delete ${loc.shortCode}?`}
-                    description={`The ${loc.shortCode} location is removed from Convoy. This can't be undone.`}
-                    confirmLabel={tStrings('delete')}
-                    loading={deleting}
-                    onConfirm={handleDelete}
-                    onClose={() => setConfirming(false)}
-                />
                 <Actions>
                     <Menu.Item onClick={() => setIsEditing(true)}>
                         {tStrings('edit')}
@@ -114,7 +106,7 @@ const LocationsContainer = () => {
                     <Menu.Item
                         color='red'
                         disabled={loc.nodesCount > 0}
-                        onClick={() => setConfirming(true)}
+                        onClick={() => confirmDelete(loc)}
                     >
                         {tStrings('delete')}
                     </Menu.Item>
@@ -125,7 +117,18 @@ const LocationsContainer = () => {
 
     return (
         <div className='bg-background min-h-screen'>
-            <PageContentBlock title={tStrings('location', { count: 2 }) ?? ''}>
+            <PageContentBlock
+                title={tStrings('location', { count: 2 }) ?? ''}
+                showFlashKey='admin.locations'
+            >
+                <ConfirmationModal
+                    open={confirmingDelete}
+                    title={`Delete ${locationToDelete?.shortCode}?`}
+                    description={`The ${locationToDelete?.shortCode} location is removed from Convoy. This can't be undone.`}
+                    confirmLabel={tStrings('delete')}
+                    onConfirm={handleDelete}
+                    onClose={() => setConfirmingDelete(false)}
+                />
                 <SearchBar
                     value={query}
                     onChange={e => setQuery(e.target.value)}

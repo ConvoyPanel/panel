@@ -47,7 +47,6 @@ const ServerSuspensionCard = () => {
             clearAndAddHttpError(error as any)
         }
         setLoading(false)
-        setConfirming(false)
     }
 
     return (
@@ -61,7 +60,6 @@ const ServerSuspensionCard = () => {
                     name: server.name,
                 })}
                 confirmLabel={t('suspension.suspend')}
-                loading={loading}
                 onConfirm={handle}
                 onClose={() => setConfirming(false)}
             />

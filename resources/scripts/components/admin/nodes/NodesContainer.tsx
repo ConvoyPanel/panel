@@ -10,7 +10,6 @@ import deleteNode from '@/api/admin/nodes/deleteNode'
 import { Node, NodeResponse } from '@/api/admin/nodes/getNodes'
 import useNodesSWR from '@/api/admin/nodes/useNodesSWR'
 
-import ConfirmationModal from '@/components/elements/ConfirmationModal'
 import Menu from '@/components/elements/Menu'
 import PageContentBlock from '@/components/elements/PageContentBlock'
 import Pagination from '@/components/elements/Pagination'
@@ -23,6 +22,7 @@ import Table, {
 
 import SearchBar from '@/components/admin/SearchBar'
 import CreateNodeModal from '@/components/admin/nodes/CreateNodeModal'
+import DeleteNodeModal from '@/components/admin/nodes/DeleteNodeModal'
 
 
 const NodesContainer = () => {
@@ -30,6 +30,8 @@ const NodesContainer = () => {
     const { t } = useTranslation('admin.nodes.index')
     const [page, setPage] = usePagination()
     const [open, setOpen] = useState(false)
+    const [nodeToDelete, setNodeToDelete] = useState<Node | null>(null)
+    const [confirmingDelete, setConfirmingDelete] = useState(false)
     const { clearFlashes, clearAndAddHttpError } =
         useFlashKey('admin.nodes.index')
 
@@ -71,63 +73,46 @@ const NodesContainer = () => {
         },
     ]
 
-    const rowActions = ({ row: node }: RowActionsProps<Node>) => {
-        const [confirming, setConfirming] = useState(false)
-        const [deleting, setDeleting] = useState(false)
-
-        const handleDelete = async () => {
-            clearFlashes()
-            setDeleting(true)
-
-            try {
-                await deleteNode(node.id)
-
-                mutate(
-                    mutateData =>
-                        ({
-                            ...mutateData,
-                            items: mutateData!.items.filter(
-                                n => n.id !== node.id
-                            ),
-                        }) as NodeResponse,
-                    false
-                )
-            } catch (error) {
-                clearAndAddHttpError(error as Error)
-            }
-            setDeleting(false)
-            setConfirming(false)
-        }
-
-        return (
-            <>
-                <ConfirmationModal
-                    open={confirming}
-                    title={`Delete ${node.name}?`}
-                    description={`${node.name}, its ISO library and its templates are removed from Convoy. Nothing changes on the Proxmox node itself. This can't be undone.`}
-                    confirmLabel={tStrings('delete')}
-                    loading={deleting}
-                    onConfirm={handleDelete}
-                    onClose={() => setConfirming(false)}
-                />
-                <Actions>
-                    <Menu.Item
-                        onClick={() => navigator.clipboard.writeText(node.id)}
-                    >
-                        Copy ID
-                    </Menu.Item>
-                    <Menu.Divider />
-                    <Menu.Item
-                        color='red'
-                        disabled={node.serversCount > 0}
-                        onClick={() => setConfirming(true)}
-                    >
-                        {tStrings('delete')}
-                    </Menu.Item>
-                </Actions>
-            </>
-        )
+    const confirmDelete = (node: Node) => {
+        setNodeToDelete(node)
+        setConfirmingDelete(true)
     }
+
+    const handleDelete = async () => {
+        const node = nodeToDelete!
+        clearFlashes()
+
+        try {
+            await deleteNode(node.id)
+
+            mutate(
+                mutateData =>
+                    ({
+                        ...mutateData,
+                        items: mutateData!.items.filter(n => n.id !== node.id),
+                    }) as NodeResponse,
+                false
+            )
+        } catch (error) {
+            clearAndAddHttpError(error as Error)
+        }
+    }
+
+    const rowActions = ({ row: node }: RowActionsProps<Node>) => (
+        <Actions>
+            <Menu.Item onClick={() => navigator.clipboard.writeText(node.id)}>
+                Copy ID
+            </Menu.Item>
+            <Menu.Divider />
+            <Menu.Item
+                color='red'
+                disabled={node.serversCount > 0}
+                onClick={() => confirmDelete(node)}
+            >
+                {tStrings('delete')}
+            </Menu.Item>
+        </Actions>
+    )
 
     return (
         <div className='bg-background min-h-screen'>
@@ -136,6 +121,12 @@ const NodesContainer = () => {
                 showFlashKey='admin.nodes.index'
             >
                 <CreateNodeModal open={open} onClose={() => setOpen(false)} />
+                <DeleteNodeModal
+                    open={confirmingDelete}
+                    name={nodeToDelete?.name ?? ''}
+                    onConfirm={handleDelete}
+                    onClose={() => setConfirmingDelete(false)}
+                />
                 <SearchBar
                     value={query}
                     onChange={e => setQuery(e.target.value)}

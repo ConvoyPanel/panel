@@ -17,7 +17,7 @@ const ServerPowerBlock = () => {
     const notify = useNotify()
     const [confirmingKill, setConfirmingKill] = useState(false)
 
-    const update = (state: PowerAction) => {
+    const update = (state: PowerAction) =>
         updateStatus(uuid!, state)
             .then(() =>
                 notify({
@@ -31,7 +31,6 @@ const ServerPowerBlock = () => {
                     color: 'red',
                 })
             )
-    }
 
     return (
         <div className='grid grid-cols-2 gap-3 xs:gap-0 xs:flex justify-end xs:space-x-3 mb-3'>
@@ -72,10 +71,7 @@ const ServerPowerBlock = () => {
                 title={t('kill_confirmation.title', { name })}
                 description={t('kill_confirmation.description', { name })}
                 confirmLabel={t('power_actions.kill')}
-                onConfirm={() => {
-                    setConfirmingKill(false)
-                    update('kill')
-                }}
+                onConfirm={() => update('kill')}
                 onClose={() => setConfirmingKill(false)}
             />
         </div>

@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import { ReactNode, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import Modal from '@/components/elements/Modal'
@@ -8,28 +8,41 @@ interface Props {
     title: ReactNode
     description: ReactNode
     confirmLabel: ReactNode
-    loading?: boolean
-    onConfirm: () => void
+    onConfirm: () => Promise<unknown>
     onClose: () => void
 }
 
 /**
- * "Are you sure?" before something that can't be undone, such as deleting a
- * user or an ISO, which used to happen on the first click.
+ * Stays open, and can't be dismissed, until the promise from `onConfirm`
+ * settles.
  */
 const ConfirmationModal = ({
     open,
     title,
     description,
     confirmLabel,
-    loading,
     onConfirm,
     onClose,
 }: Props) => {
     const { t: tStrings } = useTranslation('strings')
+    const [loading, setLoading] = useState(false)
+
+    const close = () => {
+        if (!loading) onClose()
+    }
+
+    const confirm = async () => {
+        setLoading(true)
+        try {
+            await onConfirm()
+        } finally {
+            setLoading(false)
+            onClose()
+        }
+    }
 
     return (
-        <Modal open={open} onClose={onClose}>
+        <Modal open={open} onClose={close}>
             <Modal.Header>
                 <Modal.Title>{title}</Modal.Title>
             </Modal.Header>
@@ -37,14 +50,10 @@ const ConfirmationModal = ({
                 <Modal.Description>{description}</Modal.Description>
             </Modal.Body>
             <Modal.Actions>
-                <Modal.Action type='button' onClick={onClose}>
+                <Modal.Action type='button' disabled={loading} onClick={close}>
                     {tStrings('cancel')}
                 </Modal.Action>
-                <Modal.Action
-                    type='button'
-                    loading={loading}
-                    onClick={onConfirm}
-                >
+                <Modal.Action type='button' loading={loading} onClick={confirm}>
                     {confirmLabel}
                 </Modal.Action>
             </Modal.Actions>

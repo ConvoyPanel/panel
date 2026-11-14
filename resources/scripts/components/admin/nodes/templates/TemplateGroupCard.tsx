@@ -53,7 +53,6 @@ const TemplateGroupCard = ({ group, className }: Props) => {
     const [showEditModal, setShowEditModal] = useState(false)
     const [showCreateModal, setShowCreateModal] = useState(false)
     const [confirming, setConfirming] = useState(false)
-    const [deleting, setDeleting] = useState(false)
     const { data: node } = useNodeSWR()
     const { clearFlashes, clearAndAddHttpError } = useFlash()
     const { mutate } = useTemplateGroupsSWR(node.id)
@@ -64,24 +63,16 @@ const TemplateGroupCard = ({ group, className }: Props) => {
     const keyboardSensor = useSensor(KeyboardSensor)
     const sensors = useSensors(mouseSensor, keyboardSensor)
 
-    const handleDelete = () => {
+    const handleDelete = async () => {
         clearFlashes('admin:node:template-groups')
-        setDeleting(true)
 
-        deleteTemplateGroup(node.id, group.uuid)
-            .then(() => {
-                mutate(groups => groups!.filter(g => g.id !== group.id), false)
-            })
-            .catch(error => {
-                clearAndAddHttpError({
-                    key: 'admin:node:template-groups',
-                    error,
-                })
-            })
-            .finally(() => {
-                setDeleting(false)
-                setConfirming(false)
-            })
+        try {
+            await deleteTemplateGroup(node.id, group.uuid)
+
+            mutate(groups => groups!.filter(g => g.id !== group.id), false)
+        } catch (error) {
+            clearAndAddHttpError({ key: 'admin:node:template-groups', error })
+        }
     }
 
     const updateTemplateOrder = (templates: number[]) => {
@@ -192,7 +183,6 @@ const TemplateGroupCard = ({ group, className }: Props) => {
                         title={`Delete ${group.name}?`}
                         description={`${group.name} and its templates are removed from Convoy, so servers can no longer be built or reinstalled from them. The templates on the Proxmox node aren't touched.`}
                         confirmLabel='Delete'
-                        loading={deleting}
                         onConfirm={handleDelete}
                         onClose={() => setConfirming(false)}
                     />

@@ -30,14 +30,12 @@ interface Props {
 const TemplateCard = ({ template, group, className }: Props) => {
     const [showEditModal, setShowEditModal] = useState(false)
     const [confirming, setConfirming] = useState(false)
-    const [deleting, setDeleting] = useState(false)
     const { data: node } = useNodeSWR()
     const { mutate } = useTemplateGroupsSWR(node.id)
     const { clearFlashes, clearAndAddHttpError } = useFlash()
 
     const handleDelete = async () => {
         clearFlashes('admin:node:template-groups')
-        setDeleting(true)
 
         try {
             await deleteTemplate(node.id, group!.uuid, template.uuid)
@@ -62,8 +60,6 @@ const TemplateCard = ({ template, group, className }: Props) => {
         } catch (error) {
             clearAndAddHttpError({ key: 'admin:node:template-groups', error })
         }
-        setDeleting(false)
-        setConfirming(false)
     }
 
     return (
@@ -91,7 +87,6 @@ const TemplateCard = ({ template, group, className }: Props) => {
                         title={`Delete ${template.name}?`}
                         description={`${template.name} is removed from Convoy, so servers can no longer be built or reinstalled from it. The template on the Proxmox node isn't touched.`}
                         confirmLabel='Delete'
-                        loading={deleting}
                         onConfirm={handleDelete}
                         onClose={() => setConfirming(false)}
                     />
