@@ -13,6 +13,23 @@ Stop paying hundreds of dollars for unreliable and slow software. Subscribe to a
 
 ![Screenshot of Convoy](https://imgur.com/GsORIRQ.png)
 
+## Install
+
+Convoy 5 runs as a container image on a dedicated host with Docker:
+
+```bash
+curl -fsSL https://install.convoypanel.com/5 | sudo bash
+```
+
+To upgrade a v4 install, rehearse on a copy of its data first (v4 keeps serving), then run the import for real:
+
+```bash
+curl -fsSL https://install.convoypanel.com/5 | sudo bash -s -- --import /var/www/convoy --dry-run
+convoy import-v4 /var/www/convoy
+```
+
+[docs/deployment.md](docs/deployment.md) covers the options, updating with `convoy upgrade`, and what the import does.
+
 ## Documentation
 
 -   [Panel Documentation](https://docs.convoypanel.com)

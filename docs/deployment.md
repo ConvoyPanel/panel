@@ -10,7 +10,7 @@ Convoy expects to be the only application on the host. It binds ports 80 and
 ## Install
 
 ```bash
-curl -fsSL https://install.convoypanel.com | sudo bash
+curl -fsSL https://install.convoypanel.com/5 | sudo bash
 ```
 
 The installer asks for the hostname customers will reach the panel on and an
@@ -21,7 +21,7 @@ prints a URL and a temporary password.
 Non-interactively:
 
 ```bash
-curl -fsSL https://install.convoypanel.com | sudo bash -s -- \
+curl -fsSL https://install.convoypanel.com/5 | sudo bash -s -- \
   --domain panel.example.com --email you@example.com --yes
 ```
 
@@ -59,7 +59,7 @@ Convoy 5 with one command. Rehearse first: `--dry-run` converts a copy of your
 data and checks it while v4 keeps serving.
 
 ```bash
-curl -fsSL https://install.convoypanel.com | sudo bash -s -- --import /var/www/convoy --dry-run
+curl -fsSL https://install.convoypanel.com/5 | sudo bash -s -- --import /var/www/convoy --dry-run
 convoy import-v4 /var/www/convoy
 ```
 

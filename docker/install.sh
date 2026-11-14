@@ -2,13 +2,13 @@
 #
 # Convoy installer.
 #
-#   curl -fsSL https://install.convoypanel.com | sudo bash
-#   curl -fsSL https://install.convoypanel.com | sudo bash -s -- --domain panel.example.com --email you@example.com
+#   curl -fsSL https://install.convoypanel.com/5 | sudo bash
+#   curl -fsSL https://install.convoypanel.com/5 | sudo bash -s -- --domain panel.example.com --email you@example.com
 #
 # Upgrading a v4 install (rehearse with --dry-run first; v4 keeps serving):
 #
-#   curl -fsSL https://install.convoypanel.com | sudo bash -s -- --import /var/www/convoy --dry-run
-#   curl -fsSL https://install.convoypanel.com | sudo bash -s -- --import /var/www/convoy
+#   curl -fsSL https://install.convoypanel.com/5 | sudo bash -s -- --import /var/www/convoy --dry-run
+#   curl -fsSL https://install.convoypanel.com/5 | sudo bash -s -- --import /var/www/convoy
 #
 # Installs Docker if it is missing, writes /opt/convoy, installs the `convoy`
 # command, starts the stack and creates the first administrator -- or, with
