@@ -58,7 +58,18 @@ jobs:
         env:
           REF: ${{ github.ref }}
         run: |
-          sed -n "/^## ${REF:10}/,/^## /{/^## /b;p}" CHANGELOG.md > ./RELEASE_CHANGELOG
+          # The heading has to match exactly. A sed range on /^## v4.7.0/ also
+          # opened on "## v4.7.0-rc.3" and "## v4.7.0-rc.1", so a release with
+          # several RCs got every other RC's notes appended to its own.
+          awk -v heading="## ${REF:10}" '
+            $0 == heading { found = 1; next }
+            found && /^## / { exit }
+            found { print }
+          ' CHANGELOG.md > ./RELEASE_CHANGELOG
+          if ! grep -q '[^[:space:]]' ./RELEASE_CHANGELOG; then
+            echo "CHANGELOG.md has no notes under '## ${REF:10}'." >&2
+            exit 1
+          fi
           echo "version_name=${REF:10}" >> $GITHUB_OUTPUT
 
       - name: Create Checksum and Add to Changelog
