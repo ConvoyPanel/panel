@@ -5,6 +5,14 @@ This file is a running track of new features and fixes to each version of the pa
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 follows [Semantic Versioning](https://semver.org) guidelines.
 
+## Unreleased
+
+### Fixed
+
+- A server's memory, disk or bandwidth, or a node's memory or disk, above 2,147,483,647 MiB (just under 2 PiB) is
+  rejected with a validation error instead of failing with a server error.
+- Sizes of 1 PiB and more read "PiB" or "EiB" instead of "undefined".
+
 ## v5.0.0-alpha.2
 
 Still an alpha: use it for test installs and to rehearse the upgrade from v4, and keep production panels on v4 until
