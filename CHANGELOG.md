@@ -5,7 +5,11 @@ This file is a running track of new features and fixes to each version of the pa
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 follows [Semantic Versioning](https://semver.org) guidelines.
 
-## v4.7.0-rc.5
+## v4.7.0
+
+Includes everything in [v4.6.2](https://github.com/ConvoyPanel/panel/releases/tag/v4.6.2), the security release cut
+from v4.6.1. A panel not yet on v4.6.2 or v4.7.0-rc.4 also gets its upgrade from MySQL 8.0 to 8.4, which happens the
+first time the panel starts and can't be undone, so back up before updating.
 
 ### Added
 
@@ -15,6 +19,13 @@ follows [Semantic Versioning](https://semver.org) guidelines.
   field. **Admin → Settings → Telemetry** turns it off, which also asks the console to erase what it already holds, and
   "View report" shows the exact JSON the next report sends. `CONVOY_TELEMETRY_ENABLED=false`, or an empty
   `CONVOY_TELEMETRY_URL` for a panel without internet access, turns it off from the environment.
+- A server whose installation failed can now be retried. The "Install failed" screen was a dead end that only said to
+  contact an administrator; it now offers the reinstall form, and the API accepts a reinstall for a server in that
+  state. Every other blocked state, such as suspended, still refuses it.
+- The "Installing", "Restoring Backup" and "Restoring Snapshot" screens now update by themselves. They check the
+  server every few seconds and move on once the work is done, with a spinning icon to show they're live; before, they
+  stayed put until the page was refreshed. A server deleted or disconnected in the meantime shows "Server not found",
+  and a signed-out browser goes to the sign-in page.
 
 ### Removed
 
@@ -24,8 +35,8 @@ follows [Semantic Versioning](https://semver.org) guidelines.
 
 ### Security
 
-- Caddy no longer sends a `Via: 0.0 Caddy` header. Caddy 2.11, new in v4.7.0-rc.4, adds it to every response PHP
-  serves, so the panel still named its web server after the `Server` header was removed.
+- Caddy no longer sends a `Via: 0.0 Caddy` header. Caddy 2.11, new in v4.6.2, adds it to every response PHP serves, so
+  the panel still named its web server after the `Server` header was removed.
 - The bundle size report, `stats.html`, is no longer built into `public/`, where every panel served it to anyone. It
   listed the frontend's dependencies and their versions. Every release since v2.0.0 shipped it, and updating extracts
   the new archive over the old one without deleting anything, so the php container now deletes `public/stats.html`
@@ -33,10 +44,22 @@ follows [Semantic Versioning](https://semver.org) guidelines.
 
 ### Changed
 
+- Deleting a server and keeping its virtual machine are now separate actions. **Delete** always removes everything --
+  backups (including locked ones), the virtual machine on the node, and the server's entry in Convoy -- and when the
+  virtual machine is already gone from the node, it simply removes the Convoy entry. **Disconnect**, a new button next
+  to it, replaces the "Do not purge VM and related files" checkbox: it removes the server from Convoy and leaves the
+  virtual machine and its backups on the node. The API is unchanged; `DELETE` with `no_purge` still disconnects.
+- The admin overview's Attention card now names what needs attention instead of reporting a bare count, and every row
+  links to the record itself -- a failed server to its admin page, a failed backup to its server's backups tab. Groups
+  holding several records open a sheet listing them, capped at the 25 most recent with a note saying how many more
+  there are. Previously the card showed only a failed-server count while its caption mixed in failed backups and
+  servers mid-delete, so it could read "0" with backups broken, and its link went to the unfiltered server list either
+  way. Suspended and mid-delete servers are deliberately left off it: neither is a failure, and both are already
+  counted under Server State.
 - Redis keeps its data in `dockerfiles/redis/data`, next to MySQL's. The `redis:7.0-alpine` image declared a volume for
-  it and `redis:8-alpine` doesn't, so since v4.7.0-rc.4 Redis started empty whenever its container was recreated: an
-  update signed every user out and dropped jobs still waiting in the queue, which could leave a server on "Installing"
-  for good. Data Redis held before this release isn't carried over, so this one update still signs everyone out.
+  it and `redis:8-alpine` doesn't, so since v4.6.2 Redis started empty whenever its container was recreated: an update
+  signed every user out and dropped jobs still waiting in the queue, which could leave a server on "Installing" for
+  good. Data Redis held before this release isn't carried over, so this one update still signs everyone out.
 - An error from a node now says what went wrong instead of "Server Error". A node the panel can't reach at all says so
   ("Couldn't connect to the node..."), without its address, and an error Proxmox answered with is shown as Proxmox
   worded it ("Proxmox returned 500: ..."). Both respond with `502`.
@@ -53,41 +76,78 @@ follows [Semantic Versioning](https://semver.org) guidelines.
 
 ### Fixed
 
-- Fixed the "Installing", "Restoring Backup" and "Restoring Snapshot" screens polling forever once their server was
-  gone or the session had ended. A deleted or disconnected server now shows "Server not found", and a signed-out
-  browser goes to the sign-in page.
-- Fixed "Retry Installation" looking like it did nothing when the reinstall failed: the confirmation stayed open over
-  the error. It now closes, and the error shows on the card.
+- Fixed a server's jobs getting permanently stuck after one slow request to Proxmox. The locks that keep two jobs of the
+  same kind from running on a server at once never expired, so a job the queue killed for running past its time limit
+  left its lock behind for good: every later job of that kind for the server -- including the force-stop that reinstall
+  and delete start with -- failed instantly until the lock was cleared from Redis by hand. Locks now expire shortly
+  after their job's time limit, a job that finds one held waits and retries, and the power and password jobs' time
+  limits no longer fall below a single Proxmox request.
+- Fixed failing jobs retrying with no pause. A job whose request to Proxmox failed was retried at once, again and
+  again, until it ran out of time -- thousands of requests a minute against a node that was already struggling. Jobs
+  now wait a few seconds, then longer, between retries.
+- Fixed a disk resize during server build failing without anything noticing, leaving the guest at its template's disk
+  size rather than the one the plan asks for. Proxmox answers a resize by forking a worker and returning its task ID,
+  which Convoy discarded, so the build reported success whatever became of the resize. It now waits for the task, and
+  retries one that failed with a timeout -- Proxmox runs `qemu-img` under a fixed 10 second limit, which a resize
+  issued right after a full clone can exceed on slower storage.
+- Fixed adopting an existing virtual machine (Create Server with "Should Create VM" off). The form demanded an OS
+  password it doesn't need, and the request then failed with a 500 ("Attempt to read property "name" on null") after
+  creating the server, which was left behind as Ready and never synced. Creating a server is now one transaction whose
+  jobs are queued once it commits, so a failure leaves nothing behind. The template rule also checked a field that
+  doesn't exist (`create_server`), so a new VM was accepted without a template.
+- Fixed reinstalling a server whose VM no longer exists failing every time. Reinstall stopped and deleted the old VM
+  first, and Proxmox answers both with "does not exist" when a previous install died before or during the clone. It
+  now skips straight to building when there is no VM.
+- Fixed reinstalling a server while its node couldn't be reached being taken as "there's no VM": the reinstall then
+  skipped removing the old VM and failed later on its taken VMID. It now fails straight away with the node's error, so
+  it can just be retried.
+- Fixed a failed reinstall of an already-failed server staying on "Installing" forever instead of going back to
+  "Install failed". The failure handler wrote through the copy of the server captured when the reinstall started, and
+  when that copy already read "install_failed" the write was skipped as a no-op.
+- Fixed deleting a server failing, over and over, when its virtual machine was already gone from the node or it had a
+  locked backup. A failed delete can now also be retried, or the server disconnected, straight from the "Failed to
+  Delete" screen, and a server stuck on "Deleting" can be disconnected.
+- Fixed a delete treating any error from Proxmox as "the virtual machine is gone". Only Proxmox's own "does not exist"
+  counts now, so a node that is briefly unreachable can no longer get a server removed from Convoy while its virtual
+  machine keeps running.
+- Fixed every error from Proxmox filling the log with three copies of the same stack trace -- about 256 lines per error,
+  every few seconds while a page polled a server whose VM was gone. An error is now logged once, with one trace, and its
+  message is Proxmox's own ("Proxmox returned 500: Configuration file ... does not exist").
+- Fixed opening a server that has been deleted showing "Something went wrong" with "No query results for model
+  [Convoy\Models\Server]". It now shows "Server not found" with a way back to the server list, and the API names a
+  missing record in plain words ("This server could not be found. It may have been deleted."). Deleted nodes and users
+  in the admin area, which used to break the page outright, now get the same screen.
+- Fixed a server's Overview showing "Running" after the server was deleted or suspended. It now switches to "Server not
+  found", or to the screen for the server's new status, and a signed-out browser goes to the sign-in page.
+- Fixed the admin "Deleting" screen never moving on. It now goes to "Failed to Delete" if the delete fails, and back to
+  the server list once the server is gone.
 - Fixed the error from a failed delete being squeezed into the Delete Server card's footer next to its buttons, and
   touching the "Restore Access" button on the "Failed to Delete" screen.
-- Fixed the admin overview's Attention card reading "27 servers failed -- bulk-fail-27, bulk-fail-26, bulk-fail-2...
-  and 2 more": "more" counted only past the 25 records the card loads, while the names were cut off after two or
-  three. It now names two servers (one on a phone) and counts the rest.
 - Fixed MySQL and Redis never reporting healthy, and `docker compose up -d` failing, when their password contains a
   space, as the install guide's example password does.
 - Fixed `laravel.log` being rotated only when the workers container started. supervisord ran logrotate as a
   long-running program, gave up on it after it exited a few times, and never ran it again.
 - Fixed a signed-out request to the API without `Accept: application/json` failing with a 500 (`Route [login] not
   defined`). It gets a `401` in JSON.
-- Fixed adopting an existing virtual machine (Create Server with "Should Create VM" off). The form demanded an OS
-  password it doesn't need, and the request then failed with a 500 ("Attempt to read property "name" on null") after
-  creating the server, which was left behind as Ready and never synced. Creating a server is now one transaction whose
-  jobs are queued once it commits, so a failure leaves nothing behind. The template rule also checked a field that
-  doesn't exist (`create_server`), so a new VM was accepted without a template.
-- Fixed a server's Overview showing "Running" after the server was deleted or suspended. It now switches to "Server not
-  found", or to the screen for the server's new status, and a signed-out browser goes to the sign-in page.
-- Fixed the admin "Deleting" screen never moving on. It now goes to "Failed to Delete" if the delete fails, and back to
-  the server list once the server is gone.
 - Fixed the backup list keeping a new backup's spinner and "0 Bytes" until the page was reloaded. It refreshes while a
   backup is running.
+- Fixed modals taller than the browser window clipping their own header and submit row with no way to scroll to them.
+  The panel is now bounded by the viewport and its body scrolls within it, so Create Server and Create Node stay usable
+  at shorter window heights.
+- Fixed opening a modal leaving keyboard focus behind it, which sent the first few Tab presses through the page
+  underneath instead of the dialog.
 - Fixed Escape in an open multi-select, such as Create Pool's Nodes, closing the whole dialog and losing the form. It
   closes the list; a second Escape closes the dialog.
+- Fixed the create-server form requesting addresses and template groups before a node is chosen, producing a handful of
+  404s every time the modal opened.
 - Fixed the Create Server user picker not finding a user by email, and the user search matching an email only in full
   and a name only when typed in lower case.
 - Fixed a new user not appearing in the admin user list until the page was reloaded.
 - Fixed IPAM pages requesting `/api/admin/address-pools/-1/attached-nodes` and getting a 404 on every load.
 - Fixed the IPAM pool page's breadcrumb linking to `/admin/ipam/undefined`.
 - Fixed uptime reading "1 minutes".
+- Fixed modals going out without an accessible name, so a screen reader announced only "dialog" instead of reading the
+  heading already on screen.
 - Fixed the "+" button that replaces "Create ..." on a phone, the row menus, the dark mode switch and the boot order's
   add, remove and drag buttons having no name a screen reader could announce.
 
