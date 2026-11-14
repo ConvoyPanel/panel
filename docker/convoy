@@ -9,10 +9,8 @@
 #
 # Two commands do more than wrap: `import-v4` moves a v4 install (MySQL,
 # /var/www/convoy) onto this one, and `support` collects a redacted bundle of
-# logs and diagnostics for the Convoy team. `support` also works on a v4 host,
-# which is why this file is attached to every release on its own:
-#
-#   curl -fsSLo /usr/local/bin/convoy https://github.com/ConvoyPanel/panel/releases/latest/download/convoy
+# logs and diagnostics for the Convoy team. Every command needs a Convoy 5
+# install; a v4 host gets one, and this command, from install.sh --import.
 
 set -euo pipefail
 
@@ -26,7 +24,7 @@ CONVOY_SUPPORT_URL="${CONVOY_SUPPORT_URL:-https://convoypanel.com}"
 CONVOY_PGLOADER_IMAGE="${CONVOY_PGLOADER_IMAGE:-ghcr.io/dimitri/pgloader@sha256:a1d4a78e78a64e46cd3fc7dfc57d24eb91ffb1a5520f2b1f55631815e3658d6e}"
 CONVOY_MYSQL_IMAGE="${CONVOY_MYSQL_IMAGE:-mysql:8.4}"
 
-# Where a 5.x install lives, and where a v4 one usually does.
+# Where a 5.x install lives, and where import-v4 looks for v4 by default.
 DEFAULT_DIR=/opt/convoy
 DEFAULT_V4_DIR=/var/www/convoy
 
@@ -134,34 +132,22 @@ layout_of() {
 }
 
 INSTALL_DIR=""
-LAYOUT=""
-APP_SERVICE=""
 
-# Sets INSTALL_DIR, LAYOUT and APP_SERVICE. An explicit directory (--dir, or
-# CONVOY_DIR in the environment) is used as given; otherwise a 5.x install in
-# /opt/convoy wins over a v4 one in /var/www/convoy.
+# Sets INSTALL_DIR to the Convoy 5 install in DIR, else CONVOY_DIR, else
+# /opt/convoy, and moves into it. v4 installs are refused: nothing here but
+# import-v4 works on them, and that one reads v4 through V4_DIR.
 use_install() {
-    local dir="${1:-${CONVOY_DIR:-}}"
-    if [[ -z "$dir" ]]; then
-        if [[ -n "$(layout_of "$DEFAULT_DIR")" ]]; then
-            dir="$DEFAULT_DIR"
-        elif [[ -n "$(layout_of "$DEFAULT_V4_DIR")" ]]; then
-            dir="$DEFAULT_V4_DIR"
-        else
-            die "no Convoy install found in $DEFAULT_DIR or $DEFAULT_V4_DIR (pass --dir or set CONVOY_DIR)."
-        fi
-    fi
-    LAYOUT="$(layout_of "$dir")"
-    [[ -n "$LAYOUT" ]] || die "$dir does not look like a Convoy install (no compose.yml or docker-compose.yml with Convoy's services)."
+    local dir="${1:-${CONVOY_DIR:-$DEFAULT_DIR}}"
+    case "$(layout_of "$dir")" in
+        5.x) ;;
+        v4)  die "$dir is a v4 install. This command needs Convoy 5; see 'convoy import-v4'." ;;
+        *)   die "no Convoy 5 install in $dir (set CONVOY_DIR if it is somewhere else)." ;;
+    esac
     INSTALL_DIR="$(cd "$dir" && pwd)"
-    if [[ "$LAYOUT" == "5.x" ]]; then APP_SERVICE=web; else APP_SERVICE=php; fi
     cd "$INSTALL_DIR"
 }
 
-require_5x() {
-    use_install "${CONVOY_DIR:-$DEFAULT_DIR}"
-    [[ "$LAYOUT" == "5.x" ]] || die "$INSTALL_DIR is a v4 install. This command needs Convoy 5; see 'convoy import-v4'."
-}
+require_5x() { use_install ""; }
 
 compose() { docker compose "$@"; }
 
@@ -172,7 +158,7 @@ tty_flags() {
 }
 
 app_running() {
-    [[ -n "$(compose ps -q --status running "$APP_SERVICE" 2>/dev/null)" ]]
+    [[ -n "$(compose ps -q --status running web 2>/dev/null)" ]]
 }
 
 # Sets APP_CMD to the command that runs something in the app container, or in a
@@ -183,9 +169,9 @@ APP_CMD=()
 app_cmd() {
     local flag="$1"
     if app_running; then
-        APP_CMD=(docker compose exec "$flag" "$APP_SERVICE")
+        APP_CMD=(docker compose exec "$flag" web)
     else
-        APP_CMD=(docker compose run --rm --no-deps "$flag" --entrypoint /usr/bin/env "$APP_SERVICE")
+        APP_CMD=(docker compose run --rm --no-deps "$flag" --entrypoint /usr/bin/env web)
     fi
 }
 
@@ -466,7 +452,7 @@ support_host_json() {
 compose_services() {
     awk '/^services:/ { in_services = 1; next }
          /^[^[:space:]#]/ { in_services = 0 }
-         in_services && /^  [a-z0-9][a-z0-9_.-]*:[[:space:]]*$/ { sub(/^  /, ""); sub(/:.*/, ""); print }' "$(compose_file)"
+         in_services && /^  [a-z0-9][a-z0-9_.-]*:[[:space:]]*$/ { sub(/^  /, ""); sub(/:.*/, ""); print }' "$INSTALL_DIR/compose.yml"
 }
 
 # One manifest entry per service in the compose file, created or not.
@@ -494,10 +480,6 @@ support_containers_json() {
             "$(json_str_or_null "${started:+${started}Z}")"
     done
     printf '\n    ]'
-}
-
-compose_file() {
-    if [[ "$LAYOUT" == "5.x" ]]; then echo "$INSTALL_DIR/compose.yml"; else echo "$INSTALL_DIR/docker-compose.yml"; fi
 }
 
 # Runs a diagnostic through APP_CMD into FILE. Text diagnostics keep whatever
@@ -600,7 +582,7 @@ cmd_support() {
 
     redact_init "$INSTALL_DIR/.env"
 
-    info "collecting from the $LAYOUT install in $INSTALL_DIR"
+    info "collecting from $INSTALL_DIR"
 
     # Container logs.
     local service
@@ -614,32 +596,26 @@ cmd_support() {
         cap_file "$raw/logs/$service.log"
     done
 
-    # Laravel log files: on disk for v4, inside the storage volume for 5.x.
+    # Laravel log files in the storage volume. The image logs to stderr, so
+    # these are only there if someone changed LOG_CHANNEL.
     local f name
-    if [[ "$LAYOUT" == "v4" ]]; then
-        for f in "$INSTALL_DIR"/storage/logs/*.log; do
-            [[ -f "$f" ]] || continue
-            name="$(basename "$f" .log)"
-            valid_bundle_name "$name" || continue
-            tail -c "$SUPPORT_LOG_CAP" "$f" > "$raw/logs/storage/$name.log"
-        done
-    elif app_running; then
+    if app_running; then
         # shellcheck disable=SC2016 # expanded inside the container
-        compose exec -T "$APP_SERVICE" sh -c 'cd storage/logs 2>/dev/null || exit 0; ls -t -- *.log 2>/dev/null | head -20' < /dev/null 2>/dev/null \
+        compose exec -T web sh -c 'cd storage/logs 2>/dev/null || exit 0; ls -t -- *.log 2>/dev/null | head -20' < /dev/null 2>/dev/null \
             | while IFS= read -r f; do
                 name="${f%.log}"
                 valid_bundle_name "$name" || continue
-                compose exec -T "$APP_SERVICE" tail -c "$SUPPORT_LOG_CAP" "storage/logs/$f" < /dev/null > "$raw/logs/storage/$name.log" 2>/dev/null || rm -f "$raw/logs/storage/$name.log"
+                compose exec -T web tail -c "$SUPPORT_LOG_CAP" "storage/logs/$f" < /dev/null > "$raw/logs/storage/$name.log" 2>/dev/null || rm -f "$raw/logs/storage/$name.log"
             done
     else
         support_skip "logs/storage" "web container not running"
     fi
     for f in "$raw"/logs/storage/*.log; do [[ -f "$f" ]] && cap_file "$f"; done
 
-    # The newest import-v4 log, from this install or the 5.x one beside it.
+    # The newest import-v4 log, which is how a failed upgrade from v4 reaches us.
     local import_log
     # shellcheck disable=SC2012 # our own file names, newest first
-    import_log="$(ls -t "$INSTALL_DIR"/backups/import-v4-*.log "$DEFAULT_DIR"/backups/import-v4-*.log 2>/dev/null | head -1 || true)"
+    import_log="$(ls -t "$INSTALL_DIR"/backups/import-v4-*.log 2>/dev/null | head -1 || true)"
     if [[ -n "$import_log" ]]; then
         tail -c "$SUPPORT_LOG_CAP" "$import_log" > "$raw/upgrade/import-v4.log"
     fi
@@ -652,15 +628,11 @@ cmd_support() {
     support_diagnostic diagnostics/migrate-status.txt "$raw/diagnostics/migrate-status.txt" php artisan migrate:status --no-ansi
     support_diagnostic diagnostics/failed-jobs.json "$raw/diagnostics/failed-jobs.json" env HOME=/tmp php artisan tinker --execute "$(support_failed_jobs_php)"
 
-    # Panel version: what the app says, else the image tag or the v4 tree.
+    # Panel version: what the app says, else the image tag.
     local panel=""
     panel="$(timeout 60 "${APP_CMD[@]}" env HOME=/tmp php artisan tinker --execute 'echo config("app.version"), PHP_EOL;' < /dev/null 2>/dev/null | tr -d '\r' | grep -v '^$' | tail -1 || true)"
     if [[ -z "$panel" || ! "$panel" =~ ^[A-Za-z0-9._+-]+$ ]]; then
-        if [[ "$LAYOUT" == "5.x" ]]; then
-            panel="$(compose config --images 2>/dev/null | grep -m1 -E '/panel:' | sed 's/.*://' || true)"
-        else
-            panel="$(panel_version_from_tree "$INSTALL_DIR/config/app.php")"
-        fi
+        panel="$(compose config --images 2>/dev/null | grep -m1 -E '/panel:' | sed 's/.*://' || true)"
     fi
 
     # Settings and the manifest.
@@ -681,7 +653,7 @@ cmd_support() {
         printf '    "schema": 1,\n'
         printf '    "collector": %s,\n' "$(json_str "$CONVOY_CLI_VERSION")"
         printf '    "panel": %s,\n' "$(json_str_or_null "$panel")"
-        printf '    "layout": %s,\n' "$(json_str "$LAYOUT")"
+        printf '    "layout": "5.x",\n'
         printf '    "collected_at": %s,\n' "$(json_str "$collected_at")"
         printf '    "since": %s,\n' "$(json_str "$since")"
         printf '    "host": %s,\n' "$(support_host_json)"
@@ -955,8 +927,8 @@ asks before uploading. You get a link to share and a private manage link.
                        (anyone with the link and a password) or public
   --password-stdin     read the password for --visibility password from stdin
   --yes                upload without asking
-  --dir <path>         the install to collect from (default: /opt/convoy, or a
-                       v4 install in /var/www/convoy)
+  --dir <path>         the install to collect from (default: CONVOY_DIR, else
+                       /opt/convoy)
 
 EOF
 }

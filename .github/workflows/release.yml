@@ -74,8 +74,8 @@ jobs:
 
           tar --exclude=panel.tar.gz -czf panel.tar.gz * "${files_to_include[@]}"
 
-          # Attached on its own so a v4 host can fetch it with one curl to run
-          # `convoy support` or `convoy import-v4`.
+          # Attached on its own: install.sh installs this stamped copy as
+          # /usr/local/bin/convoy.
           install -m 755 docker/convoy convoy
 
       - name: Extract Changelog

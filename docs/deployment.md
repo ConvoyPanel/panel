@@ -158,14 +158,15 @@ them.
 `convoy support` collects the container logs, a few diagnostics and details
 about the host into `/opt/convoy/backups/support`, removes secrets from them,
 shows you what it collected, and asks who may open it before uploading it to
-the Convoy team. You get a link to paste in Discord or a GitHub issue. It works
-on a v4 install too:
+the Convoy team. You get a link to paste in Discord or a GitHub issue.
 
 ```bash
-curl -fsSLo /usr/local/bin/convoy https://github.com/ConvoyPanel/panel/releases/latest/download/convoy
-chmod +x /usr/local/bin/convoy
 convoy support
 ```
+
+It needs Convoy 5, so a v4 install upgrades first. If the upgrade itself fails,
+run `convoy support` all the same: the installer has already set up
+`/opt/convoy` and the command, and the upload includes the import's log.
 
 What it collects and removes is documented in
 [support-bundle.md](support-bundle.md). `--no-upload` writes the archive and

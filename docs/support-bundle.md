@@ -18,8 +18,8 @@ that doesn't exist: the bundle leaves it out and says so in the manifest rather 
 
 - **Containers**: `docker compose ps --format json`, and each service's logs since `--since` (default 48
   hours), the last 5 MiB per service, with Docker's timestamps.
-- **Log files**: `storage/logs/*.log` when the install has them (v4 writes `laravel.log`, `horizon.log` and
-  `scheduler.log`; 5.x logs to stderr, so these are usually absent). Last 5 MiB each.
+- **Log files**: `storage/logs/*.log` from the web container when there are any (the image logs to stderr,
+  so these are usually absent). Last 5 MiB each.
 - **Upgrade**: the newest `convoy import-v4` log (pgloader output and the row-count comparison), if any.
 - **Host**: OS release, kernel, architecture, CPU count, memory and swap, free disk for the install
   directory and for Docker's root, Docker and Compose versions.
@@ -228,8 +228,8 @@ upgrade/import-v4.log
 |---|---|
 | `schema` | `1`. |
 | `collector` | Version of the `convoy` script that made the bundle. |
-| `panel` | `config('app.version')` if a diagnostic could read it, else the image tag or the v4 `config/app.php` value, else `null`. |
-| `layout` | `5.x` (compose.yml with `web`, `worker`, `scheduler`, `postgres`, `redis`) or `v4` (docker-compose.yml with `php`, `workers`, `caddy`, `database`, `redis`). |
+| `panel` | `config('app.version')` if a diagnostic could read it, else the image tag, else `null`. |
+| `layout` | Always `5.x` (compose.yml with `web`, `worker`, `scheduler`, `postgres`, `redis`). `convoy support` refuses a v4 install; v4 upgrades first. |
 | `collected_at` | UTC, when collection started. |
 | `since` | The window the container logs cover, as passed to `docker compose logs --since`. |
 | `host` | As above. Any field may be `null` when it can't be read. No hostname or IP addresses. |
