@@ -59,7 +59,8 @@ first time the panel starts and can't be undone, so back up before updating.
 - Redis keeps its data in `dockerfiles/redis/data`, next to MySQL's. The `redis:7.0-alpine` image declared a volume for
   it and `redis:8-alpine` doesn't, so since v4.6.2 Redis started empty whenever its container was recreated: an update
   signed every user out and dropped jobs still waiting in the queue, which could leave a server on "Installing" for
-  good. Data Redis held before this release isn't carried over, so this one update still signs everyone out.
+  good. Data Redis held before this release isn't carried over, so this update signs everyone out one last time, and
+  updates after it keep everyone signed in.
 - An error from a node now says what went wrong instead of "Server Error". A node the panel can't reach at all says so
   ("Couldn't connect to the node..."), without its address, and an error Proxmox answered with is shown as Proxmox
   worded it ("Proxmox returned 500: ..."). Both respond with `502`.
