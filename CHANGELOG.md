@@ -10,7 +10,8 @@ follows [Semantic Versioning](https://semver.org) guidelines.
 ### Fixed
 
 - A backup created through the API with `"is_locked": true` is locked. The request checked `is_locked` but read
-  `locked`, so the backup came out unlocked. `locked` is still accepted.
+  `locked`, so the backup came out unlocked. The request now takes only `is_locked`, the column's name; `locked` is
+  ignored.
 
 ## v4.7.1-rc.2
 
