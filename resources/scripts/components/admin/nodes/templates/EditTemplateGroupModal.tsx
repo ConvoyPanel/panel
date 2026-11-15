@@ -34,8 +34,8 @@ const EditTemplateGroupModal = ({ open, onClose, group }: Props) => {
         validationSchema: yup.object({
             name: yup
                 .string()
-                .required('Specify a name')
-                .max(40, 'Please limit up to 40 characters'),
+                .required('Required')
+                .max(40, 'Must be at most 40 characters'),
             hidden: yup.boolean(),
         }),
         onSubmit: (values, { setSubmitting }) => {
@@ -102,7 +102,7 @@ const EditTemplateGroupModal = ({ open, onClose, group }: Props) => {
         <Modal open={open} onClose={handleClose}>
             <Modal.Header>
                 <Modal.Title>
-                    {group ? 'Edit' : 'New'} Template Group
+                    {group ? 'Edit' : 'Create'} Template Group
                 </Modal.Title>
             </Modal.Header>
 

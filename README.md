@@ -22,7 +22,7 @@ rehearse your upgrade, and keep production panels on v4 until 5.0 is released. U
 curl -fsSL https://install.convoypanel.com/5 | sudo bash -s -- --version 5.0.0-alpha.3
 ```
 
-To upgrade a v4 install, rehearse on a copy of its data first (v4 keeps serving), then run the import for real:
+To upgrade a v4 install, test the import on a copy of its data first (v4 stays online), then run it for real:
 
 ```bash
 curl -fsSL https://install.convoypanel.com/5 | sudo bash -s -- --version 5.0.0-alpha.3 --import /var/www/convoy --dry-run

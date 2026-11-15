@@ -83,7 +83,7 @@ Last, it asks for consent, worded for the choice:
 
 > Only the Convoy team can open these logs. They're deleted after 30 days. Upload? [y/N]
 
-> Anyone with this link can open these logs. Secrets are removed, but the logs still show your panel's
+> Anyone with the link can open these logs. Secrets are removed, but the logs still show your panel's
 > address, the IP addresses of people who used it, your nodes' addresses, and occasionally a customer's
 > email. Upload? [y/N]
 

@@ -3,13 +3,13 @@
 return [
     'create_node' => 'Create Node',
     'create_modal' => [
-        'title' => 'Create a Node',
+        'title' => 'Create Node',
     ],
 
     'location_group' => 'Location Group',
-    'pve_name' => 'Node Name In Proxmox',
-    'override_creds' => 'Override credentials',
-    'creds_warning' => 'Please disable privilege separation and grant root privileges.',
+    'pve_name' => 'Proxmox Node Name',
+    'override_creds' => 'Leave blank to keep the current one',
+    'creds_warning' => 'Disable privilege separation on this API token and give it root privileges.',
     'token_id' => 'Token ID',
     'secret' => 'Secret',
     'memory_allocation' => 'Memory Allocation',
@@ -21,20 +21,19 @@ return [
     'iso_storage' => 'ISO Storage',
 
     'create_template_modal' => [
-        'title' => 'Create a Template',
+        'title' => 'Create Template',
     ],
-    'new_template' => 'New Template',
+    'new_template' => 'Create Template',
     'create_template_group_modal' => [
-        'title' => 'Create a Template Group',
+        'title' => 'Create Template Group',
     ],
-    'new_template_group' => 'New Template Group',
+    'new_template_group' => 'Create Template Group',
 
     'node_info' => [
         'title' => 'Node Information',
     ],
     'delete_node' => [
         'title' => 'Delete Node',
-        'description' => 'The node will be permanently deleted from Convoy. This action is irreversible and can not be undone.',
-        'has_servers_error' => 'You cannot delete a node that has servers assigned to it.',
+        'has_servers_error' => 'Delete or disconnect this node\'s servers first.',
     ],
 ];

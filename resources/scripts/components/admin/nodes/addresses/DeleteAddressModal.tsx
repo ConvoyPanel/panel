@@ -54,7 +54,7 @@ const DeleteAddressModal = ({open, onClose, address}: Props) => {
     return (
             <Modal open={open} onClose={onClose}>
                 <Modal.Header>
-                    <Modal.Title>Delete Address</Modal.Title>
+                    <Modal.Title>Delete {address.address}?</Modal.Title>
                 </Modal.Header>
                 <FormikProvider value={form}>
                     <form onSubmit={form.handleSubmit}>
@@ -65,8 +65,8 @@ const DeleteAddressModal = ({open, onClose, address}: Props) => {
                             />
 
                             <Modal.Description>
-                                Are you sure you want to delete this address? This
-                                action cannot be undone.
+                                Deleting this address also removes it from any
+                                server it's assigned to.
                             </Modal.Description>
                         </Modal.Body>
                         <Modal.Actions>

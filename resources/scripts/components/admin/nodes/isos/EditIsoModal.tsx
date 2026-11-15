@@ -31,7 +31,7 @@ const EditIsoModal = ({ open, onClose, iso }: Props) => {
             hidden: iso.hidden,
         },
         validationSchema: yup.object().shape({
-            name: yup.string().required('Name is required.'),
+            name: yup.string().required('Required'),
             hidden: yup.boolean(),
         }),
         onSubmit: ({ name, hidden }, { setSubmitting }) => {
@@ -70,7 +70,7 @@ const EditIsoModal = ({ open, onClose, iso }: Props) => {
     return (
         <Modal open={open} onClose={handleClose}>
             <Modal.Header>
-                <Modal.Title>Update ISO</Modal.Title>
+                <Modal.Title>Edit ISO</Modal.Title>
             </Modal.Header>
 
             <FormikProvider value={form}>

@@ -53,8 +53,8 @@ certificate is obtained automatically over ACME and renewed without further
 action. Certificates are stored in a volume, so they survive upgrades.
 
 If you give it an IP address, the panel serves a self-signed certificate and
-browsers will warn on first visit: certificate authorities do not issue for
-bare IPs. Point a domain at the host and re-run with `--domain` to fix this.
+browsers show a warning. For a trusted certificate, point a domain at the host
+and run the installer again with `--domain`.
 
 To terminate TLS somewhere else instead, set `CONVOY_AUTO_HTTPS=off` and put your
 proxy in front, then set `TRUSTED_PROXIES` in `/opt/convoy/.env` to its address.
@@ -63,8 +63,8 @@ Otherwise every client appears to Convoy as the proxy.
 ## Upgrading from v4
 
 A v4 install (built from source in `/var/www/convoy`, on MySQL) moves onto
-Convoy 5 with one command. Rehearse first: `--dry-run` converts a copy of your
-data and checks it while v4 keeps serving.
+Convoy 5 with one command. Test it first: `--dry-run` converts a copy of the
+data and checks it while v4 stays online.
 
 ```bash
 curl -fsSL https://install.convoypanel.com/5 | sudo bash -s -- --import /var/www/convoy --dry-run

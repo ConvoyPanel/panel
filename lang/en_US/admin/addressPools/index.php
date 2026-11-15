@@ -4,11 +4,11 @@ return [
     'create_pool' => 'Create Pool',
     'delete_modal' => [
         'title' => 'Delete :name?',
-        'description' => 'Are you sure you want to delete this pool?',
-        'nodes_linked_error' => 'This pool cannot be deleted until all nodes are unlinked.'
+        'description' => 'Deleting this pool also deletes all of its addresses.',
+        'nodes_linked_error' => 'Unlink all nodes from this pool before deleting it.'
     ],
     'edit_modal' => [
-      'title' => 'Editing :name',
+      'title' => 'Edit :name',
     ],
-    'nodes_nothing_found' => 'No nodes found',
+    'nodes_nothing_found' => 'No nodes',
 ];

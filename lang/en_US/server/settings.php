@@ -2,37 +2,37 @@
 
 return [
     'ip_allocation' => [
-        'empty_state' => 'There are no addresses associated with this server.',
+        'empty_state' => 'None',
     ],
     'display_info' => [
         'title' => 'Server Name',
     ],
     'reinstall' => [
         'title' => 'Reinstall Server',
-        'description' => 'Start your server on a fresh slate.',
-        'start_server_after_installing' => 'Start Server After Completing Installation',
+        'description' => 'Erases this server\'s disk and installs the template you pick.',
+        'start_server_after_installing' => 'Start Server After Installing',
         'modal' => [
-            'title' => 'Confirm Reinstallation',
-            'description' => 'Are you sure you want to reinstall this server? All data will be lost.',
+            'title' => 'Reinstall Server?',
+            'description' => 'Reinstalling this server erases all of its data.',
         ],
     ],
     'retry_install' => [
-        'failed_title' => 'Install failed',
-        'failed_message' => 'Your server failed to install. Pick a template to try again, or contact your administrator if it keeps failing.',
+        'failed_title' => 'Install Failed',
+        'failed_message' => 'Pick a template to try again, or contact your administrator if it keeps failing.',
         'title' => 'Retry Installation',
         'description' => 'Installs the server again from the template you pick, with a new OS password.',
         'button' => 'Retry Installation',
     ],
     'isos' => [
         'title' => 'Mountable ISOs',
-        'empty' => 'There are no ISOs',
+        'empty' => 'No ISOs',
     ],
     'device_config' => [
         'title' => 'Device Configuration',
-        'current' => 'Current Boot Order (the highest will be used first)',
+        'current' => 'Boot Order',
         'unused' => 'Unused Devices',
-        'unused_empty' => 'There are no unused devices.',
-        'no_boot_device_warning' => 'No boot device has been configured. Your VM will not start.',
+        'unused_empty' => 'None',
+        'no_boot_device_warning' => 'This server won\'t start without a boot device. Add one from Unused Devices.',
     ],
     'nameservers' => [
         'title' => 'Nameservers',
@@ -43,7 +43,7 @@ return [
         'title' => 'Authentication',
     ],
     'hardware' => [
-        'bandwidth_used' => 'Bandwidth Used',
-        'bandwidth_alloted' => 'Bandwidth Alloted',
+        'bandwidth_used' => 'Bandwidth Usage',
+        'bandwidth_alloted' => 'Bandwidth Limit',
     ],
 ];

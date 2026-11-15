@@ -77,7 +77,7 @@ const UsersContainer = () => {
                 <SearchBar
                     value={query}
                     onChange={e => setQuery(e.target.value)}
-                    buttonText='New User'
+                    buttonText='Create User'
                     onClick={() => setOpen(true)}
                 />
                 {!data ? (

@@ -154,14 +154,9 @@ const OverviewContainer = () => {
 
     return (
         <PageContentBlock title={tStrings('overview') ?? ''}>
-            <div className='mb-6 flex flex-wrap items-center justify-between gap-3'>
-                <div>
-                    <h1 className='text-2xl font-semibold text-foreground'>
-                        {tStrings('overview')}
-                    </h1>
-                    <p className='description-small mt-1'>{t('description')}</p>
-                </div>
-            </div>
+            <h1 className='mb-6 text-2xl font-semibold text-foreground'>
+                {tStrings('overview')}
+            </h1>
 
             {/* Read from its own endpoint, so it shows even when the metrics fail to load. */}
             <AnnouncementsCard className='mb-6' />
@@ -208,12 +203,7 @@ const OverviewContainer = () => {
 
                     <Card className='col-span-12 lg:col-span-7'>
                         <div className='flex items-center justify-between gap-3'>
-                            <div>
-                                <h2 className='h5'>{t('capacity')}</h2>
-                                <p className='description-small mt-1'>
-                                    {t('capacity_description')}
-                                </p>
-                            </div>
+                            <h2 className='h5'>{t('capacity')}</h2>
                             <CircleStackIcon className='h-5 w-5 text-accent-400' />
                         </div>
                         <div className='mt-6 grid gap-6'>
@@ -276,12 +266,7 @@ const OverviewContainer = () => {
 
                     <Card className='col-span-12'>
                         <div className='flex items-center justify-between gap-3'>
-                            <div>
-                                <h2 className='h5'>{t('server_state')}</h2>
-                                <p className='description-small mt-1'>
-                                    {t('server_state_description')}
-                                </p>
-                            </div>
+                            <h2 className='h5'>{t('server_state')}</h2>
                             <SignalIcon className='h-5 w-5 text-accent-400' />
                         </div>
                         <div className='mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6'>
@@ -308,9 +293,6 @@ const OverviewContainer = () => {
 
                     <Card className='col-span-12'>
                         <h2 className='h5'>{tStrings('node', { count: 2 })}</h2>
-                        <p className='description-small mt-1'>
-                            {t('nodes_description')}
-                        </p>
                         <div className='mt-2'>
                             {data.nodes.length === 0 ? (
                                 <p className='description-small py-6 text-center'>

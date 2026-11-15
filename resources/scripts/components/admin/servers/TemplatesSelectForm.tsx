@@ -52,7 +52,7 @@ const TemplatesSelectForm = ({ disabled }: Props) => {
                 value={groupUuid}
                 onChange={handleGroupsOnChange}
                 loading={isValidating || isLoading}
-                nothingFound={'No groups found'}
+                nothingFound={'No groups'}
                 disabled={disabled}
             />
             <SelectForm
@@ -60,7 +60,7 @@ const TemplatesSelectForm = ({ disabled }: Props) => {
                 name={'templateUuid'}
                 label={'Template'}
                 searchable
-                nothingFound={'No templates found'}
+                nothingFound={'No templates'}
                 disabled={groupUuid === '' || disabled}
             />
         </>

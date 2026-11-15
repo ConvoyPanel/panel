@@ -51,7 +51,7 @@ const NavigationDropdown = ({ logout, onClose, visible }: Props) => {
                         <div className='flex flex-col w-full'>
                             {user?.rootAdmin ? (
                                 <NavLink to='/admin' onClick={onClose}>
-                                    Admin Center
+                                    Admin
                                 </NavLink>
                             ) : null}
                             <button

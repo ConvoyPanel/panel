@@ -70,8 +70,8 @@ const DeleteCotermModal = ({ coterm, onClose, mutate }: Props) => {
                                 type={'error'}
                                 title={tStrings('error') ?? 'Error'}
                             >
-                                Cannot delete an instance of Coterm with nodes
-                                attached to it.
+                                Detach all nodes from this Coterm instance
+                                before deleting it.
                             </MessageBox>
                         ) : null
                     ) : null}
@@ -79,10 +79,7 @@ const DeleteCotermModal = ({ coterm, onClose, mutate }: Props) => {
                         className='mb-5'
                         byKey={`admin.coterms.${coterm?.id}.delete`}
                     />
-                    <Modal.Description>
-                        Are you sure you want to delete this instance of Coterm?
-                        This action is irreversible.
-                    </Modal.Description>
+                    <Modal.Description>This can't be undone.</Modal.Description>
                 </Modal.Body>
 
                 <Modal.Actions>

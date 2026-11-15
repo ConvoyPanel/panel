@@ -43,16 +43,21 @@ usage() {
     cat <<'EOF'
 Convoy installer
 
-  --domain <host>     Hostname or IP the panel will be reached on
+  --domain <host>     Hostname or IP address for this panel
   --email <address>   Email address for the first administrator
   --version <tag>     5 (the newest 5.x, default), 5.1, or an exact release such as 5.0.1;
                       5-canary for unreleased builds of the 5.x branch
   --dir <path>        Install directory (default: /opt/convoy)
   --import <dir>      Upgrade the v4 install in <dir> (usually /var/www/convoy)
                       instead of starting a fresh one
-  --dry-run           With --import: rehearse on a copy while v4 keeps serving
-  --yes               Do not prompt; fail instead of asking
+  --dry-run           With --import: test the import on a copy while v4 stays online
+  --yes               Don't prompt; fail instead of asking
   --help              Show this message
+
+Examples:
+  curl -fsSL https://install.convoypanel.com/5 | sudo bash
+  curl -fsSL https://install.convoypanel.com/5 | sudo bash -s -- --domain panel.example.com --email you@example.com --yes
+  curl -fsSL https://install.convoypanel.com/5 | sudo bash -s -- --import /var/www/convoy --dry-run
 
 EOF
 }
@@ -99,8 +104,8 @@ env_set() {
 prompt_for() {
     local var="$1" flag="$2" message="$3" value=""
     [[ -n "${!var}" ]] && return 0
-    (( ASSUME_YES )) && die "$message (pass $flag when using --yes)."
-    { : < /dev/tty; } 2>/dev/null || die "$message (no terminal available; pass $flag instead)."
+    (( ASSUME_YES )) && die "$flag is required with --yes."
+    { : < /dev/tty; } 2>/dev/null || die "$flag is required when there's no terminal to ask on."
     read -rp "$message: " value < /dev/tty
     [[ -n "$value" ]] || die "a value is required."
     printf -v "$var" '%s' "$value"
@@ -137,12 +142,12 @@ if [[ -e "$CONVOY_DIR/.env" ]]; then
     die "a Convoy install already exists at $CONVOY_DIR. Use 'convoy upgrade' to update it, or pass --dir to install elsewhere."
 fi
 
-command -v curl >/dev/null 2>&1 || die "curl is required but not installed."
-command -v openssl >/dev/null 2>&1 || die "openssl is required but not installed."
+command -v curl >/dev/null 2>&1 || die "curl is required but isn't installed."
+command -v openssl >/dev/null 2>&1 || die "openssl is required but isn't installed."
 
 if [[ -n "$IMPORT_DIR" ]]; then
     [[ -f "$IMPORT_DIR/docker-compose.yml" && -f "$IMPORT_DIR/.env" ]] \
-        || die "$IMPORT_DIR does not look like a v4 install (no docker-compose.yml and .env)."
+        || die "$IMPORT_DIR doesn't look like a v4 install (no docker-compose.yml and .env)."
     case "$(uname -m)" in
         x86_64|amd64) ;;
         *) die "upgrading from v4 needs an amd64 host: pgloader, which converts the database, crashes under arm64 emulation." ;;
@@ -153,11 +158,11 @@ else
     # skips this: v4 holds the ports until the import stops it.)
     for port in 80 443; do
         if command -v ss >/dev/null 2>&1 && ss -Hltn "sport = :$port" 2>/dev/null | grep -q .; then
-            die "port $port is already in use. Convoy needs both 80 and 443. Stop the service using it (often an existing nginx or apache) and run this again."
+            die "port $port is already in use. Convoy needs both 80 and 443. Stop the service using it (often an existing nginx or apache), then run the installer again."
         fi
     done
 
-    prompt_for DOMAIN --domain "Hostname or IP customers will reach this panel on"
+    prompt_for DOMAIN --domain "Hostname or IP address for this panel"
     prompt_for ADMIN_EMAIL --email "Email address for the administrator account"
 fi
 
@@ -166,7 +171,7 @@ fi
 AUTO_HTTPS=on
 if [[ "$DOMAIN" =~ ^[0-9]{1,3}(\.[0-9]{1,3}){3}$ || "$DOMAIN" == *:*:* ]]; then
     AUTO_HTTPS=off
-    warn "$DOMAIN is an IP address. Certificate authorities do not issue for bare IPs, so Convoy will serve a self-signed certificate and browsers will show a warning. Point a domain at this host and re-run with --domain to get a trusted certificate."
+    warn "$DOMAIN is an IP address, so Convoy will serve a self-signed certificate and browsers will show a warning. For a trusted certificate, point a domain at this host and run the installer with --domain."
 fi
 
 ##########################################################################
@@ -198,37 +203,37 @@ else
             ref="$(newest_release "v$version.")"
             image_tag="$version" ;;
         *)
-            die "$CONVOY_VERSION is not a Convoy 5 version. This installer sets up Convoy 5 (for example --version 5 or --version 5.0.1)." ;;
+            die "$CONVOY_VERSION isn't a Convoy 5 version. Use --version 5 for the newest release, or an exact one such as --version 5.0.1." ;;
     esac
-    [[ -n "$ref" ]] || die "could not find a published Convoy $version release. Pass --version with an exact release (for example --version 5.0.1)."
+    [[ -n "$ref" ]] || die "couldn't find a published Convoy $version release. Pass --version with an exact release (for example --version 5.0.1)."
 fi
 if [[ "${ref#v}" == "$image_tag" || "$image_tag" == 5 ]]; then
-    info "installing Convoy ${ref#v}"
+    info "Installing Convoy ${ref#v}"
 else
-    info "installing Convoy $ref (image $image_tag)"
+    info "Installing Convoy $ref (image $image_tag)"
 fi
 
 ##########################################################################
 # Docker
 ##########################################################################
 if ! command -v docker >/dev/null 2>&1; then
-    info "installing Docker"
-    curl -fsSL https://get.docker.com | sh || die "Docker installation failed. Install it manually and re-run."
+    info "Installing Docker"
+    curl -fsSL https://get.docker.com | sh || die "Docker installation failed. Install it manually, then run the installer again."
 fi
 
-docker compose version >/dev/null 2>&1 || die "the Docker Compose plugin is missing. Install docker-compose-plugin and re-run."
+docker compose version >/dev/null 2>&1 || die "the Docker Compose plugin is missing. Install docker-compose-plugin, then run the installer again."
 systemctl enable --now docker >/dev/null 2>&1 || true
 
 ##########################################################################
 # Files
 ##########################################################################
-info "writing $CONVOY_DIR"
+info "Writing $CONVOY_DIR"
 mkdir -p "$CONVOY_DIR"
 
 curl -fsSL "$CONVOY_REPO/$ref/compose.yml" -o "$CONVOY_DIR/compose.yml" \
-    || die "could not download compose.yml for $ref."
+    || die "couldn't download compose.yml for $ref."
 ( umask 077; curl -fsSL "$CONVOY_REPO/$ref/.env.docker.example" -o "$CONVOY_DIR/.env" ) \
-    || die "could not download the environment template for $ref."
+    || die "couldn't download the environment template for $ref."
 chmod 600 "$CONVOY_DIR/.env"
 
 # Neither alphabet below contains `$`, so nothing here can be mangled by
@@ -254,12 +259,12 @@ fi
 
 # A released CLI comes from the release assets, where it carries its version;
 # a branch build from the tree.
-info "installing the convoy command"
+info "Installing the convoy command"
 cli_tmp="$(mktemp)"
 if [[ "$ref" =~ ^v5\. ]] && curl -fsSL "https://github.com/$CONVOY_GITHUB_REPO/releases/download/$ref/convoy" -o "$cli_tmp" 2>/dev/null; then
     :
 else
-    curl -fsSL "$CONVOY_REPO/$ref/docker/convoy" -o "$cli_tmp" || die "could not download the convoy command for $ref."
+    curl -fsSL "$CONVOY_REPO/$ref/docker/convoy" -o "$cli_tmp" || die "couldn't download the convoy command for $ref."
 fi
 install -m 755 "$cli_tmp" /usr/local/bin/convoy
 rm -f "$cli_tmp"
@@ -269,7 +274,7 @@ rm -f "$cli_tmp"
 ##########################################################################
 cd "$CONVOY_DIR"
 
-info "downloading Convoy's images (this can take a few minutes on a new host)"
+info "Downloading Convoy's images (this can take a few minutes on a new host)"
 # Compose draws its progress bars even with --quiet, so they go to a file that
 # is only shown when the download fails.
 pull_log="$(mktemp)"
@@ -292,15 +297,15 @@ if [[ -n "$IMPORT_DIR" ]]; then
     CONVOY_DIR="$CONVOY_DIR" exec /usr/local/bin/convoy import-v4 "${import_args[@]}"
 fi
 
-info "starting Convoy"
+info "Starting Convoy"
 docker compose up -d --remove-orphans
 
-info "waiting for the panel to come up"
+info "Waiting for the panel to come up"
 waited=0
 until [[ "$(docker inspect -f '{{.State.Health.Status}}' "$(docker compose ps -q web)" 2>/dev/null)" == "healthy" ]]; do
     if (( waited >= 300 )); then
         docker compose logs --tail=50 web >&2
-        die "the panel did not start within 5 minutes. The last 50 log lines are above. 'convoy support' collects everything the Convoy team needs to help."
+        die "the panel didn't start within 5 minutes. Its last 50 log lines are shown above. If you need help, run 'convoy support' to send logs to the Convoy team."
     fi
     sleep 5
     waited=$(( waited + 5 ))
@@ -319,14 +324,14 @@ done
 specials='!@#%^&*'
 admin_password="${admin_password:0:10}${specials:RANDOM % ${#specials}:1}${admin_password:10}"
 
-info "creating the administrator account"
+info "Creating the administrator account"
 # Under curl | bash the rest of this script is still waiting on stdin, and exec
 # would read it, ending the script here without printing the password.
 docker compose exec -T web php artisan users:create \
     --email "$ADMIN_EMAIL" \
     --name "Administrator" \
     --password "$admin_password" \
-    --admin true </dev/null >/dev/null || die "could not create the administrator. The panel is running; create one with: convoy artisan users:create"
+    --admin true </dev/null >/dev/null || die "couldn't create the administrator, but the panel is running. Create one with 'convoy artisan users:create'."
 
 cat <<EOF
 
@@ -336,13 +341,13 @@ ${GREEN}${BOLD}Convoy is installed.${RESET}
   Email      $ADMIN_EMAIL
   Password   ${BOLD}$admin_password${RESET}
 
-  ${DIM}Change this password after signing in. It is not stored anywhere else.${RESET}
+  ${DIM}Change this password after signing in. It isn't stored anywhere else.${RESET}
 
 Manage the install with ${BOLD}convoy${RESET}:
 
   convoy ps                status of every container
   convoy logs web          follow the panel's logs
-  convoy upgrade           back up, pull, restart
+  convoy upgrade           back up the database and upgrade Convoy
   convoy artisan <cmd>     run an Artisan command
   convoy support           send logs to the Convoy team when something is wrong
 
@@ -350,5 +355,5 @@ Configuration lives in ${BOLD}$CONVOY_DIR/.env${RESET}.
 EOF
 
 if [[ "$AUTO_HTTPS" == "off" ]]; then
-    printf '\n%s\n' "${YELLOW}The certificate is self-signed. Your browser will warn on first visit.${RESET}"
+    printf '\n%s\n' "${YELLOW}The certificate is self-signed, so browsers will show a warning on the first visit.${RESET}"
 fi

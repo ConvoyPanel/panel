@@ -94,7 +94,6 @@ const AnnouncementsCard = ({ className }: { className?: string }) => {
                 <div>
                     <h2 className='h5'>Announcements</h2>
                     <p className='description-small mt-1'>
-                        From the Convoy team, for this panel's versions.{' '}
                         <Link to='/admin/settings/updates' className='link'>
                             See all
                         </Link>
