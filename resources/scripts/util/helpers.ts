@@ -71,11 +71,16 @@ export const bytesToString = (bytes: number, decimals = 2): string => {
 
     if (bytes < 1) return '0 Bytes'
 
+    const units = ['Bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB']
+
     decimals = Math.floor(Math.max(0, decimals))
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    const i = Math.min(
+        Math.floor(Math.log(bytes) / Math.log(k)),
+        units.length - 1
+    )
     const value = Number((bytes / Math.pow(k, i)).toFixed(decimals))
 
-    return `${value} ${['Bytes', 'KiB', 'MiB', 'GiB', 'TiB'][i]}`
+    return `${value} ${units[i]}`
 }
 
 export const capitalize = (word: string) => {

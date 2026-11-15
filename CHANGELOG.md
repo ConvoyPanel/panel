@@ -27,6 +27,9 @@ follows [Semantic Versioning](https://semver.org) guidelines.
 - `convoy import-v4` checks, before it touches v4, that every number in v4's unsigned columns fits Postgres, and names
   the ones that don't. Postgres holds half as much in the same column type, so one too large stopped the import
   partway, with v4 already stopped.
+- A server's memory, disk or bandwidth, or a node's memory or disk, above 2,147,483,647 MiB (just under 2 PiB) is
+  rejected with a validation error instead of failing with a server error.
+- Sizes of 1 PiB and more read "PiB" or "EiB" instead of "undefined".
 
 ## v5.0.0-alpha.2
 
