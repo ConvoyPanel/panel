@@ -18,6 +18,12 @@ Brings over the fixes v4 has had since v4.7.0-rc.4 ([#211](https://github.com/Co
   character(s)".
 - Saving a server's settings or hardware in the admin area says "Saved".
 - A server being deleted shows a "Deleting" screen to its owner instead of "Unusable".
+- Admin → Settings → Upgrade to Convoy 6 is now **Upgrade Checklist**. It opens with a warning that the upgrade
+  permanently drops or changes the data listed, and points to `convoy backup` first. Each item is rewritten in plain
+  words, and address pools with per-address MACs show the address blocks each one becomes. The Snapshots, Activity Logs
+  and Servers Restoring a Snapshot items are gone. The page now gives `convoy artisan convoy:upgrade-check` instead of
+  `php artisan convoy:upgrade-check`, which only works inside the container. With `--json`, those blocks are listed
+  under `splits`, which replaces `details`.
 
 ### Fixed
 

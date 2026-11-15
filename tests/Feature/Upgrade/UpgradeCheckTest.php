@@ -1,12 +1,10 @@
 <?php
 
-use Convoy\Enums\Server\Status;
 use Convoy\Models\Address;
 use Convoy\Models\AddressPool;
 use Convoy\Models\Backup;
 use Convoy\Models\ISO;
 use Convoy\Models\Node;
-use Convoy\Models\Server;
 use Convoy\Models\User;
 use Convoy\Services\Upgrade\UpgradeCheckService;
 use Illuminate\Support\Facades\Artisan;
@@ -41,17 +39,10 @@ function seedEverythingTheUpgradeTouches(): void
     ]);
     Node::query()->whereKey([$node->id, $second->id])->update(['coterm_id' => $coterm]);
 
-    $logs = collect(range(1, 4))->map(fn () => DB::table('activity_logs')->insertGetId([
-        'event' => 'server:power.start', 'ip' => '127.0.0.1', 'properties' => '{}',
-    ]));
-
     Backup::factory()->for($server)->create(['is_successful' => true]);
     Backup::factory()->for($server)->create(['is_successful' => false, 'completed_at' => now()]);
     Backup::factory()->for($server)->create(['is_successful' => false, 'completed_at' => null]);
     Backup::factory()->for($server)->create(['is_successful' => true])->delete();
-
-    $server->forceFill(['snapshot_limit' => 3])->saveQuietly();
-    Server::factory()->for($node)->for($user)->create(['status' => Status::RESTORING_SNAPSHOT->value, 'snapshot_limit' => 0]);
 
     $pinned = AddressPool::factory()->create(['name' => 'Pinned MACs']);
     foreach (['aa:bb:cc:00:00:01', 'AA:BB:CC:00:00:01', 'aa:bb:cc:00:00:02', null] as $i => $mac) {
@@ -65,13 +56,14 @@ it('finds nothing to drop or change on an empty panel', function () {
     $items = upgradeItems();
 
     expect(array_keys($items))->toBe([
-        'templates', 'isos', 'activity', 'snapshots', 'coterms', 'failed_backups',
-        'deleted_backups', 'nodes', 'address_pools', 'removed_statuses',
+        'templates', 'isos', 'coterms', 'failed_backups',
+        'deleted_backups', 'nodes', 'address_pools',
     ]);
 
     foreach ($items as $item) {
         expect($item['affected'])->toBeFalse()
             ->and($item['action'])->toBeNull()
+            ->and($item['splits'])->toBe([])
             ->and($item['summary'])->not->toBe('');
     }
 });
@@ -84,29 +76,31 @@ it('says what Convoy 6 does with each kind of data this panel has', function () 
     expect($items['templates'])->toMatchArray(['affected' => true, 'effect' => 'dropped', 'count' => 3])
         ->and($items['templates']['summary'])->toContain('1 template group and 2 templates')
         ->and($items['isos'])->toMatchArray(['count' => 3, 'effect' => 'dropped'])
-        ->and($items['isos']['summary'])->toContain('The 3 ISOs listed under nodes here are not carried over.')
-        ->and($items['failed_backups']['summary'])->toContain('There is 1 here; it holds no data.')
-        ->and($items['deleted_backups']['summary'])->toContain('the 1 deleted backup comes back into its server\'s backup list')
-        ->and($items['activity'])->toMatchArray(['count' => 4])
-        ->and($items['activity']['action'])->toContain('convoy export-activity')
-        ->and($items['snapshots'])->toMatchArray(['count' => 1])
+        ->and($items['isos']['summary'])->toContain("The 3 ISOs here won't carry over.")
+        ->and($items['failed_backups']['summary'])->toContain('The 1 here holds no data, so nothing is lost.')
+        ->and($items['deleted_backups']['summary'])->toContain("The 1 here will reappear in its server's backup list.")
         ->and($items['coterms'])->toMatchArray(['count' => 1])
-        ->and($items['coterms']['summary'])->toContain('1 Coterm and their links to 2 nodes')
+        ->and($items['coterms']['summary'])->toContain("The 1 Coterm here won't carry over.")
         ->and($items['coterms']['action'])->toContain('Anchor')
         ->and($items['failed_backups'])->toMatchArray(['count' => 1, 'effect' => 'dropped'])
         ->and($items['deleted_backups'])->toMatchArray(['count' => 1, 'effect' => 'changed'])
         ->and($items['nodes'])->toMatchArray(['count' => 2, 'effect' => 'changed'])
-        ->and($items['nodes']['summary'])->toContain('2 nodes')->toContain('2 clusters')
+        ->and($items['nodes']['summary'])->toContain('each of the 2 nodes here shows 1 CPU')
         ->and($items['address_pools'])->toMatchArray(['count' => 1, 'effect' => 'changed'])
-        ->and($items['address_pools']['details'])->toBe(['Pinned MACs: 2 distinct MACs with their own MAC address, so it becomes 3 address blocks.'])
-        ->and($items['removed_statuses'])->toMatchArray(['count' => 1])
-        ->and($items['removed_statuses']['summary'])->toContain('as ready');
+        ->and($items['address_pools']['splits'])->toBe([[
+            'pool' => 'Pinned MACs',
+            'blocks' => [
+                ['mac' => 'aa:bb:cc:00:00:01', 'addresses' => 2],
+                ['mac' => 'aa:bb:cc:00:00:02', 'addresses' => 1],
+                ['mac' => null, 'addresses' => 1],
+            ],
+        ]]);
 });
 
 it('changes nothing', function () {
     seedEverythingTheUpgradeTouches();
 
-    $tables = ['templates', 'template_groups', 'iso_library', 'activity_logs', 'coterms', 'backups', 'servers', 'nodes', 'ip_addresses'];
+    $tables = ['templates', 'template_groups', 'iso_library', 'coterms', 'backups', 'servers', 'nodes', 'ip_addresses'];
     $before = collect($tables)->mapWithKeys(fn ($table) => [$table => DB::table($table)->orderBy('id')->get()->toJson()]);
 
     app(UpgradeCheckService::class)->items();
@@ -121,15 +115,16 @@ it('prints the check on the command line', function () {
     seedEverythingTheUpgradeTouches();
 
     $this->artisan('convoy:upgrade-check')
-        ->expectsOutputToContain('Templates and template groups [dropped]')
-        ->expectsOutputToContain('What to do: Export them before upgrading, with `convoy export-activity`')
-        ->expectsOutputToContain('Pinned MACs: 2 distinct MACs')
-        ->expectsOutputToContain('10 of 10 items apply to this panel.')
+        ->expectsOutputToContain('Templates [dropped]')
+        ->expectsOutputToContain('    aa:bb:cc:00:00:01  2 addresses')
+        ->expectsOutputToContain('What to do: After upgrading, add the ISOs you offer again.')
+        ->expectsOutputToContain('Pinned MACs → 3 blocks')
+        ->expectsOutputToContain('7 of 7 apply to this panel.')
         ->assertSuccessful();
 
     Artisan::call('convoy:upgrade-check', ['--json' => true]);
 
-    expect(json_decode(Artisan::output(), true)['data'])->toHaveCount(10);
+    expect(json_decode(Artisan::output(), true)['data'])->toHaveCount(7);
 });
 
 it('shows the check to admins only', function () {
@@ -138,7 +133,7 @@ it('shows the check to admins only', function () {
     $this->actingAs(User::factory()->create(['root_admin' => true]))
         ->getJson('/api/admin/settings/upgrade')
         ->assertOk()
-        ->assertJsonCount(10, 'data.items')
+        ->assertJsonCount(7, 'data.items')
         ->assertJsonPath('data.items.0.key', 'templates')
         ->assertJsonPath('data.items.0.affected', true);
 
