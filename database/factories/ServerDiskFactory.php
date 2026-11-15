@@ -13,7 +13,6 @@ class ServerDiskFactory extends Factory
         return [
             'server_id' => Server::factory(),
             'storage_id' => Storage::factory(),
-            // Bytes in; StorageSizeCast stores MiB (matches ServerFactory.disk).
             'size' => 20 * 1024 * 1024 * 1024,
             'interface' => null,
             'is_primary' => true,

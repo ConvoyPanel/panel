@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Casts\StorageSizeCast;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -44,7 +43,7 @@ class ServerDisk extends Model
     protected function casts(): array
     {
         return [
-            'size' => StorageSizeCast::class,
+            'size' => 'integer',
             'is_primary' => 'boolean',
         ];
     }

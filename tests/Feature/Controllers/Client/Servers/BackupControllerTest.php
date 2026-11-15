@@ -296,8 +296,6 @@ describe('index quota totals', function () {
     it('reports count and size across every non-failed backup, not just the page', function () {
         [$user, $_, $_, $server] = createServerModel();
 
-        // StorageSizeCast persists MiB, so these are 4 MiB each on disk and
-        // must come back as bytes -- a raw SUM() would report 8, not 8 MiB.
         Backup::factory()->count(2)->create([
             'server_id' => $server->id,
             'size' => 4 * 1024 * 1024,

@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Casts\StorageSizeCast;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Str;
 
@@ -47,7 +46,7 @@ class ISO extends Model
     protected function casts(): array
     {
         return [
-            'size' => StorageSizeCast::class,
+            'size' => 'integer',
             'hidden' => 'boolean',
         ];
     }

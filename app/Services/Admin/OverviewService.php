@@ -27,7 +27,6 @@ use App\Models\Storage;
 use App\Models\User;
 use App\Services\Metrics\VictoriaMetrics;
 use App\Services\Nodes\NodeResourceSnapshotCache;
-use App\Support\ByteUnit;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -160,8 +159,7 @@ class OverviewService
     }
 
     /**
-     * Per-node committed memory/disk. These are raw aggregates over the (MiB) DB columns —
-     * StorageSizeCast is not applied to the SUM alias — so callers convert to bytes.
+     * Per-node committed memory/disk, in bytes.
      *
      * @return Collection<int|string, \stdClass> keyed by node_id
      */
@@ -241,15 +239,14 @@ class OverviewService
     /** @param  Collection<int, Node>  $nodes */
     private function memory(Collection $nodes, Collection $allocations): ResourceAllocationData
     {
-        // $node->memory is StorageSizeCast (bytes); the allocation aggregate is raw (MiB).
-        $allocated = ByteUnit::Mebibytes->toBytes((int) $allocations->sum('memory_allocated'));
+        $allocated = (int) $allocations->sum('memory_allocated');
 
         return $this->allocation($allocated, (int) $nodes->sum('memory'));
     }
 
     private function storage(Collection $allocations): ResourceAllocationData
     {
-        $allocated = ByteUnit::Mebibytes->toBytes((int) $allocations->sum('disk_allocated'));
+        $allocated = (int) $allocations->sum('disk_allocated');
 
         /*
          * Total VM-disk capacity: distinct storages that back VM disks and are
@@ -315,7 +312,7 @@ class OverviewService
     private function node(Node $node, Collection $allocations): NodeSummaryData
     {
         $row = $allocations->get($node->id);
-        $allocated = ByteUnit::Mebibytes->toBytes((int) ($row->memory_allocated ?? 0));
+        $allocated = (int) ($row->memory_allocated ?? 0);
 
         return new NodeSummaryData(
             id: $node->id,

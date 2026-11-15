@@ -28,11 +28,8 @@ class ImageDiskData extends Data
         public ?string $path,
         public string $sha256,
         /**
-         * Bytes on the wire -- what a node has to transfer.
-         *
-         * Bytes, not mebibytes, because this lives inside a JSON column and
-         * `StorageSizeCast` cannot reach in there. The `size` column beside it
-         * *is* cast, and is the sum of these.
+         * Bytes on the wire -- what a node has to transfer. The `size` column
+         * beside it is the sum of these.
          */
         public int $size,
         /**
@@ -41,7 +38,7 @@ class ImageDiskData extends Data
          * The floor a plan's disk has to clear: an imported disk arrives at
          * this size and `qm disk resize` only grows. Understating it would let
          * a plan through and silently hand the tenant a larger disk than they
-         * bought, so it is kept exact rather than rounded to whole mebibytes.
+         * bought, so it is kept exact.
          */
         public int $virtualSize,
         public string $format = 'qcow2',

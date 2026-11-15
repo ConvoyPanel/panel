@@ -82,7 +82,6 @@ it('returns overview metrics for admins', function () {
         ->assertJsonPath('data.summary.failedServers', 1)
         ->assertJsonPath('data.servers.ready', 1)
         ->assertJsonPath('data.servers.failed', 1)
-        // DB stores MiB (StorageSizeCast); the endpoint reports bytes.
         ->assertJsonPath('data.memory.allocated', 12 * 1024 * 1024 * 1024)
         ->assertJsonPath('data.memory.total', 64 * 1024 * 1024 * 1024)
         ->assertJsonPath('data.storage.allocated', 48 * 1024 * 1024 * 1024)

@@ -12,7 +12,7 @@ beforeEach(function () {
 
     $this->location = Location::factory()->create();
     $this->node = Node::factory()->for($this->location)->create();
-    // 100 MiB reserve buffer (passed in bytes; StorageSizeCast stores MiB).
+    // 100 MiB reserve buffer.
     $this->storageA = Storage::factory()->create(['reserved_bytes' => 100 * 1048576]);
     $this->storageB = Storage::factory()->create();
     $this->node->storages()->attach($this->storageA);

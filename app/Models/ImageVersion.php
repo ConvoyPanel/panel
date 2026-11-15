@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Casts\StorageSizeCast;
 use App\Data\Image\ImageDiskData;
 use App\Enums\Image\ImageSource;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -27,7 +26,7 @@ use Ramsey\Uuid\Uuid;
  * @property int $version_minor
  * @property int $version_patch
  * @property array $disks
- * @property int $size Bytes. Mebibytes on disk -- see StorageSizeCast.
+ * @property int $size Bytes.
  * @property ImageSource $source
  * @property ?Carbon $built_at When the publisher built it, for a catalogue image.
  * @property bool $is_active
@@ -52,7 +51,7 @@ class ImageVersion extends Model
         return [
             'disks' => 'array',
             // Same convention as every other size column: MiB stored, bytes read.
-            'size' => StorageSizeCast::class,
+            'size' => 'integer',
             'source' => ImageSource::class,
             'built_at' => 'datetime',
             'is_active' => 'boolean',

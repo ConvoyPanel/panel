@@ -22,7 +22,7 @@ beforeEach(function () {
         'cluster_id' => Cluster::factory()->standalone()->create()->id,
     ]);
 
-    // 100 MiB reserve buffer (passed in bytes; StorageSizeCast stores MiB).
+    // 100 MiB reserve buffer.
     $this->storage = Storage::factory()->create([
         'reserved_bytes' => 100 * 1048576,
     ]);

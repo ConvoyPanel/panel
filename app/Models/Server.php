@@ -3,10 +3,8 @@
 namespace App\Models;
 
 use App\Casts\OveragePenaltyCast;
-use App\Casts\StorageSizeCast;
 use App\Data\Server\OveragePenaltyData;
 use App\Enums\Server\ServerLifecycle;
-use App\Support\ByteUnit;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -102,11 +100,11 @@ class Server extends Model
             'lifecycle' => ServerLifecycle::class,
             'suspended_at' => 'immutable_datetime',
             'flagged_at' => 'immutable_datetime',
-            'memory' => StorageSizeCast::class,
-            'disk' => StorageSizeCast::class,
-            'bandwidth_usage' => StorageSizeCast::class,
-            'bandwidth_limit' => StorageSizeCast::class,
-            'backup_size_limit' => StorageSizeCast::class,
+            'memory' => 'integer',
+            'disk' => 'integer',
+            'bandwidth_usage' => 'integer',
+            'bandwidth_limit' => 'integer',
+            'backup_size_limit' => 'integer',
             'speed_limit' => 'integer',
             'overage_penalty' => OveragePenaltyCast::class,
             'bandwidth_reset_day' => 'integer',
@@ -312,18 +310,10 @@ class Server extends Model
         return $this->lifecycle->isReady();
     }
 
-    /**
-     * Total bytes consumed by this server's non-failed backups.
-     *
-     * `backups.size` is persisted in MiB (StorageSizeCast) but read back as
-     * bytes, and a SQL aggregate bypasses the cast entirely — so the sum has to
-     * be scaled the same way the cast's read direction does.
-     */
+    /** Total bytes consumed by this server's non-failed backups. */
     public function nonFailedBackupSize(): int
     {
-        return ByteUnit::Mebibytes->toBytes(
-            (int) $this->backups()->nonFailed()->sum('size'),
-        );
+        return (int) $this->backups()->nonFailed()->sum('size');
     }
 
     /**
