@@ -12,6 +12,8 @@ follows [Semantic Versioning](https://semver.org) guidelines.
 - A backup created through the API with `"is_locked": true` is locked. The request checked `is_locked` but read
   `locked`, so the backup came out unlocked. The request now takes only `is_locked`, the column's name; `locked` is
   ignored.
+- Creating a server through the API with `"should_create_server": false` accepts `"account_password": null`, as it
+  already accepted `"template_uuid": null`. It used to fail validation, and only leaving the field out worked.
 
 ## v4.7.1-rc.2
 
