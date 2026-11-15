@@ -8,7 +8,7 @@ use App\Enums\Activity\TaskExitStatus;
 use App\Enums\Activity\TaskStatus;
 use App\Exceptions\Proxmox\RequestException;
 use App\Exceptions\Service\Server\Allocation\DiskResizeFailedException;
-use App\Jobs\Middleware\ExpiringWithoutOverlapping;
+use App\Jobs\Server\ConfigureVmJob;
 use App\Models\Server;
 use App\Services\Proxmox\Server\ProxmoxActivityClient;
 use App\Services\Proxmox\Server\ProxmoxDiskClient;
@@ -71,9 +71,8 @@ class DiskResizeService
      * One retry, because the failure this exists for clears as soon as the
      * storage finishes flushing; a resize that fails twice ten seconds apart is
      * not a race and should be reported. The whole worst case -- 30s, 10s, 30s --
-     * stays under {@see ExpiringWithoutOverlapping::EXPIRES_AFTER},
-     * so the server's overlap lock cannot expire underneath a build that is
-     * still working.
+     * leaves room inside {@see ConfigureVmJob::$timeout} for the rest of a
+     * configure pass.
      */
     private const ATTEMPTS = 2;
 

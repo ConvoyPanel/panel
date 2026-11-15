@@ -21,6 +21,8 @@ class SyncNetworkSettingsJob implements ShouldQueue
 
     public int $tries = 3;
 
+    public int $timeout = 60;
+
     public function __construct(
         #[WithoutRelations]
         public Server $server
@@ -30,7 +32,7 @@ class SyncNetworkSettingsJob implements ShouldQueue
     {
         return [
             new SkipIfBatchCancelled,
-            new ExpiringWithoutOverlapping((string) $this->server->id),
+            new ExpiringWithoutOverlapping((string) $this->server->id, $this->timeout),
         ];
     }
 
