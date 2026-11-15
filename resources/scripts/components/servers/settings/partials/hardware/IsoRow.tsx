@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next'
 import { Iso } from '@/api/server/settings/getIsos'
 import mountMedia from '@/api/server/settings/mountMedia'
 import unmountMedia from '@/api/server/settings/unmountMedia'
+import unmountMissingMedia from '@/api/server/settings/unmountMissingMedia'
 import useBootOrderSWR from '@/api/server/settings/useBootOrderSWR'
 import useIsosSWR from '@/api/server/settings/useIsosSWR'
 
@@ -19,6 +20,7 @@ interface Props {
 }
 
 const IsoRow = ({ iso }: Props) => {
+    const { t } = useTranslation('server.settings')
     const { t: tStrings } = useTranslation('strings')
     const uuid = ServerContext.useStoreState(state => state.server.data!.uuid)
     const { clearFlashes, clearAndAddHttpError } = useFlashKey(
@@ -32,15 +34,15 @@ const IsoRow = ({ iso }: Props) => {
         setLoading(true)
         clearFlashes()
         try {
-            await mountMedia(uuid, iso.uuid)
+            await mountMedia(uuid, iso.uuid!)
 
             mutateMedia(data => {
-                return data?.map(iso => {
-                    if (iso.uuid === iso.uuid) {
-                        return { ...iso, mounted: true }
+                return data?.map(item => {
+                    if (item.uuid === iso.uuid) {
+                        return { ...item, mounted: true }
                     }
 
-                    return iso
+                    return item
                 })
             }, false)
             mutateBootOrder()
@@ -54,17 +56,21 @@ const IsoRow = ({ iso }: Props) => {
         setLoading(true)
         clearFlashes()
         try {
-            await unmountMedia(uuid, iso.uuid)
+            if (iso.missing) {
+                await unmountMissingMedia(uuid, iso.interface!)
+                mutateMedia()
+            } else {
+                await unmountMedia(uuid, iso.uuid!)
+                mutateMedia(data => {
+                    return data?.map(item => {
+                        if (item.uuid === iso.uuid) {
+                            return { ...item, mounted: false }
+                        }
 
-            mutateMedia(data => {
-                return data?.map(iso => {
-                    if (iso.uuid === iso.uuid) {
-                        return { ...iso, mounted: false }
-                    }
-
-                    return iso
-                })
-            }, false)
+                        return item
+                    })
+                }, false)
+            }
             mutateBootOrder()
         } catch (error) {
             clearAndAddHttpError(error as any)
@@ -88,7 +94,9 @@ const IsoRow = ({ iso }: Props) => {
                         />
                     )}
                 </div>
-                <p className={'description-small'}>{bytesToString(iso.size)}</p>
+                <p className={'description-small'}>
+                    {iso.missing ? t('isos.missing') : bytesToString(iso.size)}
+                </p>
             </div>
 
             {iso.mounted ? (

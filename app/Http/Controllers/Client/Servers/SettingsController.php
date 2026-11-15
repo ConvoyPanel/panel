@@ -5,6 +5,7 @@ namespace Convoy\Http\Controllers\Client\Servers;
 use Convoy\Data\Server\Deployments\ServerDeploymentData;
 use Convoy\Data\Server\Proxmox\Config\DiskData;
 use Convoy\Enums\Server\AuthenticationType;
+use Convoy\Enums\Server\DiskInterface;
 use Convoy\Enums\Server\Status;
 use Convoy\Http\Controllers\ApiController;
 use Convoy\Http\Requests\Client\Servers\Settings\MountMediaRequest;
@@ -150,7 +151,21 @@ class SettingsController extends ApiController
             }
         }, $media);
 
-        return fractal($media, new MediaTransformer())->respond();
+        $missing = $disks
+            ->filter(fn (DiskData $disk) => ! is_null($disk->media_file) && is_null($disk->media_name))
+            ->map(fn (DiskData $disk) => [
+                'uuid' => null,
+                'name' => $disk->media_file,
+                'size' => 0,
+                'hidden' => false,
+                'mounted' => true,
+                'missing' => true,
+                'interface' => $disk->interface->value,
+            ])
+            ->values()
+            ->all();
+
+        return fractal([...$media, ...$missing], new MediaTransformer())->respond();
     }
 
     /*
@@ -173,6 +188,15 @@ class SettingsController extends ApiController
     public function unmountMedia(Server $server, ISO $iso)
     {
         $this->allocationService->unmountIso($server, $iso);
+
+        return $this->returnNoContent();
+    }
+
+    public function unmountMissingMedia(Server $server, string $interface)
+    {
+        $this->allocationService->ejectMissingIso(
+            $server, DiskInterface::tryFrom($interface) ?? abort(404),
+        );
 
         return $this->returnNoContent();
     }

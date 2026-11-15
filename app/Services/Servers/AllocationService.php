@@ -41,6 +41,7 @@ class AllocationService
                 'is_primary_disk' => false,
                 'is_media' => false,
                 'media_name' => null,
+                'media_file' => null,
                 'size' => 0,
             ];
 
@@ -56,6 +57,8 @@ class AllocationService
                 $disk['is_media'] = true;
                 // this piece of code adds the name of the mounted ISO
                 if (preg_match("/\/(.*\.iso)/s", $value, $fileNameMatches)) {
+                    $disk['media_file'] = $fileNameMatches[1];
+
                     if ($iso = $isos->where('file_name', $fileNameMatches[1])->first()) {
                         $disk['media_name'] = $iso->name;
                     }
@@ -164,6 +167,37 @@ class AllocationService
         } else {
             throw new IsoAlreadyUnmountedException();
         }
+    }
+
+    /**
+     * Ejects the ISO from every drive it's mounted in.
+     */
+    public function ejectIso(Server $server, ISO $iso): void
+    {
+        $interfaces = $this->getDisks($server)
+            ->filter(fn (DiskData $disk) => $disk->media_file === $iso->file_name)
+            ->map(fn (DiskData $disk) => $disk->interface->value);
+
+        if ($interfaces->isNotEmpty()) {
+            $this->repository->update(['delete' => $interfaces->join(',')]);
+        }
+    }
+
+    /**
+     * Ejects a drive whose ISO is no longer in Convoy's library.
+     */
+    public function ejectMissingIso(Server $server, DiskInterface $interface): void
+    {
+        $disk = $this->getDisks($server)->first(
+            fn (DiskData $disk) => $disk->interface === $interface && $disk->is_media
+                && ! is_null($disk->media_file) && is_null($disk->media_name),
+        );
+
+        if (is_null($disk)) {
+            throw new IsoAlreadyUnmountedException();
+        }
+
+        $this->repository->update(['delete' => $interface->value]);
     }
 
     public function convertToBytes(string $from): ?int

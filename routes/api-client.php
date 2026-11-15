@@ -55,6 +55,10 @@ Route::prefix('/servers/{server}')->middleware(
             '/hardware/isos/{iso}/unmount',
             [Client\Servers\SettingsController::class, 'unmountMedia'],
         );
+        Route::post(
+            '/hardware/drives/{interface}/unmount',
+            [Client\Servers\SettingsController::class, 'unmountMissingMedia'],
+        );
 
         Route::get('/network', [Client\Servers\SettingsController::class, 'getNetworkSettings']);
         Route::put('/network', [Client\Servers\SettingsController::class, 'updateNetworkSettings']);

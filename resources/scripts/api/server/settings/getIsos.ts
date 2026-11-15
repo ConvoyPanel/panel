@@ -1,11 +1,13 @@
 import http from '@/api/http'
 
 export interface Iso {
-    uuid: string
+    uuid: string | null
     name: string
     size: number
     hidden: boolean
     mounted: boolean
+    missing: boolean
+    interface: string | null
 }
 
 // it looks stupid but I wrote this for in the future
