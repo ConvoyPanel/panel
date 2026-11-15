@@ -55,6 +55,18 @@ it('adopts an existing VM without a template or a password', function () {
     Queue::assertNotPushed(BuildServerJob::class);
 });
 
+it('adopts an existing VM when the template and password are sent as null', function () {
+    $node = Node::factory()->for(Location::factory())->create();
+    $owner = User::factory()->create();
+
+    createAsAdmin(serverPayload($node, $owner, [
+        'template_uuid' => null,
+        'account_password' => null,
+    ]))->assertOk();
+
+    expect(Server::where('vmid', 4242)->exists())->toBeTrue();
+});
+
 it('still requires a template and a password to build a new VM', function () {
     $node = Node::factory()->for(Location::factory())->create();
     $owner = User::factory()->create();

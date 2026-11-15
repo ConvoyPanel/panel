@@ -49,6 +49,8 @@ Brings over the fixes v4 has had since v4.7.0-rc.4 ([#211](https://github.com/Co
 - A backup created through the API with `"is_locked": true` is locked. The request checked `is_locked` but read
   `locked`, so the backup came out unlocked. The request now takes only `is_locked`, the column's name; `locked` is
   ignored.
+- Creating a server through the API with `"should_create_server": false` accepts `"account_password": null`, as it
+  already accepted `"template_uuid": null`. It used to fail validation, and only leaving the field out worked.
 
 ### Security
 
