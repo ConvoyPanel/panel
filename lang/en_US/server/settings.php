@@ -26,6 +26,7 @@ return [
     'isos' => [
         'title' => 'Mountable ISOs',
         'empty' => 'No ISOs',
+        'missing' => 'Deleted',
     ],
     'device_config' => [
         'title' => 'Device Configuration',

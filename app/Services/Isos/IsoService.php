@@ -9,6 +9,9 @@ use Convoy\Jobs\Node\MonitorIsoDownloadJob;
 use Convoy\Models\ISO;
 use Convoy\Models\Node;
 use Convoy\Repositories\Proxmox\Node\ProxmoxStorageRepository;
+use Convoy\Exceptions\Repository\Proxmox\ProxmoxConnectionException;
+use Convoy\Services\Servers\AllocationService;
+use Convoy\Services\Servers\ServerBuildService;
 use Illuminate\Database\ConnectionInterface;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
@@ -16,6 +19,7 @@ class IsoService
 {
     public function __construct(
         private ConnectionInterface $connection, private ProxmoxStorageRepository $repository,
+        private AllocationService $allocationService,
     )
     {
     }
@@ -67,6 +71,16 @@ class IsoService
 
         $this->connection->transaction(function () use ($node, $iso) {
             if ($iso->is_successful) {
+                foreach ($node->servers as $server) {
+                    try {
+                        $this->allocationService->ejectIso($server, $iso);
+                    } catch (ProxmoxConnectionException $e) {
+                        if (! ServerBuildService::isVmMissingError($e)) {
+                            throw $e;
+                        }
+                    }
+                }
+
                 $this->repository->setNode($node)->deleteFile(ContentType::ISO, $iso->file_name);
             }
 

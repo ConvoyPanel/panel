@@ -18,6 +18,9 @@ class DiskData extends Data
         public ?string       $media_name,
 
         public int           $size,
+
+        /** The file a CD drive points at, whether or not Convoy still has an ISO for it. */
+        public ?string       $media_file = null,
     )
     {
     }
