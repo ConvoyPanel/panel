@@ -54,6 +54,9 @@ written one screen at a time and drifted into a house voice — balanced clauses
 semicolon, a knowing little reveal at the end — that reads like documentation being
 recited at the user. Do not add more of it, and strip it when you touch a screen.
 
+The full rules, including capitalization, dialogs, errors and command-line output, are in
+[docs/writing.md](docs/writing.md).
+
 - **Don't write page subtitles.** A page under an `<h1>` gets no explanatory paragraph.
   If the heading is a decent noun (`Audit Log`, `Users`, `Storage`), the gloss under it is
   the heading again in more words. Delete it rather than rewriting it shorter. Same for
