@@ -11,6 +11,7 @@ use Convoy\Models\Server;
 use Convoy\Models\Template;
 use Convoy\Repositories\Eloquent\ServerRepository;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 /**
@@ -26,6 +27,15 @@ class ServerCreationService
     }
 
     public function handle(array $data)
+    {
+        // One transaction, so a server that can't be deployed isn't left
+        // behind: adopting an existing VM used to fail after the record was
+        // written, leaving a server that never synced. The build chain is
+        // dispatched once this commits.
+        return DB::transaction(fn () => $this->create($data));
+    }
+
+    private function create(array $data): Server
     {
         $uuid = $this->generateUniqueUuidCombo();
 

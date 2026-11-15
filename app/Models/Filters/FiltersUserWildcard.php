@@ -7,6 +7,7 @@ use Spatie\QueryBuilder\Filters\Filter;
 
 class FiltersUserWildcard implements Filter
 {
+    /** An id, or part of a name or email address, in any case. */
     public function __invoke(Builder $query, $value, string $property): void
     {
         // Grouped, so the ORs can't escape a constraint the controller applied first.
@@ -15,7 +16,7 @@ class FiltersUserWildcard implements Filter
                 $query->orWhere('id', $id);
             }
 
-            $query->orWhereRaw('LOWER(email) = ?', [SearchTerm::lower($value)])
+            $query->orWhereRaw('LOWER(email) LIKE ?', [SearchTerm::contains($value)])
                   ->orWhereRaw('LOWER(name) LIKE ?', [SearchTerm::contains($value)]);
         });
     }

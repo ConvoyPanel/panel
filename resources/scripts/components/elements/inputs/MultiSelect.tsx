@@ -1,7 +1,7 @@
 import { css } from '@emotion/react'
 import styled from '@emotion/styled'
 import { MultiSelect as MantineMultiSelect } from '@mantine/core'
-import { ComponentProps, forwardRef } from 'react'
+import { ComponentProps, forwardRef, useRef } from 'react'
 import tw from 'twin.macro'
 
 import ErrorMessage from '@/components/elements/ErrorMessage'
@@ -44,15 +44,48 @@ export interface MultiSelectProps
 }
 
 const MultiSelect = forwardRef<HTMLInputElement, MultiSelectProps>(
-    ({ loading, nothingFound, error, ...props }, ref) => (
-        <StyledMultiSelect
-            error={error ? <ErrorMessage>{error}</ErrorMessage> : undefined}
-            nothingFound={loading ? 'Loading...' : nothingFound}
-            rightSection={loading && <LoadingDots size={4} />}
-            ref={ref}
-            {...props}
-        />
-    )
+    (
+        {
+            loading,
+            nothingFound,
+            error,
+            onKeyDown,
+            onDropdownOpen,
+            onDropdownClose,
+            ...props
+        },
+        ref
+    ) => {
+        const opened = useRef(false)
+
+        return (
+            <StyledMultiSelect
+                error={error ? <ErrorMessage>{error}</ErrorMessage> : undefined}
+                nothingFound={loading ? 'Loading...' : nothingFound}
+                rightSection={loading && <LoadingDots size={4} />}
+                ref={ref}
+                onDropdownOpen={() => {
+                    opened.current = true
+                    onDropdownOpen?.()
+                }}
+                onDropdownClose={() => {
+                    opened.current = false
+                    onDropdownClose?.()
+                }}
+                onKeyDown={event => {
+                    // Escape with the list open only closes the list. Mantine's
+                    // Select marks that Escape as handled and MultiSelect
+                    // doesn't, so the modal around it took the key as its own
+                    // and closed, losing the form.
+                    if (event.key === 'Escape' && opened.current) {
+                        event.preventDefault()
+                    }
+                    onKeyDown?.(event)
+                }}
+                {...props}
+            />
+        )
+    }
 )
 
 export default MultiSelect

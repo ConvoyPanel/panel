@@ -35,10 +35,14 @@ class StoreServerRequest extends BaseApiRequest
             'limits.bandwidth' => $rules['bandwidth_limit'],
             'limits.address_ids' => 'sometimes|nullable|array',
             'limits.address_ids.*' => 'integer|exists:ip_addresses,id',
-            'account_password' => ['required_if:should_create_server,1', 'string', 'min:8', 'max:191', new Password(
+            'account_password' => ['required_if_accepted:should_create_server', 'string', 'min:8', 'max:191', new Password(
             ), new USKeyboardCharacters()],
             'should_create_server' => 'present|boolean',
-            'template_uuid' => 'required_if:create_server,1|string|exists:templates,uuid',
+            // Keyed on create_server before, a field that doesn't exist, so a
+            // build was accepted without a template. required_if_accepted
+            // because a JSON true doesn't strictly equal the "1" required_if
+            // compares against.
+            'template_uuid' => 'required_if_accepted:should_create_server|nullable|string|exists:templates,uuid',
             'start_on_completion' => 'present|boolean',
         ];
     }

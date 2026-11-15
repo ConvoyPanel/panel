@@ -135,6 +135,30 @@ const AdminServerRouter = () => {
         }
     }, [match?.params.id])
 
+    // A delete runs as a queued job, so the "Deleting" screen polls: it moves
+    // to "Failed to Delete" if the job fails, and back to the server list
+    // once the server is gone.
+    const isDeleting = server?.status === 'deleting'
+
+    useEffect(() => {
+        if (!isDeleting) return
+
+        const interval = setInterval(() => {
+            getServer(match!.params.id as string).catch((error: any) => {
+                const status = error?.response?.status
+
+                if (status === 401 || status === 419) {
+                    window.location.assign('/auth/login')
+                } else if (isNotFoundError(error)) {
+                    navigate('/admin/servers')
+                }
+                // Anything else is retried on the next tick.
+            })
+        }, 5000)
+
+        return () => clearInterval(interval)
+    }, [match?.params.id, isDeleting])
+
     const { setRoutes, setBreadcrumb } = useContext(NavigationBarContext)
 
     useEffect(() => {
@@ -180,7 +204,10 @@ const AdminServerRouter = () => {
                             }
                         >
                             <RestoreAccessButton />
-                            <DeleteServerActions className='mt-6 justify-center' />
+                            <DeleteServerActions
+                                className='mt-6'
+                                align='center'
+                            />
                         </ScreenBlock>
                     ) : (
                         <Outlet />

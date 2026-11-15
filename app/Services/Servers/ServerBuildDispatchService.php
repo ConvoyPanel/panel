@@ -16,6 +16,7 @@ use Convoy\Jobs\Server\WaitUntilVmIsCreatedJob;
 use Convoy\Jobs\Server\WaitUntilVmIsDeletedJob;
 use Convoy\Models\Server;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class ServerBuildDispatchService
@@ -26,13 +27,17 @@ class ServerBuildDispatchService
 
     public function build(ServerDeploymentData $deployment): void
     {
+        // Built before anything is written, so a deployment that can't be
+        // built fails inside the caller's transaction with nothing saved.
         $jobs = $this->getChainedBuildJobs($deployment);
 
-        Bus::chain($jobs)
-            ->catch(self::markInstallFailed($deployment->server->id))
-            ->dispatch();
-
         $deployment->server->update(['status' => Status::INSTALLING->value]);
+
+        // Once the caller's transaction commits (straight away outside one):
+        // a worker that picked the chain up sooner wouldn't find the server.
+        DB::afterCommit(fn () => Bus::chain($jobs)
+            ->catch(self::markInstallFailed($deployment->server->id))
+            ->dispatch());
     }
 
     /* the delete virtual machine method is typically not used by itself and is accompanied by other logic like server reinstallations, server deletions */
@@ -92,7 +97,8 @@ class ServerBuildDispatchService
                 new SyncBuildJob($deployment->server->id),
             ];
 
-        if (Str::contains(Str::lower($deployment->template->name), 'windows')) {
+        // Adopting an existing VM has no template; treat it as not Windows.
+        if (Str::contains(Str::lower($deployment->template?->name ?? ''), 'windows')) {
             $jobs = [
                 ...$jobs,
                 new SendPowerCommandJob($deployment->server->id, PowerAction::START),

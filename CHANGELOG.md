@@ -7,10 +7,50 @@ follows [Semantic Versioning](https://semver.org) guidelines.
 
 ## Unreleased
 
+Brings over the fixes v4 has had since v4.7.0-rc.4 ([#211](https://github.com/ConvoyPanel/panel/issues/211)).
+
+### Changed
+
+- An error from a node now says what went wrong instead of "Server Error". A node the panel can't reach at all says so
+  ("Couldn't connect to the node..."), without its address, and an error Proxmox answered with is shown as Proxmox
+  worded it ("Proxmox returned 500: ..."). Both respond with `502`.
+- Validation messages read as sentences: "This field is required." instead of "String must contain at least 1
+  character(s)".
+- Saving a server's settings or hardware in the admin area says "Saved".
+- A server being deleted shows a "Deleting" screen to its owner instead of "Unusable".
+
 ### Fixed
 
 - `convoy import-v4` no longer breaks its closing messages partway through a line when the install path is long. Each
   sentence is printed whole and the terminal wraps it.
+- Fixed adopting an existing virtual machine (Create Server with "Should Create VM" off). The form demanded an OS
+  password it doesn't need, and the request then failed with a 500 after creating the server, which was left behind as
+  Ready and never synced. Creating a server is now one transaction whose jobs are queued once it commits, so a failure
+  leaves nothing behind. A new VM is no longer accepted without a template.
+- Fixed the "Installing", "Restoring Backup" and "Restoring Snapshot" screens and a server's Overview polling forever
+  after the server was deleted or the browser signed out. They now show "Server not found" or go to the sign-in page,
+  and the Overview switches to the screen for a server's new status, such as suspended.
+- Fixed the admin "Deleting" screen never moving on. It now goes to "Failed to Delete" if the delete fails, and back to
+  the server list once the server is gone.
+- Fixed the backup list keeping a new backup's spinner and "0 Bytes" until the page was reloaded.
+- Fixed the Create Server user picker not finding a user by email, and the user search matching an email only in full.
+  `%` and `_` in any admin search now match themselves instead of acting as wildcards.
+- Fixed a new user not appearing in the admin user list until the page was reloaded.
+- Fixed Escape in an open multi-select, such as Create Pool's Nodes, closing the whole dialog and losing the form. It
+  closes the list; a second Escape closes the dialog.
+- Fixed IPAM pages requesting `/api/admin/address-pools/-1/attached-nodes` and getting a 404 on every load, and the
+  pool page's breadcrumb linking to `/admin/ipam/undefined`.
+- Fixed uptime reading "1 minutes".
+- Fixed a signed-out request to the API without `Accept: application/json` failing with a 500. It gets a `401` in JSON.
+- Fixed the `failed_jobs` table growing forever. Failed jobs older than a week are now pruned once a day.
+- Fixed the row menus, the search bar's "+" button, the dark mode switch and the boot order's add, remove and drag
+  buttons having no name a screen reader could announce.
+- Fixed a release's notes picking up every release candidate's notes for the same version.
+
+### Security
+
+- The bundle size report, `stats.html`, is no longer built into `public/`, where the release archive shipped it. It
+  listed the frontend's dependencies and their versions. The Docker image never included it.
 
 ## v5.0.0-alpha.4
 

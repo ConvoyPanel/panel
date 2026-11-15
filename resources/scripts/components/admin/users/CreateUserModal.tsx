@@ -1,11 +1,9 @@
 import { useFlashKey } from '@/util/useFlash'
-import usePagination from '@/util/usePagination'
 import { FormikProvider, useFormik } from 'formik'
+import { useSWRConfig } from 'swr'
 import * as yup from 'yup'
 
 import createUser from '@/api/admin/users/createUser'
-import { UserResponse } from '@/api/admin/users/getUsers'
-import useUsersSWR from '@/api/admin/users/useUsersSWR'
 
 import FlashMessageRender from '@/components/elements/FlashMessageRenderer'
 import MessageBox from '@/components/elements/MessageBox'
@@ -13,17 +11,15 @@ import Modal from '@/components/elements/Modal'
 import CheckboxFormik from '@/components/elements/formik/CheckboxFormik'
 import TextInputFormik from '@/components/elements/formik/TextInputFormik'
 
-
 interface Props {
     open: boolean
     onClose: () => void
 }
 
 const CreateUserButton = ({ open, onClose }: Props) => {
-    const [page] = usePagination()
     const { clearFlashes, clearAndAddHttpError } =
         useFlashKey('admin:users.create')
-    const { mutate } = useUsersSWR({ page })
+    const { mutate } = useSWRConfig()
 
     const form = useFormik({
         initialValues: {
@@ -53,16 +49,13 @@ const CreateUserButton = ({ open, onClose }: Props) => {
         onSubmit: async values => {
             clearFlashes()
             try {
-                const user = await createUser(values)
+                await createUser(values)
 
-                mutate(data => {
-                    if (!data) return data
-
-                    return {
-                        ...data,
-                        items: [user, ...data.items],
-                    } as UserResponse
-                }, false)
+                // Every cached user list, whatever its page and search. This
+                // updated ['admin:users', page, undefined] while the list reads
+                // ['admin:users', page, ''], so a new user never appeared
+                // until the page was reloaded.
+                mutate(key => Array.isArray(key) && key[0] === 'admin:users')
 
                 handleClose()
             } catch (e) {
