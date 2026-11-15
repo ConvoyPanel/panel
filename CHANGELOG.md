@@ -51,6 +51,9 @@ Brings over the fixes v4 has had since v4.7.0-rc.4 ([#211](https://github.com/Co
   ignored.
 - Creating a server through the API with `"should_create_server": false` accepts `"account_password": null`, as it
   already accepted `"template_uuid": null`. It used to fail validation, and only leaving the field out worked.
+- Creating addresses through the API without `server_id` or `mac_address` works. Both are optional, but leaving
+  either out failed with a 500.
+- A range of addresses assigned to a server updates the server's network settings, as a single address already did.
 
 ### Security
 
