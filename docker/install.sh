@@ -202,7 +202,11 @@ else
     esac
     [[ -n "$ref" ]] || die "could not find a published Convoy $version release. Pass --version with an exact release (for example --version 5.0.1)."
 fi
-info "installing Convoy $ref (image tag $image_tag)"
+if [[ "${ref#v}" == "$image_tag" || "$image_tag" == 5 ]]; then
+    info "installing Convoy ${ref#v}"
+else
+    info "installing Convoy $ref (image $image_tag)"
+fi
 
 ##########################################################################
 # Docker
@@ -265,14 +269,21 @@ rm -f "$cli_tmp"
 ##########################################################################
 cd "$CONVOY_DIR"
 
-info "pulling images (this takes a minute on a fresh host)"
-docker compose pull --quiet
+info "downloading Convoy's images (this can take a few minutes on a new host)"
+# Compose draws its progress bars even with --quiet, so they go to a file that
+# is only shown when the download fails.
+pull_log="$(mktemp)"
+if ! docker compose pull --quiet > "$pull_log" 2>&1; then
+    cat "$pull_log" >&2
+    rm -f "$pull_log"
+    die "couldn't download Convoy's images. Check that this host can reach ghcr.io and Docker Hub, then run the installer again."
+fi
+rm -f "$pull_log"
 
 if [[ -n "$IMPORT_DIR" ]]; then
     import_args=("$IMPORT_DIR")
     (( DRY_RUN )) && import_args+=(--dry-run)
     (( ASSUME_YES )) && import_args+=(--yes)
-    info "handing over to: convoy import-v4 ${import_args[*]}"
     # The CLI asks for confirmation on a terminal, which stdin is not under
     # curl | bash.
     if { : < /dev/tty; } 2>/dev/null; then
