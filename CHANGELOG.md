@@ -54,6 +54,9 @@ Brings over the fixes v4 has had since v4.7.0-rc.4 ([#211](https://github.com/Co
 - Creating addresses through the API without `server_id` or `mac_address` works. Both are optional, but leaving
   either out failed with a 500.
 - A range of addresses assigned to a server updates the server's network settings, as a single address already did.
+- Addresses, gateways and MAC addresses are stored in lowercase again, when created and when edited. Since
+  v4.0.0-beta they were stored as typed, so an IPv6 address differing only in case from an existing one was accepted
+  as a duplicate. Addresses already stored with capitals aren't changed.
 
 ### Security
 
