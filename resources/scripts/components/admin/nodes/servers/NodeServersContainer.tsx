@@ -26,7 +26,7 @@ const NodeServersContainer = () => {
                 <SearchBar
                     value={query}
                     onChange={e => setQuery(e.target.value)}
-                    buttonText='New Server'
+                    buttonText='Create Server'
                     onClick={() => setOpen(true)}
                 />
                 <ServersTable query={debouncedQuery} nodeId={node.id} />

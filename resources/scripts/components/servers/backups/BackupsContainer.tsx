@@ -40,7 +40,7 @@ const BackupsContainer = () => {
             {!data ? (
                 <Spinner />
             ) : data.backupCount === 0 ? (
-                <p className='text-sm text-center'>There are no backups</p>
+                <p className='text-sm text-center'>No backups</p>
             ) : (
                 <Pagination data={data} onPageSelect={setPage}>
                     {({ items }) => (

@@ -32,7 +32,7 @@ class PruneOrphanedBackupsCommand extends Command
 
         $count = $query->count();
         if (! $count) {
-            $this->info('There are no orphaned backups to be marked as failed.');
+            $this->info('No orphaned backups to mark as failed.');
 
             return;
         }

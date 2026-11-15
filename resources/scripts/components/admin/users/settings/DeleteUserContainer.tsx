@@ -35,7 +35,7 @@ const DeleteUserContainer = () => {
             <ConfirmationModal
                 open={confirming}
                 title={`Delete ${user.name}?`}
-                description={`${user.name} (${user.email}) and their data will be deleted. This can't be undone.`}
+                description="Deleting this user also deletes their SSH keys and API tokens. This can't be undone."
                 confirmLabel='Delete'
                 onConfirm={handleDelete}
                 onClose={() => setConfirming(false)}
@@ -44,14 +44,9 @@ const DeleteUserContainer = () => {
                 <FormCard.Title>Delete User</FormCard.Title>
                 <div className='space-y-3 mt-3'>
                     <FlashMessageRender byKey='admin:user:settings:delete' />
-
-                    <p className='description-small !text-foreground'>
-                        The user and its associated data will be deleted
-                    </p>
                     {user.serversCount > 0 ? (
                         <MessageBox title='Error' type='error'>
-                            This user cannot be deleted with servers still
-                            associated with it.
+                            Delete or reassign this user's servers first.
                         </MessageBox>
                     ) : null}
                 </div>

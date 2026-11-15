@@ -32,8 +32,8 @@ const CreateTokenButton = () => {
         validationSchema: yup.object({
             name: yup
                 .string()
-                .max(191, 'Do not exceed 191 characters')
-                .required('A name is required.'),
+                .max(191, 'Must be at most 191 characters')
+                .required('Required'),
         }),
         onSubmit: async values => {
             clearFlashes()
@@ -67,12 +67,12 @@ const CreateTokenButton = () => {
     return (
         <div className='flex justify-end items-center mb-3'>
             <Button onClick={() => setOpen(true)} variant='filled'>
-                New Token
+                Create Token
             </Button>
             <PlainTextTokenModal value={token} onClose={() => setToken(null)} />
             <Modal open={open} onClose={handleClose}>
                 <Modal.Header>
-                    <Modal.Title>Create a Token</Modal.Title>
+                    <Modal.Title>Create Token</Modal.Title>
                 </Modal.Header>
 
                 <FormikProvider value={form}>

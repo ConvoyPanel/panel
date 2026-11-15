@@ -63,7 +63,7 @@ const AddressesMultiSelectForm = ({ disabled, nodeId: propNodeId }: Props) => {
             onSearchChange={val => setQuery(val)}
             loading={isValidating || isLoading}
             label={'Addresses'}
-            nothingFound='No addresses found'
+            nothingFound='No addresses'
             name={'addressIds'}
             disabled={disabled}
         />
