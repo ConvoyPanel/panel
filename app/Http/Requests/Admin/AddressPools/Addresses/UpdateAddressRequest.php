@@ -13,6 +13,8 @@ use Convoy\Validation\ValidateAddressUniqueness;
 
 class UpdateAddressRequest extends BaseApiRequest
 {
+    use LowercasesAddresses;
+
     public function rules(): array
     {
         $rules = Address::getRulesForUpdate($this->parameter('address', Address::class));
