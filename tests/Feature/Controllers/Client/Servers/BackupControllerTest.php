@@ -141,7 +141,7 @@ function testDeleteBackups(
 
 it('can create backups', testCreateBackup());
 
-it('locks a new backup when asked to', function (string $field) {
+it('locks a new backup when asked to', function () {
     Http::fake(['*' => Http::response(['data' => 'upid'], 200)]);
 
     [$user, $_, $_, $server] = createServerModel();
@@ -150,9 +150,9 @@ it('locks a new backup when asked to', function (string $field) {
         'name' => 'Locked Backup',
         'mode' => 'snapshot',
         'compression_type' => 'none',
-        $field => true,
+        'is_locked' => true,
     ])->assertOk()->assertJsonPath('data.is_locked', 1);
-})->with(['is_locked', 'locked']);
+});
 
 it('can restore backups', testRestoreBackups());
 

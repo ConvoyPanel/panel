@@ -47,7 +47,8 @@ Brings over the fixes v4 has had since v4.7.0-rc.4 ([#211](https://github.com/Co
   buttons having no name a screen reader could announce.
 - Fixed a release's notes picking up every release candidate's notes for the same version.
 - A backup created through the API with `"is_locked": true` is locked. The request checked `is_locked` but read
-  `locked`, so the backup came out unlocked. `locked` is still accepted.
+  `locked`, so the backup came out unlocked. The request now takes only `is_locked`, the column's name; `locked` is
+  ignored.
 
 ### Security
 
