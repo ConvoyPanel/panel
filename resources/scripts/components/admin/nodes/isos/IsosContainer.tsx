@@ -149,7 +149,7 @@ const IsosContainer = () => {
                 <ConfirmationModal
                     open={confirmingDelete}
                     title={`Delete ${isoToDelete?.name}?`}
-                    description="Deleting this ISO removes it from the library and deletes its file from the Proxmox node. This can't be undone."
+                    description="Deleting this ISO removes it from the library, ejects it from every server it's mounted on and deletes its file from the Proxmox node. This can't be undone."
                     confirmLabel='Delete'
                     onConfirm={handleDelete}
                     onClose={() => setConfirmingDelete(false)}
