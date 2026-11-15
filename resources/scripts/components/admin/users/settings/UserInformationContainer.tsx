@@ -29,17 +29,17 @@ const UserInformationContainer = () => {
         validationSchema: yup.object({
             name: yup
                 .string()
-                .max(191, 'Do not exceed 191 characters')
-                .required('A name is required.'),
+                .max(191, 'Must be at most 191 characters')
+                .required('Required'),
             email: yup
                 .string()
                 .email('Enter a valid email address')
-                .required('An email address is required.'),
+                .required('Required'),
             password: yup
                 .string()
                 .matches(
                     /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/,
-                    'Must Contain 8 Characters, One Uppercase, One Lowercase, One Number and One Special Case Character'
+                    'Must be at least 8 characters, with an uppercase letter, a lowercase letter, a number and one of !@#$%^&*'
                 )
                 .optional(),
             rootAdmin: yup.boolean(),
@@ -72,7 +72,9 @@ const UserInformationContainer = () => {
                             <TextInputFormik
                                 name='password'
                                 label='Password'
-                                placeholder={'Override password'}
+                                placeholder={
+                                    'Leave blank to keep the current password'
+                                }
                             />
                             <CheckboxFormik
                                 name={'rootAdmin'}

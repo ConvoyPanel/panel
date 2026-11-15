@@ -35,7 +35,7 @@ const NodesSelectForm = ({ disabled }: Props) => {
             searchValue={query}
             onSearchChange={query => setQuery(query)}
             loading={isValidating || isLoading}
-            nothingFound={'No nodes found'}
+            nothingFound={'No nodes'}
             name={'nodeId'}
             disabled={disabled}
         />

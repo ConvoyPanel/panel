@@ -38,8 +38,8 @@ const TelemetryContainer = () => {
             notify({
                 color: 'green',
                 message: enabled
-                    ? 'Telemetry is on. The first report goes out at its time today or tomorrow.'
-                    : "Telemetry is off. The Convoy console has been asked to erase this panel's reports.",
+                    ? 'Telemetry is on. The first report goes out within a day.'
+                    : 'Telemetry is off. The panel asked the Convoy console to erase its reports.',
             })
         } catch (e) {
             clearAndAddHttpError(e as Error)
@@ -78,7 +78,7 @@ const TelemetryContainer = () => {
 
                     <div className='mt-6'>
                         <Switch
-                            label='Send the daily report'
+                            label='Send the Daily Report'
                             checked={data.enabled}
                             disabled={saving || data.disabledBy !== null}
                             onChange={event =>
@@ -120,7 +120,7 @@ const TelemetryContainer = () => {
                 </FormCard.Body>
                 <FormCard.Footer>
                     <Button size='sm' onClick={() => setReportOpen(true)}>
-                        View report
+                        View Report
                     </Button>
                 </FormCard.Footer>
             </FormCard>

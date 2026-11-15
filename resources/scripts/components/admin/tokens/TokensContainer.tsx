@@ -41,7 +41,7 @@ const columns: ColumnArray<Token> = [
     },
     {
         accessor: 'lastUsedAt',
-        header: 'Last Used At',
+        header: 'Last Used',
         cell: ({ value }) =>
             value
                 ? formatDistanceToNow(value, {
@@ -90,9 +90,8 @@ const TokensContainer = () => {
 
                     <Modal.Body>
                         <Modal.Description>
-                            Are you sure you want to delete this token?
-                            Subsequent requests to the API relying on this token
-                            will immediately fail.
+                            Anything using this token loses access to the API
+                            immediately.
                         </Modal.Description>
                     </Modal.Body>
                     <Modal.Actions>

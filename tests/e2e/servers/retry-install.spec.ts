@@ -19,7 +19,7 @@ test('offers to retry a failed install', async ({ page }) => {
     await page.getByRole('option', { name: 'E2E Linux' }).click()
     await page.getByLabel('Template', { exact: true }).click()
     await page.getByRole('option', { name: 'E2E Debian 12' }).click()
-    await page.getByLabel('System OS Password').fill('Rt-Aa1!bcdefgh9')
+    await page.getByLabel('OS Password').fill('Rt-Aa1!bcdefgh9')
 
     // The seeded node isn't a real Proxmox host, so answer the reinstall here
     // rather than queue a build that could only fail.

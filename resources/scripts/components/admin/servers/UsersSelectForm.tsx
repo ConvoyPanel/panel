@@ -34,7 +34,7 @@ const UsersSelectForm = () => {
             searchValue={query}
             onSearchChange={val => setQuery(val)}
             loading={isValidating || isLoading}
-            nothingFound={'No users found'}
+            nothingFound={'No users'}
             name={'userId'}
             itemComponent={DescriptiveItemComponent}
         />

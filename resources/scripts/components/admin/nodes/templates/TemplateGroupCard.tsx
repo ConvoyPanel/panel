@@ -215,7 +215,7 @@ const TemplateGroupCard = ({ group, className }: Props) => {
                                 <img
                                     src={Dots}
                                     className='w-4 h-4 min-w-[1rem] dark:invert cursor-pointer'
-                                    alt='3 vertical dots meant for activating a menu'
+                                    alt='More actions'
                                 />
                             </Menu.Target>
                             <Menu.Dropdown>
@@ -281,7 +281,7 @@ const TemplateGroupCard = ({ group, className }: Props) => {
                                     onClick={() => setShowCreateModal(true)}
                                     className='text-sm bg-transparent active:bg-accent-200 sm:hover:bg-accent-100 transition-colors text-foreground border border-accent-400 border-dashed rounded py-2'
                                 >
-                                    New Template
+                                    Create Template
                                 </button>
                             ) : null}
                         </div>

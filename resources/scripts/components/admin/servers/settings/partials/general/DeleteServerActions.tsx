@@ -99,12 +99,8 @@ const DeleteServerActions = ({ className }: Props) => {
                 <Modal.Body>
                     <Modal.Description>
                         {confirming === 'disconnect'
-                            ? t('deletion.disconnect_confirmation.description', {
-                                  name: server.name,
-                              })
-                            : t('deletion.confirmation.description', {
-                                  name: server.name,
-                              })}
+                            ? t('deletion.disconnect_confirmation.description')
+                            : t('deletion.confirmation.description')}
                     </Modal.Description>
                 </Modal.Body>
                 <Modal.Actions>

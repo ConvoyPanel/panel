@@ -2,7 +2,7 @@ import * as yup from 'yup'
 
 yup.addMethod(yup.string, 'englishKeyboardCharacters', function () {
     return this.matches(/^[A-Za-z0-9!@#$%^&*()_+\-=[\]{}|;':",.\/<>?\\ ]*$/, {
-        message: 'Invalid English keyboard characters',
+        message: 'Can only contain characters from a US keyboard',
         excludeEmptyString: true,
     })
 })
@@ -12,7 +12,7 @@ yup.addMethod(yup.string, 'passwordRequirements', function () {
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/,
         {
             message:
-                'Must contain 8 characters, 1 uppercase, 1 lowercase, 1 number and 1 special character',
+                'Must be at least 8 characters, with an uppercase letter, a lowercase letter, a number and one of !@#$%^&*',
             excludeEmptyString: true,
         }
     )

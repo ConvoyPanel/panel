@@ -34,17 +34,16 @@ const TelemetryReportModal = ({ open, onClose }: Props) => {
     return (
         <Modal open={open} onClose={onClose}>
             <Modal.Header>
-                <Modal.Title>Telemetry report</Modal.Title>
+                <Modal.Title>Telemetry Report</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <Modal.Description bottomMargin>
-                    This is the report as the next one would be sent: counts,
-                    switches and version numbers under a random installation id.
-                    Nothing in it names a person or this panel.
+                    This is the next report, exactly as it'll be sent. Nothing
+                    in it identifies a person or this panel.
                 </Modal.Description>
                 {error ? (
                     <p className='text-sm text-error'>
-                        The report could not be built. Try again in a moment.
+                        Couldn't build the report. Try again in a moment.
                     </p>
                 ) : report === null ? (
                     <div className='grid place-items-center py-10'>

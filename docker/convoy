@@ -29,14 +29,39 @@ DEFAULT_DIR=/opt/convoy
 DEFAULT_V4_DIR=/var/www/convoy
 
 if [[ -t 2 ]]; then
-    RED=$'\033[0;31m' GREEN=$'\033[0;32m' YELLOW=$'\033[0;33m' BOLD=$'\033[1m' RESET=$'\033[0m'
+    RED=$'\033[0;31m' GREEN=$'\033[0;32m' YELLOW=$'\033[0;33m' BOLD=$'\033[1m' DIM=$'\033[2m' RESET=$'\033[0m'
 else
-    RED='' GREEN='' YELLOW='' BOLD='' RESET=''
+    RED='' GREEN='' YELLOW='' BOLD='' DIM='' RESET=''
 fi
 
-err()  { printf '%s\n' "${RED}error:${RESET} $*" >&2; }
-info() { printf '%s\n' "${GREEN}==>${RESET} $*" >&2; }
-warn() { printf '%s\n' "${YELLOW}warning:${RESET} $*" >&2; }
+# Messages for the person running the command go to USER_FD. import-v4 sends
+# everything else only to its log, so it points USER_FD at the terminal and sets
+# IMPORT_LOG to have these messages logged too.
+USER_FD=2
+IMPORT_LOG=""
+# Set while a begin line waits for its finish on the same line.
+LINE_OPEN=0
+
+uncolor() {
+    local s="$1" c
+    for c in "$RED" "$GREEN" "$YELLOW" "$BOLD" "$DIM" "$RESET"; do
+        [[ -z "$c" ]] || s="${s//"$c"/}"
+    done
+    printf '%s' "$s"
+}
+
+say() {
+    if (( LINE_OPEN )); then
+        printf '\n' >&"$USER_FD"
+        LINE_OPEN=0
+    fi
+    printf '%s\n' "$*" >&"$USER_FD"
+    if [[ -n "$IMPORT_LOG" ]]; then printf '%s\n' "$(uncolor "$*")" >> "$IMPORT_LOG"; fi
+}
+
+err()  { say "${RED}error:${RESET} $*"; }
+info() { say "${GREEN}==>${RESET} $*"; }
+warn() { say "${YELLOW}warning:${RESET} $*"; }
 die()  { err "$@"; exit 1; }
 
 ##########################################################################
@@ -141,8 +166,8 @@ use_install() {
     local dir="${1:-${CONVOY_DIR:-$DEFAULT_DIR}}"
     case "$(layout_of "$dir")" in
         5.x) ;;
-        v4)  die "$dir is a v4 install. This command needs Convoy 5; see 'convoy import-v4'." ;;
-        *)   die "no Convoy 5 install in $dir (set CONVOY_DIR if it is somewhere else)." ;;
+        v4)  die "$dir is a v4 install. This command needs Convoy 5. See 'convoy import-v4'." ;;
+        *)   die "there's no Convoy 5 install in $dir. If it's somewhere else, set CONVOY_DIR to its directory." ;;
     esac
     INSTALL_DIR="$(cd "$dir" && pwd)"
     cd "$INSTALL_DIR"
@@ -216,7 +241,7 @@ bundled_postgres() {
 }
 
 cmd_backup() {
-    bundled_postgres || die "this install uses an external database; back it up with your provider's tooling."
+    bundled_postgres || die "this install uses an external database. Back it up with your provider's tooling."
     load_db_settings
 
     local backup_dir="$INSTALL_DIR/backups" stamp file
@@ -225,7 +250,7 @@ cmd_backup() {
     stamp="$(date -u +%Y%m%dT%H%M%SZ)"
     file="$backup_dir/convoy-$stamp.sql.gz"
 
-    info "dumping database to $file"
+    info "Backing up the database to $file"
     # --clean --if-exists so the dump can be replayed over an existing database.
     # A failed dump leaves no file: a truncated one would pass for a backup.
     if ! ( umask 077; compose exec -T postgres pg_dump \
@@ -237,7 +262,7 @@ cmd_backup() {
         die "the database backup failed. Check 'convoy logs postgres'."
     fi
 
-    info "backup complete ($(du -h "$file" | cut -f1))"
+    info "Backup complete ($(du -h "$file" | cut -f1))"
     printf '%s\n' "$file"
 }
 
@@ -285,12 +310,12 @@ update_self() {
     fi
     if ! bash -n "$new" 2>/dev/null; then
         rm -f "$new"
-        warn "the convoy command in the new release does not parse; keeping this one."
+        warn "the convoy command in the new release doesn't parse, so the upgrade kept this one."
         return 1
     fi
     if [[ ! -w "$(dirname "$self")" ]]; then
         rm -f "$new"
-        warn "cannot replace $self (run 'sudo convoy upgrade' to update the convoy command too)."
+        warn "can't replace $self. To update the convoy command too, run 'sudo convoy upgrade' again."
         return 1
     fi
     version="$(sed -n 's/^CONVOY_CLI_VERSION="\([^"]*\)"$/\1/p' "$new")"
@@ -299,7 +324,7 @@ update_self() {
     install -m 755 "$new" "$self.new"
     mv -f "$self.new" "$self"
     rm -f "$new"
-    info "updated the convoy command: $CONVOY_CLI_VERSION -> ${version:-unknown}"
+    info "Updated the convoy command: $CONVOY_CLI_VERSION -> ${version:-unknown}"
 }
 
 # Brings compose.yml up to the new release's, unless it has been edited: then
@@ -318,10 +343,10 @@ update_compose_file() {
         && docker run --rm --network none --entrypoint cat "$old_image" "$IMAGE_APP_DIR/compose.yml" > "$shipped" 2>/dev/null \
         && [[ -s "$shipped" ]] && cmp -s "$shipped" compose.yml; then
         install -m 644 "$new" compose.yml
-        info "updated compose.yml to this release's"
+        info "Updated compose.yml to this release's"
     else
         install -m 644 "$new" compose.yml.new
-        warn "compose.yml has local changes, so it was left alone. This release's is in compose.yml.new;"
+        warn "compose.yml has local changes, so the upgrade left it alone and saved the new one as compose.yml.new."
         warn "compare them with 'diff $INSTALL_DIR/compose.yml $INSTALL_DIR/compose.yml.new' and bring over what you need."
     fi
     rm -f "$new" "$shipped"
@@ -333,7 +358,7 @@ UPGRADE_DRAINED=0
 
 resume_after_failed_upgrade() {
     if (( UPGRADE_DRAINED )); then
-        warn "the upgrade stopped before anything was replaced; starting the worker and scheduler again."
+        warn "the upgrade stopped before anything was replaced. Starting the worker and scheduler again."
         compose start worker scheduler >/dev/null 2>&1 || true
     fi
 }
@@ -349,7 +374,7 @@ cmd_upgrade() {
     # Once per upgrade: the updated command carries on from here, with the
     # images already pulled, and must not update itself again.
     if [[ -z "${CONVOY_UPGRADE_UPDATED_SELF:-}" ]]; then
-        info "pulling images"
+        info "Downloading images"
         compose pull
         if update_self; then
             CONVOY_UPGRADE_UPDATED_SELF=1 exec "$(readlink -f "${BASH_SOURCE[0]}")" upgrade
@@ -363,32 +388,31 @@ cmd_upgrade() {
 
     trap resume_after_failed_upgrade EXIT
 
-    info "stopping the scheduler, so it starts no new jobs"
+    info "Stopping the scheduler"
     compose stop scheduler >/dev/null
     UPGRADE_DRAINED=1
-    info "waiting for the worker to finish the jobs it is running (at most $(( UPGRADE_DRAIN_TIMEOUT / 60 )) minutes)"
+    info "Waiting for the worker to finish its current jobs (up to $(( UPGRADE_DRAIN_TIMEOUT / 60 )) minutes)"
     compose stop --timeout "$UPGRADE_DRAIN_TIMEOUT" worker >/dev/null
 
     if bundled_postgres; then
-        info "backing up the database"
         cmd_backup >/dev/null
     else
-        warn "external database in use -- take your own backup before continuing."
+        warn "this install uses an external database, which the upgrade doesn't back up."
     fi
 
     # Migrations run when the web container starts (AUTORUN).
-    info "starting the new release"
+    info "Starting the new release"
     UPGRADE_DRAINED=0
     compose up -d web
-    info "waiting for the panel to report healthy"
-    wait_healthy web 300 || die "the panel did not become healthy within 5 minutes, so the worker and scheduler are still stopped. Check 'convoy logs web', then run 'convoy up'."
+    info "Waiting for the panel to report healthy"
+    wait_healthy web 300 || die "the panel didn't become healthy within 5 minutes, so the worker and scheduler are still stopped. Check 'convoy logs web', then run 'convoy up'."
 
-    info "starting the worker and scheduler"
+    info "Starting the worker and scheduler"
     compose up -d --remove-orphans
-    wait_healthy worker 120 || warn "the worker is not healthy yet. Check 'convoy logs worker'; queued jobs wait until it is."
+    wait_healthy worker 120 || warn "the worker isn't healthy yet, so queued jobs won't run until it is. Check 'convoy logs worker'."
 
     trap - EXIT
-    info "upgrade complete: $(run_artisan --version 2>/dev/null | tail -1)"
+    info "Upgrade complete: $(run_artisan --version 2>/dev/null | tail -1)"
 }
 
 ##########################################################################
@@ -462,7 +486,7 @@ SED
 }
 
 redact() {
-    [[ -n "$REDACT_SED" ]] || die "redact_init has not run."
+    [[ -n "$REDACT_SED" ]] || die "redact_init hasn't run."
     LC_ALL=C sed -E -f "$REDACT_SED"
 }
 
@@ -702,7 +726,7 @@ cmd_support() {
     fi
 
     use_install "$dir"
-    command -v docker >/dev/null 2>&1 || die "docker is not installed."
+    command -v docker >/dev/null 2>&1 || die "docker isn't installed."
 
     local out_dir="$INSTALL_DIR/backups/support" stamp collected_at work raw bundle archive
     collected_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
@@ -719,7 +743,7 @@ cmd_support() {
 
     redact_init "$INSTALL_DIR/.env"
 
-    info "collecting from $INSTALL_DIR"
+    info "Collecting from $INSTALL_DIR"
 
     # Container logs.
     local service
@@ -758,7 +782,7 @@ cmd_support() {
     fi
 
     # Diagnostics, through the app image so they work with the stack down.
-    info "running diagnostics (a stopped stack makes some of these fail; that is recorded, not fatal)"
+    info "Running diagnostics"
     app_cmd -T
     support_diagnostic diagnostics/about.json "$raw/diagnostics/about.json" php artisan about --json
     support_diagnostic diagnostics/horizon-status.txt "$raw/diagnostics/horizon-status.txt" php artisan horizon:status --no-ansi
@@ -819,11 +843,11 @@ cmd_support() {
     printf '%s\n' "$archive"
 
     if [[ "$upload" == no ]]; then
-        info "not uploaded (--no-upload). Open the archive to see exactly what it contains."
+        info "Not uploaded (--no-upload). Open the archive to see exactly what it contains."
         return 0
     fi
     if [[ "$upload" == ask && ! -t 0 && -z "$visibility" ]]; then
-        info "not uploaded: no terminal to ask on. Re-run with --visibility and --yes to upload."
+        info "Not uploaded: no terminal to ask on. Run 'convoy support' again with --visibility and --yes to upload."
         return 0
     fi
 
@@ -846,11 +870,11 @@ cmd_support() {
     fi
 
     if [[ "$upload" == ask ]]; then
-        [[ -t 0 ]] || { info "not uploaded: no terminal to ask on. Re-run with --yes to upload."; return 0; }
+        [[ -t 0 ]] || { info "Not uploaded: no terminal to ask on. Run 'convoy support' again with --yes to upload."; return 0; }
         local answer=""
         printf '\n%s\n' "$(support_consent_text "$visibility")" >&2
         read -rp "Upload? [y/N] " answer
-        [[ "$answer" =~ ^[Yy]([Ee][Ss])?$ ]] || { info "not uploaded."; return 0; }
+        [[ "$answer" =~ ^[Yy]([Ee][Ss])?$ ]] || { info "Not uploaded."; return 0; }
     fi
 
     support_upload "$archive" "$out_dir" "$panel" "$visibility" "$password"
@@ -880,7 +904,7 @@ support_consent_text() {
     case "$1" in
         staff)    printf '%s' "Only the Convoy team can open these logs. They're deleted after 30 days." ;;
         password) printf '%s' "Anyone with the link and the password can open these logs. $exposed" ;;
-        public)   printf '%s' "Anyone with this link can open these logs. $exposed" ;;
+        public)   printf '%s' "Anyone with the link can open these logs. $exposed" ;;
     esac
 }
 
@@ -891,10 +915,10 @@ support_read_password() {
     if (( from_stdin )); then
         IFS= read -r password || true
     else
-        [[ -t 0 ]] || die "a password is needed for --visibility password; pass it with --password-stdin."
+        [[ -t 0 ]] || die "a password is needed for --visibility password. Pass it with --password-stdin."
         IFS= read -rsp "Password for the link (8 to 128 characters): " password; printf '\n' >&2
         IFS= read -rsp "Again: " again; printf '\n' >&2
-        [[ "$password" == "$again" ]] || die "the passwords do not match."
+        [[ "$password" == "$again" ]] || die "the passwords don't match."
     fi
     (( ${#password} >= 8 && ${#password} <= 128 )) || die "the password must be 8 to 128 characters."
     printf '%s' "$password"
@@ -910,9 +934,9 @@ support_upload() {
     local archive="$1" out_dir="$2" panel="$3" visibility="$4" password="$5" response status body code url manage_url
 
     (( $(wc -c < "$archive") <= 20 * 1024 * 1024 )) \
-        || die "the bundle is larger than the 20 MiB the console accepts. Try a shorter window, e.g. --since 12h."
+        || die "the bundle is larger than the 20 MiB upload limit. Try a shorter window, e.g. --since 12h."
 
-    info "uploading"
+    info "Uploading"
     response="$(mktemp)"
     # The password goes in through a config on a file descriptor, never on the
     # command line where `ps` would show it.
@@ -923,27 +947,27 @@ support_upload() {
         -F "bundle=@$archive;type=application/gzip" \
         -F "visibility=$visibility" \
         --config <(if [[ -n "$password" ]]; then printf 'form-string = %s\n' "$(curl_config_str "password=$password")"; fi) \
-        "$CONVOY_SUPPORT_URL/api/v1/support-bundles")" || { rm -f "$response"; die "could not reach $CONVOY_SUPPORT_URL. The bundle is still at $archive."; }
+        "$CONVOY_SUPPORT_URL/api/v1/support-bundles")" || { rm -f "$response"; die "couldn't reach $CONVOY_SUPPORT_URL. The bundle is still at $archive."; }
     body="$(cat "$response")"
     rm -f "$response"
 
     case "$status" in
         201) ;;
-        413) die "the console refused the bundle as too large. Try a shorter window, e.g. --since 12h." ;;
-        422) die "the console refused the upload: $(json_field "$body" message)" ;;
-        429) die "too many uploads from this address. Wait an hour and try again; the bundle is at $archive." ;;
-        *)   die "the console answered HTTP $status. The bundle is still at $archive." ;;
+        413) die "the upload failed because the bundle is too large. Try a shorter window, e.g. --since 12h." ;;
+        422) die "the upload failed: $(json_field "$body" message)" ;;
+        429) die "too many uploads from this address. The bundle is still at $archive. Wait an hour and try again." ;;
+        *)   die "the upload failed with HTTP $status. The bundle is still at $archive." ;;
     esac
 
     code="$(json_field "$body" code | tr '[:lower:]' '[:upper:]')"
-    valid_code "$code" || die "the console's answer did not contain a support code."
+    valid_code "$code" || die "the response from $CONVOY_SUPPORT_URL didn't include a support code."
     url="$(json_field "$body" url)"
     manage_url="$(json_field "$body" manage_url)"
     ( umask 077; printf '%s\n' "$body" > "$out_dir/$code.json" )
 
     printf '\n  %s\n\n' "${BOLD}${url:-$code}${RESET}" >&2
     printf '  Share this link in Discord or your GitHub issue (code %s).\n\n' "$code" >&2
-    printf '  Private, for you only -- whoever has it can change who sees the logs or delete them:\n  %s\n\n' "$manage_url" >&2
+    printf '  Keep this link private. Anyone with it can change who sees the logs or delete them:\n  %s\n\n' "$manage_url" >&2
     printf '  Or from this host: convoy support visibility %s <staff|password|public>\n                     convoy support delete %s\n\n' "$code" "$code" >&2
 }
 
@@ -985,11 +1009,11 @@ cmd_support_delete() {
         -H 'Accept: application/json' \
         -A "convoy-cli/$CONVOY_CLI_VERSION" \
         --config <(printf 'header = %s\n' "$(curl_config_str "Authorization: Bearer $token")") \
-        "$CONVOY_SUPPORT_URL/api/v1/support-bundles/$code")" || die "could not reach $CONVOY_SUPPORT_URL."
+        "$CONVOY_SUPPORT_URL/api/v1/support-bundles/$code")" || die "couldn't reach $CONVOY_SUPPORT_URL."
 
-    [[ "$status" == "204" ]] || die "the console answered HTTP $status."
+    [[ "$status" == "204" ]] || die "deleting $code failed with HTTP $status."
     rm -f "$INSTALL_DIR/backups/support/$code.json"
-    info "deleted $code."
+    info "Deleted $code."
 }
 
 cmd_support_visibility() {
@@ -1016,7 +1040,7 @@ cmd_support_visibility() {
         local answer=""
         printf '%s\n' "$(support_consent_text public)" >&2
         read -rp "Make it public? [y/N] " answer
-        [[ "$answer" =~ ^[Yy]([Ee][Ss])?$ ]] || die "left as it was."
+        [[ "$answer" =~ ^[Yy]([Ee][Ss])?$ ]] || die "cancelled, so $code wasn't changed."
     fi
     payload+="}"
 
@@ -1029,15 +1053,15 @@ cmd_support_visibility() {
         -A "convoy-cli/$CONVOY_CLI_VERSION" \
         --config <(printf 'header = %s\n' "$(curl_config_str "Authorization: Bearer $token")") \
         --data-binary @<(printf '%s' "$payload") \
-        "$CONVOY_SUPPORT_URL/api/v1/support-bundles/$code")" || { rm -f "$response"; die "could not reach $CONVOY_SUPPORT_URL."; }
+        "$CONVOY_SUPPORT_URL/api/v1/support-bundles/$code")" || { rm -f "$response"; die "couldn't reach $CONVOY_SUPPORT_URL."; }
     body="$(cat "$response")"
     rm -f "$response"
 
     case "$status" in
         200) ;;
-        404) die "the console does not know $code with this token. It may have expired or been deleted." ;;
-        422) die "the console refused the change: $(json_field "$body" message)" ;;
-        *)   die "the console answered HTTP $status." ;;
+        404) die "couldn't find $code with this host's manage token. It may have expired or been deleted." ;;
+        422) die "changing the visibility of $code failed: $(json_field "$body" message)" ;;
+        *)   die "changing the visibility of $code failed with HTTP $status." ;;
     esac
 
     record="$INSTALL_DIR/backups/support/$code.json"
@@ -1049,14 +1073,14 @@ support_usage() {
     cat <<'EOF'
 convoy support -- send logs and diagnostics to the Convoy team
 
-  convoy support [--since 48h] [--no-upload] [--visibility <who>] [--password-stdin] [--yes] [--dir <path>]
+  convoy support [options]
   convoy support visibility <code> <staff|password|public> [--password-stdin]
   convoy support delete <code>
 
 Collects container logs, Laravel logs, the last import-v4 log, host details
 and a few Artisan diagnostics into a .tar.gz under <install>/backups/support,
-with secrets removed. Shows you what it collected, asks who may open it, then
-asks before uploading. You get a link to share and a private manage link.
+with secrets removed. Shows you what it collected, then asks who can open it
+and whether to upload it. You get a link to share and a private manage link.
 
   --since <window>     how far back container logs go (default 48h)
   --no-upload          stop after writing the archive
@@ -1066,6 +1090,12 @@ asks before uploading. You get a link to share and a private manage link.
   --yes                upload without asking
   --dir <path>         the install to collect from (default: CONVOY_DIR, else
                        /opt/convoy)
+
+Examples:
+  convoy support
+  convoy support --no-upload
+  convoy support --since 12h --yes
+  convoy support visibility CVY-XXXX-XXXX staff
 
 EOF
 }
@@ -1145,7 +1175,67 @@ version_ge() {
     [[ "$(printf '%s\n%s\n' "$2" "$1" | sort -V | head -1)" == "$2" ]]
 }
 
-step() { printf '\n%s\n' "${BOLD}[$1] $2${RESET}" >&2; }
+# Each step gets a numbered heading and short indented lines under it. What the
+# commands underneath print goes only to the log.
+step() { say ""; say "${BOLD}[$1/5] $2${RESET}"; }
+note() { say "      $*"; }
+
+# For work that takes a while: "      Doing it ... " now, then finish prints
+# "done" (or its argument) on the same line.
+begin() {
+    if (( LINE_OPEN )); then printf '\n' >&"$USER_FD"; fi
+    printf '%s' "      $* ... " >&"$USER_FD"
+    LINE_OPEN=1
+    printf '%s ...\n' "      $(uncolor "$*")" >> "$IMPORT_LOG"
+}
+
+finish() {
+    local result="${1:-done}"
+    if (( LINE_OPEN )); then
+        printf '%s\n' "$result" >&"$USER_FD"
+        LINE_OPEN=0
+    else
+        printf '%s\n' "      $result" >&"$USER_FD"
+    fi
+    printf '%s\n' "      ... $(uncolor "$result")" >> "$IMPORT_LOG"
+}
+
+# Runs a command whose output goes only to the log. If it fails, the end of
+# that output is shown as well, because that's usually where the reason is.
+# LOGGED_FROM is where its output starts in the log.
+LOGGED_FROM=0
+logged() {
+    local status=0
+    LOGGED_FROM="$(wc -c < "$IMPORT_LOG")"
+    "$@" || status=$?
+    if (( status != 0 )); then
+        if (( LINE_OPEN )); then
+            printf '%s\n' "${RED}failed${RESET}" >&"$USER_FD"
+            LINE_OPEN=0
+        fi
+        logged_output | tail -n 25 | sed 's/^/      /' >&"$USER_FD"
+    fi
+    return "$status"
+}
+
+logged_output() { tail -c "+$(( LOGGED_FROM + 1 ))" "$IMPORT_LOG"; }
+
+# Downloads whichever of these images the host doesn't have yet. Images already
+# here aren't pulled again: v4's database runs on mysql:8.4, and a newer image
+# under that tag would change what v4 runs on its next start.
+import_pull_missing() {
+    local image
+    for image in "$@"; do
+        [[ -n "$image" ]] || continue
+        docker image inspect "$image" >/dev/null 2>&1 && continue
+        docker pull -q "$image" || return 1
+    done
+}
+
+# 107478 -> "104 GiB", 1659 -> "1.6 GiB", 300 -> "300 MiB".
+human_mib() {
+    awk -v m="$1" 'BEGIN { if (m >= 10240) printf "%d GiB", m / 1024; else if (m >= 1024) printf "%.1f GiB", m / 1024; else printf "%d MiB", m }'
+}
 
 import_cleanup() {
     local status=$?
@@ -1157,11 +1247,17 @@ import_cleanup() {
     if [[ -n "${IMPORT_WORK:-}" ]]; then rm -rf "$IMPORT_WORK"; fi
     if [[ -n "${REDACT_SED:-}" ]]; then rm -f "$REDACT_SED"; fi
     if (( status != 0 )) && (( ${IMPORT_V4_STOPPED:-0} )); then
-        printf '\n%s\n' "${RED}${BOLD}The import did not finish.${RESET} v4 is untouched; bring it back with:" >&2
-        import_rollback_hint >&2
+        say ""
+        say "${RED}${BOLD}The import didn't finish,${RESET} but v4's data wasn't changed. To switch back to v4, run:"
+        import_rollback_hint
+    fi
+    if (( status != 0 )) && (( ${IMPORT_DRY_RUN:-0} )); then
+        say ""
+        say "This dry run didn't change v4, which is still online."
     fi
     if (( status != 0 )) && [[ -n "${IMPORT_LOG:-}" ]]; then
-        printf '\nThe full log is %s; %s includes it.\n' "$IMPORT_LOG" "'convoy support'" >&2
+        say ""
+        say "The full log is saved at $IMPORT_LOG. If you need help, run 'convoy support' to send it to the Convoy team."
     fi
 }
 
@@ -1170,8 +1266,10 @@ import_cleanup() {
 # stopped containers are attached to. v4 keeps its data in bind mounts, so
 # recreating its containers loses nothing.
 import_rollback_hint() {
-    printf '\n  docker compose -f %s/compose.yml down\n' "$INSTALL_DIR"
-    printf '  cd %s && docker compose up -d --force-recreate && docker compose exec php php artisan up\n\n' "$V4_DIR"
+    say ""
+    say "  docker compose -f $INSTALL_DIR/compose.yml down"
+    say "  cd $V4_DIR && docker compose up -d --force-recreate && docker compose exec php php artisan up"
+    say ""
 }
 
 # Runs SQL in the throwaway MySQL and prints the result without headers.
@@ -1189,15 +1287,61 @@ import_require_empty_db() {
     tables="$(import_psql -c "SELECT count(*) FROM information_schema.tables WHERE table_schema NOT IN ('pg_catalog', 'information_schema')" < /dev/null)"
     if [[ "$tables" != "0" ]]; then
         if [[ -n "${IMPORT_DRY_PROJECT:-}" ]]; then
-            die "the scratch database already has $tables tables, which should not happen. Run this again."
+            die "the dry run's temporary database already has $tables tables in it, which shouldn't happen. Run the dry run again."
         fi
         local project
         project="$(compose config 2>/dev/null | sed -n 's/^name: //p' | head -1)"
-        die "the Convoy 5 database already has $tables tables (from an earlier attempt?). import-v4 only fills an empty database. To start over, remove Convoy 5's database (v4's data is not affected) and run this again:
+        die "Convoy 5's database already has $tables tables in it, probably from an earlier attempt, and the import can only fill an empty database. To start over, delete Convoy 5's database with the command below (this doesn't affect v4) and run the import again:
 
   docker compose -f $INSTALL_DIR/compose.yml rm -sf postgres && docker volume rm ${project:-convoy}_postgres"
     fi
 
+}
+
+# The dump, with the container's own MYSQL_* variables (set from v4's .env by
+# its compose file), so no password passes through this host's process list.
+import_dump() {
+    # shellcheck disable=SC2016 # expanded inside the container
+    ( umask 077; v4_compose exec -T database sh -c 'MYSQL_PWD="$MYSQL_PASSWORD" exec mysqldump --single-transaction --quick --hex-blob --no-tablespaces --routines --triggers -u"$MYSQL_USER" "$MYSQL_DATABASE"' < /dev/null \
+        | gzip > "$1" )
+}
+
+# Postgres first, so the throwaway MySQL can join its network. A real run
+# started it in step 1; Redis waits until now because v4's has the same
+# service name in the usual shared project name ("convoy").
+import_prepare_copy() {
+    local dump="$1" waited=0
+    compose "${IMPORT_PROJECT_ARGS[@]}" up -d --wait postgres redis || return 1
+    (( ! IMPORT_DRY_RUN )) || import_require_empty_db
+
+    local postgres_id
+    postgres_id="$(compose "${IMPORT_PROJECT_ARGS[@]}" ps -q postgres)"
+    IMPORT_NETWORK="$(docker inspect -f '{{range $name, $_ := .NetworkSettings.Networks}}{{$name}}{{"\n"}}{{end}}' "$postgres_id" | head -1)"
+
+    IMPORT_MYSQL="convoy-import-mysql-$IMPORT_STAMP"
+    IMPORT_MYSQL_ROOT="$(openssl rand -hex 24)"
+    # pgloader's MySQL driver only speaks mysql_native_password, which MySQL 8.4
+    # ships disabled. Enabling it is not enough: the server offers its default
+    # plugin in the handshake, before it knows which user is connecting, and
+    # pgloader fails on caching_sha2_password even for a native-password user.
+    docker run -d --name "$IMPORT_MYSQL" --network "$IMPORT_NETWORK" \
+        -e MYSQL_ROOT_PASSWORD="$IMPORT_MYSQL_ROOT" -e MYSQL_DATABASE=convoy \
+        "$CONVOY_MYSQL_IMAGE" --mysql-native-password=ON --authentication-policy=mysql_native_password || return 1
+    until import_mysql -e 'SELECT 1' < /dev/null >/dev/null 2>&1; do
+        if (( waited >= 180 )); then
+            echo "the temporary MySQL database didn't start within 3 minutes"
+            return 1
+        fi
+        sleep 2
+        waited=$(( waited + 2 ))
+    done
+    import_mysql -e "CREATE USER 'pgloader'@'%' IDENTIFIED WITH mysql_native_password BY '$IMPORT_LOADER_PASSWORD'; GRANT ALL ON convoy.* TO 'pgloader'@'%';" < /dev/null || return 1
+    gunzip -c "$dump" | import_mysql convoy
+}
+
+import_copy_storage() {
+    tar -C "$V4_DIR/storage/app" --exclude=.gitignore -cf - . \
+        | compose exec -T web tar -C /var/www/html/storage/app -xf -
 }
 
 cmd_import_v4() {
@@ -1212,53 +1356,66 @@ cmd_import_v4() {
             *)         V4_DIR="$1"; shift ;;
         esac
     done
+    IMPORT_DRY_RUN="$dry_run"
 
     require_5x
-    [[ -f .env ]] || die "$INSTALL_DIR/.env is missing. Run the installer with --import first."
-    [[ "$(layout_of "$V4_DIR")" == "v4" ]] || die "$V4_DIR is not a v4 install (no docker-compose.yml with php and database services)."
+    [[ -f .env ]] || die "$INSTALL_DIR/.env doesn't exist. Run the installer with --import first."
+    [[ "$(layout_of "$V4_DIR")" == "v4" ]] || die "$V4_DIR doesn't look like a v4 install, because it has no docker-compose.yml with php and database services."
     V4_DIR="$(cd "$V4_DIR" && pwd)"
-    [[ "$V4_DIR" != "$INSTALL_DIR" ]] || die "the v4 install and this one are the same directory."
-    [[ -r "$V4_DIR/.env" ]] || die "cannot read $V4_DIR/.env."
+    [[ "$V4_DIR" != "$INSTALL_DIR" ]] || die "v4 and Convoy 5 can't be in the same directory."
+    [[ -r "$V4_DIR/.env" ]] || die "couldn't read $V4_DIR/.env."
 
-    local backups="$INSTALL_DIR/backups" stamp suffix="" mode=""
-    stamp="$(date -u +%Y%m%dT%H%M%SZ)"
+    local backups="$INSTALL_DIR/backups" suffix="" mode=""
+    IMPORT_STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
     if (( dry_run )); then suffix="-dry-run"; mode=" (dry run)"; fi
     mkdir -p "$backups"
     chmod 700 "$backups"
-    IMPORT_LOG="$backups/import-v4-$stamp$suffix.log"
-    ( umask 077; : > "$IMPORT_LOG" )
-    exec > >(tee -a "$IMPORT_LOG") 2> >(tee -a "$IMPORT_LOG" >&2)
+    local log="$backups/import-v4-$IMPORT_STAMP$suffix.log"
+    ( umask 077; : > "$log" )
+    # From here the terminal only gets what say, note, begin and finish print.
+    exec 3>&2
+    USER_FD=3
+    IMPORT_LOG="$log"
+    exec >> "$IMPORT_LOG" 2>&1
     trap import_cleanup EXIT
     IMPORT_V4_STOPPED=0
 
     printf 'convoy %s import-v4 %s -> %s%s, %s\n' "$CONVOY_CLI_VERSION" "$V4_DIR" "$INSTALL_DIR" "$mode" "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
+    say ""
+    if (( dry_run )); then
+        say "${BOLD}Testing the import of v4 from $V4_DIR into Convoy 5${RESET} ($CONVOY_CLI_VERSION)"
+        say "This is a dry run, so v4 stays online and the converted copy is deleted at the end."
+    else
+        say "${BOLD}Importing v4 from $V4_DIR into Convoy 5${RESET} ($CONVOY_CLI_VERSION)"
+    fi
+
     ######################################################################
-    step 1 "Preconditions"
+    step 1 "Checking v4"
     ######################################################################
     case "$(uname -m)" in
         x86_64|amd64) ;;
-        *) die "import-v4 needs an amd64 host. pgloader, which converts the database, crashes under arm64 emulation. Move the v4 database to an amd64 machine for the conversion, or ask for help in Discord." ;;
+        *) die "the import has to run on an amd64 host, because pgloader, which converts the database, crashes under arm64 emulation. You can move the v4 database to an amd64 machine to convert it, or ask for help in Discord." ;;
     esac
 
     local v4_key v4_url v4_version target_key
     v4_key="$(env_get "$V4_DIR/.env" APP_KEY || true)"
-    [[ "$v4_key" == base64:* ]] || die "$V4_DIR/.env has no APP_KEY. Without it nothing encrypted in v4 can be read."
+    [[ "$v4_key" == base64:* ]] || die "$V4_DIR/.env has no APP_KEY, and Convoy 5 can't read anything v4 encrypted without it."
     v4_url="$(env_get "$V4_DIR/.env" APP_URL || true)"
-    [[ "$v4_url" =~ ^https?://[^/]+ ]] || die "$V4_DIR/.env has no usable APP_URL (found '${v4_url}')."
+    [[ "$v4_url" =~ ^https?://[^/]+ ]] || die "$V4_DIR/.env doesn't have a valid APP_URL (it's set to '${v4_url}')."
 
     v4_version="$(panel_version_from_tree "$V4_DIR/config/app.php")"
     if [[ "$v4_version" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+ ]]; then
         version_ge "${v4_version#v}" "$IMPORT_MIN_V4" \
-            || die "this is v$v4_version. Update v4 to v$IMPORT_MIN_V4 or later first; older layouts are not supported."
-        echo "v4 version: $v4_version"
+            || die "the import needs v$IMPORT_MIN_V4 or later, but $V4_DIR is on v${v4_version#v}. Update v4 first."
+        note "Version ${v4_version#v}"
     else
-        warn "cannot tell which v4 version is in $V4_DIR (found '${v4_version:-nothing}'). It must be v$IMPORT_MIN_V4 or later."
+        warn "couldn't tell which version $V4_DIR is on (found '${v4_version:-nothing}'). Make sure it's v$IMPORT_MIN_V4 or later."
     fi
 
     target_key="$(env_get .env APP_KEY || true)"
     if [[ -n "$target_key" && "$target_key" != "$v4_key" ]]; then
-        die "$INSTALL_DIR/.env already has a different APP_KEY. v4's key has to come across unchanged (it decrypts node credentials and two-factor secrets). Clear APP_KEY in $INSTALL_DIR/.env and run this again."
+        die "$INSTALL_DIR/.env already has an APP_KEY that's different from v4's, but Convoy 5 needs v4's key to decrypt node credentials and two-factor secrets. Clear APP_KEY in $INSTALL_DIR/.env and run the import again."
     fi
 
     load_db_settings
@@ -1268,7 +1425,7 @@ cmd_import_v4() {
     else
         IMPORT_PROJECT_ARGS=()
         if [[ -n "$(compose ps -q web 2>/dev/null)" ]]; then
-            die "Convoy 5 is already running in $INSTALL_DIR. import-v4 only fills an empty install."
+            die "Convoy 5 is already running in $INSTALL_DIR, and the import can only fill a new install."
         fi
     fi
 
@@ -1280,77 +1437,91 @@ cmd_import_v4() {
     docker_root="$(docker info -f '{{.DockerRootDir}}' 2>/dev/null || echo /var/lib/docker)"
     free_mib="$(df -Pm "$docker_root" 2>/dev/null | awk 'NR == 2 { print $4 }')" || true
     if [[ "$free_mib" =~ ^[0-9]+$ ]]; then
-        (( free_mib >= need_mib )) || die "not enough disk: about $need_mib MiB is needed under $docker_root, $free_mib MiB is free."
-        echo "disk: $free_mib MiB free, about $need_mib MiB needed"
+        (( free_mib >= need_mib )) || die "the import needs about $(human_mib "$need_mib") of free space under $docker_root, but only $(human_mib "$free_mib") is free."
+        note "$(human_mib "$free_mib") of disk space free, about $(human_mib "$need_mib") needed"
     else
-        warn "could not measure free space under $docker_root; make sure about $need_mib MiB is free."
+        warn "couldn't check the free space under $docker_root. Make sure at least $(human_mib "$need_mib") is free."
     fi
+
+    # Everything a real import runs, downloaded while v4 is still serving, so
+    # the downtime never waits on a download (or fails on one).
+    local images=()
+    mapfile -t images < <(compose config --images 2>/dev/null)
+    begin "Downloading the images the import needs"
+    logged import_pull_missing "${images[@]}" "$CONVOY_PGLOADER_IMAGE" "$CONVOY_MYSQL_IMAGE" \
+        || die "couldn't download the images the import needs, so nothing has been changed yet. Check that this host can reach ghcr.io and Docker Hub, then run the import again."
+    finish
 
     # Before anything happens to v4: the target must be empty.
     if (( ! dry_run )); then
-        compose up -d --wait postgres
+        begin "Checking that Convoy 5's database is empty"
+        logged compose up -d --wait postgres || die "Convoy 5's database didn't start."
         import_require_empty_db
-        echo "Convoy 5's database: empty"
-    fi
-
-    if (( ! dry_run )); then
-        cat >&2 <<EOF
-
-This moves the v4 panel in $V4_DIR onto Convoy 5 in $INSTALL_DIR.
-
-  * v4 goes into maintenance mode and its queue workers stop.
-  * Its database is dumped to $backups and converted to Postgres.
-  * v4 is then stopped and Convoy 5 started on the same ports.
-
-Nothing in $V4_DIR is changed or deleted. Expect a few minutes of downtime.
-Run with --dry-run first to rehearse on a copy while v4 keeps serving.
-
-EOF
-        if (( ! assume_yes )); then
-            [[ -t 0 ]] || die "no terminal to confirm on; pass --yes."
-            local answer=""
-            read -rp "Continue? [y/N] " answer
-            [[ "$answer" =~ ^[Yy]([Ee][Ss])?$ ]] || die "stopped; nothing was changed."
-        fi
+        finish
     fi
 
     local v4_db_running=1
     [[ -n "$(v4_compose ps -q --status running database 2>/dev/null)" ]] || v4_db_running=0
     if (( ! v4_db_running )); then
-        info "starting v4's database container to read from it"
-        v4_compose up -d --wait database
+        begin "Starting v4's database"
+        logged v4_compose up -d --wait database || die "v4's database didn't start."
+        finish
     fi
 
     local oversized
-    oversized="$(v4_oversized_integers)" || die "could not read v4's database to check its numbers."
+    begin "Checking v4's data for numbers too large for Convoy 5"
+    oversized="$(v4_oversized_integers)" || { finish "${RED}failed${RESET}"; die "couldn't read v4's database to check its numbers."; }
     if [[ -n "$oversized" ]]; then
+        finish "${RED}found $(grep -c . <<< "$oversized")${RESET}"
         (( v4_db_running )) || v4_compose stop database
-        die "these v4 columns hold numbers larger than Postgres can store in them, so the import would fail. Nothing was changed.
+        die "some of v4's columns hold numbers too large for Convoy 5's database, so the import would fail. Nothing has been changed yet.
 
 $(printf '%s\n' "$oversized" | sed 's/\t/: /; s/^/  /')
 
-Lower them in v4 (a server's memory, disk or bandwidth above 2,147,483,647 MiB is the likely case), or ask for help in Discord."
+Lower these values in v4 (usually a server's memory, disk or bandwidth set above 2,147,483,647 MiB), or ask for help in Discord."
     fi
-    echo "numbers: every value fits Postgres"
+    finish "none found"
+
+    if (( ! dry_run )); then
+        say ""
+        say "To move v4 onto Convoy 5 in $INSTALL_DIR, the import will:"
+        say ""
+        say "  1. Wait for v4's queued jobs to finish, then put v4 into maintenance mode."
+        say "  2. Back up v4's database to $backups and convert it for Convoy 5."
+        say "  3. Stop v4 and start Convoy 5 in its place at $v4_url."
+        say ""
+        say "The panel will be offline for a few minutes. The import doesn't change or delete"
+        say "anything in $V4_DIR, so you can switch back to v4 if something goes wrong. To test"
+        say "the import first while v4 stays online, stop here and run it with --dry-run."
+        say ""
+        if (( ! assume_yes )); then
+            [[ -t 0 ]] || die "can't ask for confirmation without a terminal. Pass --yes to import without asking."
+            local answer=""
+            read -rp "Continue? [y/N] " answer 2>&"$USER_FD"
+            printf 'Continue? %s\n' "$answer"
+            [[ "$answer" =~ ^[Yy]([Ee][Ss])?$ ]] || { say "You cancelled the import, so nothing has been changed."; exit 1; }
+        fi
+    fi
 
     if (( ! dry_run )) && [[ -n "$(v4_compose ps -q --status running php 2>/dev/null)" ]]; then
         # Jobs still queued in v4's Redis do not come across, so the queue has
         # to be empty first. Horizon stops taking jobs in maintenance mode, so
         # this waits before `artisan down`, not after.
-        info "waiting for v4's queue to be empty"
+        begin "Waiting for v4's queued jobs to finish"
         local pending waited=0
         while :; do
             pending="$(v4_queue_size)"
             [[ "$pending" == "0" ]] && break
             if (( waited >= 300 )); then
-                die "v4 still has ${pending:-an unknown number of} jobs queued after 5 minutes (a running backup keeps one queued until it finishes). They would be lost. Run this again once they are done."
+                die "v4 still has ${pending:-an unknown number of} queued jobs after 5 minutes, and they would be lost if the import went ahead, so nothing has been changed yet. A running backup keeps its job queued until it finishes. Run the import again once they're done."
             fi
             sleep 10
             waited=$(( waited + 10 ))
         done
+        finish
 
-        info "putting v4 into maintenance mode"
-        v4_compose exec -T php php artisan down < /dev/null || die "could not put v4 into maintenance mode."
+        begin "Putting v4 into maintenance mode"
+        logged v4_compose exec -T php php artisan down < /dev/null || die "couldn't put v4 into maintenance mode."
         IMPORT_V4_STOPPED=1
 
         # Something queued between the check and `down` would be lost.
@@ -1358,18 +1529,20 @@ Lower them in v4 (a server's memory, disk or bandwidth above 2,147,483,647 MiB i
         if [[ "$pending" != "0" ]]; then
             v4_compose exec -T php php artisan up < /dev/null || true
             IMPORT_V4_STOPPED=0
-            die "a job was queued while v4 was going into maintenance mode, so v4 is back up. Run this again."
+            die "a new job was queued while v4 was going into maintenance mode, so the import has taken v4 out of maintenance mode again. Run the import again."
         fi
+        finish
 
-        info "stopping v4's queue workers"
         # Horizon finishes the job it holds when asked to stop.
-        v4_compose stop -t 120 workers
+        begin "Stopping v4's queue workers"
+        logged v4_compose stop -t 120 workers || die "couldn't stop v4's queue workers."
+        finish
     fi
 
     ######################################################################
-    step 2 "Settings"
+    step 2 "Copying v4's settings"
     ######################################################################
-    local domain auto_https key raw
+    local domain auto_https key raw carried=()
     domain="${v4_url#*://}"
     domain="${domain%%/*}"
     domain="${domain%%:*}"
@@ -1379,8 +1552,14 @@ Lower them in v4 (a server's memory, disk or bandwidth above 2,147,483,647 MiB i
     if [[ "$domain" =~ ^[0-9]{1,3}(\.[0-9]{1,3}){3}$ || "$domain" == \[* || "$v4_url" == http://* ]]; then
         auto_https="off"
     fi
-    echo "APP_KEY: carried over unchanged"
-    echo "APP_URL: $v4_url (APP_DOMAIN $domain, automatic HTTPS $auto_https)"
+    note "Copied APP_KEY and APP_URL ($v4_url)"
+    if [[ "$auto_https" == on ]]; then
+        note "Automatic HTTPS for $domain"
+    elif [[ "$v4_url" == http://* ]]; then
+        note "No automatic HTTPS, because v4's APP_URL uses http://"
+    else
+        note "No automatic HTTPS, because $domain is an IP address"
+    fi
     if (( ! dry_run )); then
         env_set .env APP_KEY "$v4_key"
         env_set .env APP_URL "$v4_url"
@@ -1394,168 +1573,179 @@ Lower them in v4 (a server's memory, disk or bandwidth above 2,147,483,647 MiB i
         for key in APP_NAME MAIL_MAILER MAIL_HOST MAIL_PORT MAIL_USERNAME MAIL_PASSWORD MAIL_ENCRYPTION MAIL_FROM_ADDRESS MAIL_FROM_NAME; do
             if raw="$(env_raw "$V4_DIR/.env" "$key")"; then
                 env_set .env "$key" "$raw"
-                echo "$key: carried over"
+                carried+=("$key")
             fi
         done
+        if (( ${#carried[@]} )); then
+            note "Also copied $(IFS=,; printf '%s' "${carried[*]}" | sed 's/,/, /g')"
+        fi
+        note "Saved to $INSTALL_DIR/.env"
     else
-        echo "(dry run: $INSTALL_DIR/.env is left as it is)"
+        note "Not saved to $INSTALL_DIR/.env, because this is a dry run"
     fi
 
     ######################################################################
-    step 3 "Database dump"
+    step 3 "Backing up v4's database"
     ######################################################################
-    local dump="$backups/v4-$stamp.sql.gz"
-    info "dumping v4's MySQL database to $dump"
-    # The container's own MYSQL_* variables (set from v4's .env by its compose
-    # file), so no password passes through this host's process list.
-    # shellcheck disable=SC2016 # expanded inside the container
-    ( umask 077; v4_compose exec -T database sh -c 'MYSQL_PWD="$MYSQL_PASSWORD" exec mysqldump --single-transaction --quick --hex-blob --no-tablespaces --routines --triggers -u"$MYSQL_USER" "$MYSQL_DATABASE"' < /dev/null \
-        | gzip > "$dump" ) || die "mysqldump failed."
-    gzip -t "$dump" || die "the dump in $dump is corrupt."
-    echo "dump: $(du -h "$dump" | cut -f1)"
+    local dump="$backups/v4-$IMPORT_STAMP.sql.gz"
+    begin "Saving the backup to $dump"
+    logged import_dump "$dump" || die "couldn't back up v4's database."
+    gzip -t "$dump" || die "the backup in $dump is corrupt."
+    finish "done ($(du -h "$dump" | cut -f1))"
 
     if (( ! v4_db_running )); then
-        v4_compose stop database
+        logged v4_compose stop database || true
     fi
 
     if (( ! dry_run )); then
-        info "stopping v4"
-        v4_compose stop
+        begin "Stopping v4"
         IMPORT_V4_STOPPED=1
+        logged v4_compose stop || die "couldn't stop v4."
+        finish
     fi
 
-    # Postgres first, so the throwaway MySQL can join its network. A real run
-    # started it in step 1; Redis waits until now because v4's has the same
-    # service name in the usual shared project name ("convoy").
-    info "starting Postgres and Redis"
-    compose "${IMPORT_PROJECT_ARGS[@]}" up -d --wait postgres redis
-    (( ! dry_run )) || import_require_empty_db
-
-    local network postgres_id
-    postgres_id="$(compose "${IMPORT_PROJECT_ARGS[@]}" ps -q postgres)"
-    network="$(docker inspect -f '{{range $name, $_ := .NetworkSettings.Networks}}{{$name}}{{"\n"}}{{end}}' "$postgres_id" | head -1)"
-
-    IMPORT_MYSQL="convoy-import-mysql-$stamp"
-    IMPORT_MYSQL_ROOT="$(openssl rand -hex 24)"
-    local loader_password
-    loader_password="$(openssl rand -hex 24)"
-    info "restoring into a throwaway MySQL ($CONVOY_MYSQL_IMAGE)"
-    # pgloader's MySQL driver only speaks mysql_native_password, which MySQL 8.4
-    # ships disabled. Enabling it is not enough: the server offers its default
-    # plugin in the handshake, before it knows which user is connecting, and
-    # pgloader fails on caching_sha2_password even for a native-password user.
-    docker run -d --name "$IMPORT_MYSQL" --network "$network" \
-        -e MYSQL_ROOT_PASSWORD="$IMPORT_MYSQL_ROOT" -e MYSQL_DATABASE=convoy \
-        "$CONVOY_MYSQL_IMAGE" --mysql-native-password=ON --authentication-policy=mysql_native_password >/dev/null
-    local waited=0
-    until import_mysql -e 'SELECT 1' < /dev/null >/dev/null 2>&1; do
-        (( waited < 180 )) || die "the throwaway MySQL did not start within 3 minutes."
-        sleep 2
-        waited=$(( waited + 2 ))
-    done
-    import_mysql -e "CREATE USER 'pgloader'@'%' IDENTIFIED WITH mysql_native_password BY '$loader_password'; GRANT ALL ON convoy.* TO 'pgloader'@'%';" < /dev/null
-    gunzip -c "$dump" | import_mysql convoy || die "restoring the dump into the throwaway MySQL failed."
-
     ######################################################################
-    step 4 "Conversion to Postgres (pgloader)"
+    step 4 "Converting the database for Convoy 5"
     ######################################################################
+    IMPORT_LOADER_PASSWORD="$(openssl rand -hex 24)"
+    begin "Loading the backup into a temporary MySQL database"
+    logged import_prepare_copy "$dump" || die "couldn't load the backup into the temporary MySQL database."
+    finish
+
     IMPORT_WORK="$(mktemp -d "$backups/.import-v4-XXXXXX")"
     chmod 700 "$IMPORT_WORK"
     local recipe="$IMPORT_WORK/v4-to-5.load" db_password mysql_url pg_url
     compose "${IMPORT_PROJECT_ARGS[@]}" run --rm --no-deps -T --entrypoint cat web "$IMPORT_RECIPE" < /dev/null > "$recipe" 2>/dev/null \
-        || die "could not read $IMPORT_RECIPE from the Convoy image. Is CONVOY_VERSION in $INSTALL_DIR/.env a 5.x release?"
+        || die "couldn't read $IMPORT_RECIPE from the Convoy image. Check that CONVOY_VERSION in $INSTALL_DIR/.env is a 5.x release."
     db_password="$(env_get .env DB_PASSWORD || true)"
-    mysql_url="mysql://pgloader:$loader_password@$IMPORT_MYSQL/convoy"
+    mysql_url="mysql://pgloader:$IMPORT_LOADER_PASSWORD@$IMPORT_MYSQL/convoy"
     pg_url="postgresql://$(urlencode "$DB_USERNAME"):$(urlencode "$db_password")@postgres/$(urlencode "$DB_DATABASE")"
     sed -i -e "s|\${MYSQL_URL}|$mysql_url|g" -e "s|\${PG_URL}|$pg_url|g" -e "s|\${MYSQL_DB}|convoy|g" "$recipe"
     chmod 644 "$recipe"
 
-    info "running pgloader ($CONVOY_PGLOADER_IMAGE)"
-    local pgloader_log="$IMPORT_WORK/pgloader.log"
-    docker run --rm --network "$network" -v "$recipe:/load/v4-to-5.load:ro" \
+    begin "Converting the backup to Postgres with pgloader"
+    local pgloader_log="$IMPORT_WORK/pgloader.log" pgloader_output
+    docker run --rm --network "$IMPORT_NETWORK" -v "$recipe:/load/v4-to-5.load:ro" \
         "$CONVOY_PGLOADER_IMAGE" pgloader /load/v4-to-5.load > "$pgloader_log" 2>&1 || true
-    sed -e "s/$loader_password/[redacted]/g" -e "s/$(urlencode "$db_password")/[redacted]/g" "$pgloader_log"
+    pgloader_output="$(sed -e "s/$IMPORT_LOADER_PASSWORD/[redacted]/g" -e "s/$(urlencode "$db_password")/[redacted]/g" "$pgloader_log")"
+    printf '%s\n' "$pgloader_output"
     # pgloader exits 0 when it fails, so its output is the only verdict.
     if grep -qE ' ERROR |FATAL' "$pgloader_log" || ! grep -q 'Total import time' "$pgloader_log"; then
-        die "pgloader did not convert the database cleanly (see its output above)."
+        finish "${RED}failed${RESET}"
+        printf '%s\n' "$pgloader_output" | tail -n 25 | sed 's/^/      /' >&"$USER_FD"
+        die "pgloader couldn't convert the database. The end of its output is shown above."
     fi
+    finish
 
-    info "comparing row counts"
-    local table m p mismatches=0 tables_list=()
+    local table m p mismatches=() tables_list=() rows=0
     # Into an array first: both docker execs below read stdin, and inside a
     # `while read` loop they would swallow the rest of the table list.
     mapfile -t tables_list < <(import_mysql convoy -e 'SHOW TABLES' < /dev/null)
-    (( ${#tables_list[@]} > 0 )) || die "the throwaway MySQL has no tables; the dump restored nothing."
+    (( ${#tables_list[@]} > 0 )) || die "the temporary MySQL database is empty, so the backup didn't restore anything."
     printf '%-40s %12s %12s\n' table mysql postgres
     for table in "${tables_list[@]}"; do
         m="$(import_mysql convoy -e "SELECT COUNT(*) FROM \`$table\`" < /dev/null)"
         p="$(import_psql -c "SELECT COUNT(*) FROM public.\"$table\"" < /dev/null 2>/dev/null || echo missing)"
         printf '%-40s %12s %12s%s\n' "$table" "$m" "$p" "$([[ "$m" == "$p" ]] || echo '   MISMATCH')"
-        [[ "$m" == "$p" ]] || mismatches=$(( mismatches + 1 ))
+        if [[ "$m" == "$p" ]]; then
+            rows=$(( rows + m ))
+        else
+            mismatches+=("$table: $m rows in v4, $p after converting")
+        fi
     done
-    (( mismatches == 0 )) || die "$mismatches of ${#tables_list[@]} tables have different row counts in MySQL and Postgres."
-    echo "row counts match on all ${#tables_list[@]} tables"
+    if (( ${#mismatches[@]} )); then
+        printf '      %s\n' "${mismatches[@]}" >&"$USER_FD"
+        die "${#mismatches[@]} of ${#tables_list[@]} tables have a different number of rows after the conversion."
+    fi
+    note "All $rows rows in ${#tables_list[@]} tables converted"
 
     docker rm -fv "$IMPORT_MYSQL" >/dev/null
     IMPORT_MYSQL=""
 
-    ######################################################################
-    step 5 "Convoy 5"
-    ######################################################################
+    local applied checks
     if (( dry_run )); then
+        ######################################################################
+        step 5 "Testing the converted database on Convoy 5"
+        ######################################################################
         # The image's entrypoint is skipped (as in app_cmd): it would print its
         # banner and, on the web service, run AUTORUN first.
-        info "running Convoy 5's migrations on the copy"
-        APP_KEY="$v4_key" compose "${IMPORT_PROJECT_ARGS[@]}" run --rm --no-deps -T \
+        begin "Running Convoy 5's database migrations"
+        logged env APP_KEY="$v4_key" docker compose "${IMPORT_PROJECT_ARGS[@]}" run --rm --no-deps -T \
             -e APP_KEY --entrypoint /usr/bin/env web php artisan migrate --force < /dev/null \
-            || die "Convoy 5's migrations failed on your data."
-        info "verifying the converted data"
-        APP_KEY="$v4_key" compose "${IMPORT_PROJECT_ARGS[@]}" run --rm --no-deps -T \
-            -e APP_KEY --entrypoint /usr/bin/env web php artisan import:verify < /dev/null \
-            || die "import:verify failed."
+            || die "Convoy 5's database migrations failed on the converted data."
+        applied="$(logged_output | grep -c ' DONE$' || true)"
+        finish "done ($applied migrations)"
 
-        printf '\n%s\n' "${GREEN}${BOLD}Dry run passed.${RESET} v4 was not touched." >&2
-        printf 'The copy has been thrown away. Run the real import with:\n\n  convoy import-v4 %s\n\n' "$V4_DIR" >&2
+        begin "Checking the converted data"
+        logged env APP_KEY="$v4_key" docker compose "${IMPORT_PROJECT_ARGS[@]}" run --rm --no-deps -T \
+            -e APP_KEY --entrypoint /usr/bin/env web php artisan import:verify < /dev/null \
+            || die "the converted data failed the checks shown above."
+        checks="$(logged_output | grep -c '✓' || true)"
+        finish "done ($checks checks passed)"
+
+        say ""
+        say "${GREEN}${BOLD}The dry run passed,${RESET} and the converted copy has been deleted."
+        say ""
+        say "The panel will be offline for a few minutes during the real import. When you're"
+        say "ready, run:"
+        say ""
+        say "  convoy import-v4 $V4_DIR"
+        say ""
+        say "${DIM}The full log is saved at $IMPORT_LOG.${RESET}"
         return 0
     fi
 
+    ######################################################################
+    step 5 "Starting Convoy 5"
+    ######################################################################
     # Certificates first, so Caddy does not ask for new ones on boot.
     local v4_caddy="$V4_DIR/dockerfiles/caddy/data/data/caddy"
     if [[ -d "$v4_caddy/certificates" ]]; then
-        info "copying v4's TLS certificates"
-        compose run --rm --no-deps -T --user root --entrypoint sh -v "$v4_caddy:/v4-caddy:ro" web \
-            -c 'cp -R /v4-caddy/. /data/caddy/ && chown -R www-data:www-data /data/caddy' < /dev/null \
-            || warn "could not copy v4's certificates; Caddy will request new ones."
+        begin "Copying v4's HTTPS certificates"
+        if logged compose run --rm --no-deps -T --user root --entrypoint sh -v "$v4_caddy:/v4-caddy:ro" web \
+            -c 'cp -R /v4-caddy/. /data/caddy/ && chown -R www-data:www-data /data/caddy' < /dev/null; then
+            finish
+        else
+            warn "couldn't copy v4's HTTPS certificates, so Convoy 5 will request new ones."
+        fi
     fi
 
-    info "starting Convoy 5 (its migrations run on first boot)"
+    begin "Starting Convoy 5 and running its database migrations (this can take a few minutes)"
     # Not --remove-orphans: v4's stopped containers may share this project name
     # ("convoy"), and the rollback below needs them.
-    compose up -d
-    wait_healthy web 600 || {
-        compose logs --tail=50 web >&2
-        die "Convoy 5 did not become healthy within 10 minutes. The last 50 log lines are above."
-    }
+    logged compose up -d || die "Convoy 5 didn't start."
+    if ! wait_healthy web 600; then
+        finish "${RED}failed${RESET}"
+        compose logs --tail=50 web
+        compose logs --tail=25 web 2>&1 | sed 's/^/      /' >&"$USER_FD"
+        die "Convoy 5 still wasn't ready after 10 minutes. Its last log lines are shown above."
+    fi
+    finish
 
-    info "verifying the converted data"
-    compose exec -T web php artisan import:verify < /dev/null || die "import:verify failed."
+    begin "Checking the converted data"
+    logged compose exec -T web php artisan import:verify < /dev/null || die "the converted data failed the checks shown above."
+    checks="$(logged_output | grep -c '✓' || true)"
+    finish "done ($checks checks passed)"
 
     if [[ -d "$V4_DIR/storage/app" ]]; then
-        info "copying storage/app"
-        tar -C "$V4_DIR/storage/app" --exclude=.gitignore -cf - . \
-            | compose exec -T web tar -C /var/www/html/storage/app -xf - \
-            || warn "could not copy $V4_DIR/storage/app; copy it into the storage volume by hand."
+        begin "Copying v4's uploaded files (storage/app)"
+        if logged import_copy_storage; then
+            finish
+        else
+            warn "couldn't copy $V4_DIR/storage/app. Copy it into Convoy 5's storage volume yourself."
+        fi
     fi
 
     IMPORT_V4_STOPPED=0
-    printf '\n%s\n\n' "${GREEN}${BOLD}Convoy 5 is running at $v4_url with v4's data.${RESET}" >&2
-    cat >&2 <<EOF
-  The v4 database dump is $dump.
-  $V4_DIR is untouched. Once you are happy, it can be archived or removed.
-
-To go back to v4:
-EOF
-    import_rollback_hint >&2
+    say ""
+    say "${GREEN}${BOLD}Convoy 5 is now running at $v4_url with all of v4's data.${RESET}"
+    say ""
+    say "v4's database backup is saved at $dump. Nothing in $V4_DIR was changed, so you can"
+    say "archive or delete it once you're happy with Convoy 5."
+    say ""
+    say "If you need to switch back to v4, run:"
+    import_rollback_hint
+    say "${DIM}The full log is saved at $IMPORT_LOG.${RESET}"
 }
 
 import_usage() {
@@ -1564,11 +1754,15 @@ convoy import-v4 -- move a v4 install onto this Convoy 5 install
 
   convoy import-v4 [<v4 directory>] [--dry-run] [--yes]
 
-The v4 directory defaults to /var/www/convoy. It is only read, so v4 can always
-be brought back with `docker compose up -d` in it.
+The v4 directory defaults to /var/www/convoy. The import doesn't change it, so
+you can always switch back to v4.
 
-  --dry-run   convert a copy of the data and check it, with v4 still serving
-  --yes       do not ask for confirmation
+  --dry-run   test the import on a copy of the data while v4 stays online
+  --yes       don't ask for confirmation
+
+Examples:
+  convoy import-v4 --dry-run
+  convoy import-v4 /var/www/convoy
 
 EOF
 }
@@ -1586,16 +1780,22 @@ convoy -- manage a Convoy installation
   convoy restart [service]     Restart everything, or one service
   convoy ps                    Show container status
   convoy logs [service]        Follow logs
-  convoy upgrade               Update this command, let running jobs finish,
-                               back up, upgrade, verify
-  convoy backup                Dump the bundled database to ./backups
+  convoy upgrade               Back up the database and upgrade Convoy
+  convoy backup                Back up the bundled database to <install>/backups
   convoy artisan <args>        Run an Artisan command
   convoy shell [service]       Open a shell (default: web)
   convoy horizon               Show queue worker status
   convoy export-activity       Export the activity log as CSV
   convoy import-v4 [dir]       Move a v4 install onto this one (--dry-run first)
   convoy support               Send logs and diagnostics to the Convoy team
-  convoy version               Show this script's version
+  convoy version               Show this command's version
+
+Examples:
+  convoy logs web
+  convoy artisan users:create
+  convoy import-v4 /var/www/convoy --dry-run
+
+Run 'convoy support --help' or 'convoy import-v4 --help' for their options.
 
 EOF
 }

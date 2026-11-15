@@ -26,8 +26,8 @@ return [
             'startsWith' => 'Invalid input: must start with "{{startsWith}}"',
             'endsWith' => 'Invalid input: must end with "{{endsWith}}"',
             'hostname' => 'Invalid hostname',
-            'us_keyboard_characters' => 'Invalid US keyboard characters',
-            'password' => 'Must contain 8 characters, one uppercase, one lowercase, one number and one special case character',
+            'us_keyboard_characters' => 'Can only contain characters from a US keyboard',
+            'password' => 'Must be at least 8 characters, with an uppercase letter, a lowercase letter, a number and one of !@#$%^&*',
             'ip_address' => 'Invalid IP address',
             'mac_address' => 'Invalid MAC address',
         ],
@@ -39,7 +39,8 @@ return [
             ],
             'string' => [
                 'exact' => 'String must contain exactly {{minimum}} character(s)',
-                'inclusive' => 'String must contain at least {{minimum}} character(s)',
+                'inclusive_one' => 'Required',
+                'inclusive_other' => 'Must be at least {{minimum}} characters',
                 'not_inclusive' => 'String must contain over {{minimum}} character(s)',
             ],
             'number' => [
@@ -66,7 +67,8 @@ return [
             ],
             'string' => [
                 'exact' => 'String must contain exactly {{maximum}} character(s)',
-                'inclusive' => 'String must contain at most {{maximum}} character(s)',
+                'inclusive_one' => 'Must be at most {{maximum}} character',
+                'inclusive_other' => 'Must be at most {{maximum}} characters',
                 'not_inclusive' => 'String must contain under {{maximum}} character(s)',
             ],
             'number' => [
@@ -88,7 +90,7 @@ return [
     ],
     'validations' => [
         'email' => 'email',
-        'url' => 'url',
+        'url' => 'URL',
         'uuid' => 'uuid',
         'cuid' => 'cuid',
         'regex' => 'regex',

@@ -5,6 +5,33 @@ This file is a running track of new features and fixes to each version of the pa
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 follows [Semantic Versioning](https://semver.org) guidelines.
 
+## Unreleased
+
+### Changed
+
+- `convoy import-v4` now shows one short line for each thing it does, and before a real import it lists what will
+  happen to v4. The output from Compose, pgloader and the migrations is saved to the log instead of the terminal, and
+  if one of them fails, the import shows the end of its output. The installer also downloads Convoy without Compose's
+  progress bars.
+- Text across the panel, the installer and `convoy` follows the new writing guide in `docs/writing.md`:
+  - Descriptions that repeated a title are gone, including those on the admin Overview page and its cards.
+  - Delete and confirmation dialogs say what will happen instead of asking "Are you sure?".
+  - Empty states read "No backups", "No servers" and so on.
+  - Errors end with what to do next.
+  - Create buttons and their dialogs share one name, such as "Create User".
+  - The admin area is called "Admin" everywhere.
+  - `convoy --help`, `convoy support --help`, `convoy import-v4 --help` and the installer's `--help` end with examples.
+- Form errors read "Required" and "Must be at most 40 characters" instead of "String must contain at least 1
+  character(s)". The password rule names the symbols it accepts.
+
+### Fixed
+
+- The server picker in the address form showed a translation key instead of "No servers" when nothing matched.
+
+- `convoy import-v4` now downloads everything it needs, including pgloader and MySQL, before putting v4 into
+  maintenance mode. They used to be downloaded after v4 was stopped, so a slow download added to the downtime and a
+  failed one ended the import with v4 offline.
+
 ## v5.0.0-alpha.3
 
 Still an alpha: use it for test installs and to rehearse the upgrade from v4, and keep production panels on v4 until

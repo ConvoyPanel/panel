@@ -10,7 +10,7 @@ const EffectBadge = ({ item }: { item: UpgradeItem }) => {
     if (!item.affected) {
         return (
             <Badge color='green' variant='light'>
-                Nothing here
+                Doesn't Apply
             </Badge>
         )
     }
@@ -41,17 +41,15 @@ const UpgradeContainer = () => {
                 <FormCard.Title>Upgrade to Convoy 6</FormCard.Title>
                 <div className='mt-3 space-y-3 text-sm text-accent-600'>
                     <p>
-                        Convoy 6 is a new major version with a new data model.
-                        Most of this panel's data moves over as it is; the items
-                        below are what its upgrade drops or changes, with what
-                        that means for this panel's data. This page only reads:
-                        nothing changes until you upgrade.
+                        Convoy 6 has a new data model. Most of this panel's data
+                        moves over as it is, but the upgrade drops or changes
+                        the items below. Nothing changes until you upgrade.
                     </p>
                     <p>
                         {affected === 0
                             ? 'None of them apply to this panel.'
                             : `${affected} of ${data.length} apply to this panel.`}{' '}
-                        The same check runs on the command line with{' '}
+                        Run the same check from the command line with{' '}
                         <code className='rounded bg-accent-200 px-1 py-0.5 font-mono text-xs text-foreground'>
                             php artisan convoy:upgrade-check
                         </code>

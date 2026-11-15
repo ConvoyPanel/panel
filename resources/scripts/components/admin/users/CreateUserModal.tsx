@@ -35,19 +35,19 @@ const CreateUserButton = ({ open, onClose }: Props) => {
         validationSchema: yup.object({
             name: yup
                 .string()
-                .max(191, 'Do not exceed 191 characters')
-                .required('A name is required.'),
+                .max(191, 'Must be at most 191 characters')
+                .required('Required'),
             email: yup
                 .string()
                 .email('Enter a valid email address')
-                .required('An email address is required.'),
+                .required('Required'),
             password: yup
                 .string()
                 .matches(
                     /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/,
-                    'Must Contain 8 Characters, One Uppercase, One Lowercase, One Number and One Special Case Character'
+                    'Must be at least 8 characters, with an uppercase letter, a lowercase letter, a number and one of !@#$%^&*'
                 )
-                .required('A password is required.'),
+                .required('Required'),
             rootAdmin: yup.boolean(),
         }),
         onSubmit: async values => {
@@ -81,7 +81,7 @@ const CreateUserButton = ({ open, onClose }: Props) => {
         <>
             <Modal open={open} onClose={handleClose}>
                 <Modal.Header>
-                    <Modal.Title>Create a User</Modal.Title>
+                    <Modal.Title>Create User</Modal.Title>
                 </Modal.Header>
 
                 <FormikProvider value={form}>
@@ -105,8 +105,8 @@ const CreateUserButton = ({ open, onClose }: Props) => {
                             />
                             {form.values.rootAdmin && (
                                 <MessageBox type={'warning'} title={'Warning'}>
-                                    You are giving this user administrator
-                                    privileges
+                                    Administrators have full access to this
+                                    panel, including every server and user.
                                 </MessageBox>
                             )}
                         </Modal.Body>

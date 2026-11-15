@@ -41,7 +41,7 @@ const CreateIsoModal = ({ open, onClose, mutate }: Props) => {
             .regex(
                 /\.iso$/,
                 t('create_modal.non_iso_file_name_error') ??
-                    'The file extension must end in .iso'
+                    'The file name must end in .iso'
             )
             .max(191)
             .nonempty(),
@@ -57,7 +57,7 @@ const CreateIsoModal = ({ open, onClose, mutate }: Props) => {
             .regex(
                 /\.iso$/,
                 t('create_modal.non_iso_file_name_error') ??
-                    'The file extension must end in .iso'
+                    'The file name must end in .iso'
             )
             .max(191)
             .nonempty(),
@@ -75,7 +75,7 @@ const CreateIsoModal = ({ open, onClose, mutate }: Props) => {
             .regex(
                 /\.iso$/,
                 t('create_modal.non_iso_file_name_error') ??
-                    'The file extension must end in .iso'
+                    'The file name must end in .iso'
             )
             .max(191)
             .nonempty(),
