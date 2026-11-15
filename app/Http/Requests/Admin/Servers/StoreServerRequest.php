@@ -35,7 +35,7 @@ class StoreServerRequest extends BaseApiRequest
             'limits.bandwidth' => $rules['bandwidth_limit'],
             'limits.address_ids' => 'sometimes|nullable|array',
             'limits.address_ids.*' => 'integer|exists:ip_addresses,id',
-            'account_password' => ['required_if_accepted:should_create_server', 'string', 'min:8', 'max:191', new Password(
+            'account_password' => ['required_if_accepted:should_create_server', 'nullable', 'string', 'min:8', 'max:191', new Password(
             ), new USKeyboardCharacters()],
             'should_create_server' => 'present|boolean',
             // Keyed on create_server before, a field that doesn't exist, so a
