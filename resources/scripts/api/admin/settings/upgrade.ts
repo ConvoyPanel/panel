@@ -2,6 +2,11 @@ import useSWR from 'swr'
 
 import http from '@/api/http'
 
+export interface AddressPoolSplit {
+    pool: string
+    blocks: { mac: string | null; addresses: number }[]
+}
+
 export interface UpgradeItem {
     key: string
     title: string
@@ -11,7 +16,8 @@ export interface UpgradeItem {
     count: number
     summary: string
     action: string | null
-    details: string[]
+    /** How each address pool is split into address blocks, one per MAC. */
+    splits: AddressPoolSplit[]
 }
 
 export const getUpgradeCheck = async (): Promise<UpgradeItem[]> => {

@@ -15,7 +15,7 @@ const SettingsContainer = () => (
         routes={[
             { path: '/admin/settings/updates', name: 'Updates' },
             { path: '/admin/settings/telemetry', name: 'Telemetry' },
-            { path: '/admin/settings/upgrade', name: 'Upgrade to Convoy 6' },
+            { path: '/admin/settings/upgrade', name: 'Upgrade Checklist' },
         ]}
     />
 )
