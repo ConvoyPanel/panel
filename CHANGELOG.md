@@ -5,7 +5,27 @@ This file is a running track of new features and fixes to each version of the pa
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 follows [Semantic Versioning](https://semver.org) guidelines.
 
-## Unreleased
+## v5.0.0-alpha.3
+
+Still an alpha: use it for test installs and to rehearse the upgrade from v4, and keep production panels on v4 until
+5.0 is released. The installer only picks up full releases by default, so name this one:
+
+```bash
+curl -fsSL https://install.convoypanel.com/5 | sudo bash -s -- --version 5.0.0-alpha.3
+```
+
+It's the first release that can import a panel running v4.7.0. The fixes v4 has had since v4.7.0-rc.4 aren't in 5.x
+yet ([#211](https://github.com/ConvoyPanel/panel/issues/211)), so an imported panel goes without them for now. For
+example, adopting an existing VM still asks for a System OS Password.
+
+### Updating from 5.0.0-alpha.2
+
+Point the install at this release and upgrade:
+
+```bash
+sed -i 's/^CONVOY_VERSION=.*/CONVOY_VERSION=5.0.0-alpha.3/' /opt/convoy/.env
+convoy upgrade
+```
 
 ### Changed
 
