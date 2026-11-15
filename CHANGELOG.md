@@ -14,6 +14,9 @@ follows [Semantic Versioning](https://semver.org) guidelines.
   ignored.
 - Creating a server through the API with `"should_create_server": false` accepts `"account_password": null`, as it
   already accepted `"template_uuid": null`. It used to fail validation, and only leaving the field out worked.
+- Creating addresses through the API without `server_id` or `mac_address` works. Both are optional, but leaving
+  either out failed with a 500.
+- A range of addresses assigned to a server updates the server's network settings, as a single address already did.
 
 ## v4.7.1-rc.2
 
