@@ -30,7 +30,9 @@ const IsoCard = () => {
                                 {t('isos.empty')}
                             </p>
                         ) : (
-                            data.map(iso => <IsoRow iso={iso} key={iso.uuid} />)
+                            data.map(iso => (
+                                <IsoRow iso={iso} key={iso.uuid ?? iso.interface} />
+                            ))
                         )
                     ) : null}
                 </div>

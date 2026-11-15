@@ -52,6 +52,21 @@ Brings over the fixes v4 has had since v4.7.0-rc.4 ([#211](https://github.com/Co
 - Fixed the row menus, the search bar's "+" button, the dark mode switch and the boot order's add, remove and drag
   buttons having no name a screen reader could announce.
 - Fixed a release's notes picking up every release candidate's notes for the same version.
+- A backup created through the API with `"is_locked": true` is locked. The request checked `is_locked` but read
+  `locked`, so the backup came out unlocked. The request now takes only `is_locked`, the column's name; `locked` is
+  ignored.
+- Creating a server through the API with `"should_create_server": false` accepts `"account_password": null`, as it
+  already accepted `"template_uuid": null`. It used to fail validation, and only leaving the field out worked.
+- Creating addresses through the API without `server_id` or `mac_address` works. Both are optional, but leaving
+  either out failed with a 500.
+- A range of addresses assigned to a server updates the server's network settings, as a single address already did.
+- Addresses, gateways and MAC addresses are stored in lowercase again, when created and when edited. Since
+  v4.0.0-beta they were stored as typed, so an IPv6 address differing only in case from an existing one was accepted
+  as a duplicate. Addresses already stored with capitals aren't changed.
+- Deleting an ISO ejects it from every server it's mounted on first. It used to stay in their CD drives, and Proxmox
+  then refused to start them ("volume ... does not exist").
+- A server whose CD drive holds an ISO that was already deleted lists it under Mountable ISOs as "Deleted", with an
+  Unmount button. It used to be hidden there, so the server couldn't start and nothing in Convoy could eject it.
 
 ### Security
 

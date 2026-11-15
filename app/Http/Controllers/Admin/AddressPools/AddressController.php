@@ -60,9 +60,13 @@ class AddressController extends ApiController
 
     public function store(StoreAddressRequest $request, AddressPool $addressPool)
     {
-        $data = $request->validated();
+        $data = [
+            'server_id' => null,
+            'mac_address' => null,
+            ...$request->validated(),
+        ];
 
-        if ($data['is_bulk_action']) {
+        if ($data['is_bulk_action'] ?? false) {
             $this->bulkAddressCreationService->handle(
                 type      : AddressType::from($data['type']),
                 from      : $data['starting_address'],
@@ -74,8 +78,8 @@ class AddressController extends ApiController
                 macAddress: $data['mac_address'],
             );
 
-            if (!is_null($request->server_id)) {
-                SyncNetworkSettings::dispatch($request->integer('server_id'));
+            if (!is_null($data['server_id'])) {
+                SyncNetworkSettings::dispatch((int) $data['server_id']);
             }
 
             return $this->returnNoContent();

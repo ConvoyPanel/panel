@@ -13,6 +13,8 @@ use Illuminate\Support\Arr;
 
 class StoreAddressRequest extends BaseApiRequest
 {
+    use LowercasesAddresses;
+
     public function rules(): array
     {
         $rules = Arr::except(Address::getRules(), ['address_pool_id', 'address']);
@@ -49,31 +51,5 @@ class StoreAddressRequest extends BaseApiRequest
         }
 
         return $rules;
-    }
-
-    /**
-     * Transform IPv6 addresses to lowercase to avoid saving duplicate variants that are upper
-     * and lowercase.
-     *
-     * If you don't prefer this lowercase behavior, you can thank Fro! I surveyed him for IPv6
-     * capitalization preference.
-     */
-    protected function passedValidation(): void
-    {
-        if ($this->boolean('is_bulk_action')) {
-            $this->replace([
-                'address' => strtolower($this->string('address')),
-            ]);
-        }
-
-        if (!is_null($this->mac_address)) {
-            $this->replace([
-                'mac_address' => strtolower($this->string('mac_address')),
-            ]);
-        }
-
-        $this->replace([
-            'gateway' => strtolower($this->string('gateway')),
-        ]);
     }
 }
