@@ -46,6 +46,8 @@ Brings over the fixes v4 has had since v4.7.0-rc.4 ([#211](https://github.com/Co
 - Fixed the row menus, the search bar's "+" button, the dark mode switch and the boot order's add, remove and drag
   buttons having no name a screen reader could announce.
 - Fixed a release's notes picking up every release candidate's notes for the same version.
+- A backup created through the API with `"is_locked": true` is locked. The request checked `is_locked` but read
+  `locked`, so the backup came out unlocked. `locked` is still accepted.
 
 ### Security
 

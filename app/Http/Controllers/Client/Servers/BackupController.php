@@ -57,7 +57,7 @@ class BackupController extends ApiController
                 name           : $request->name,
                 mode           : $request->enum('mode', BackupMode::class),
                 compressionType: $request->enum('compression_type', BackupCompressionType::class),
-                isLocked       : $request->input('locked', false),
+                isLocked       : $request->boolean('is_locked', $request->boolean('locked')),
             );
 
         return fractal($backup, new BackupTransformer())->respond();

@@ -141,6 +141,19 @@ function testDeleteBackups(
 
 it('can create backups', testCreateBackup());
 
+it('locks a new backup when asked to', function (string $field) {
+    Http::fake(['*' => Http::response(['data' => 'upid'], 200)]);
+
+    [$user, $_, $_, $server] = createServerModel();
+
+    $this->actingAs($user)->postJson("/api/client/servers/{$server->uuid}/backups", [
+        'name' => 'Locked Backup',
+        'mode' => 'snapshot',
+        'compression_type' => 'none',
+        $field => true,
+    ])->assertOk()->assertJsonPath('data.is_locked', 1);
+})->with(['is_locked', 'locked']);
+
 it('can restore backups', testRestoreBackups());
 
 it('can delete backups', testDeleteBackups());

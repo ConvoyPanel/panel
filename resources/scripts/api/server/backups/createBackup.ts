@@ -16,7 +16,7 @@ export default async (
         data: { data },
     } = await http.post(`/api/client/servers/${uuid}/backups/`, {
         name: params.name,
-        locked: params.locked,
+        is_locked: params.locked,
         mode: params.mode,
         compression_type: params.compressionType,
     })
