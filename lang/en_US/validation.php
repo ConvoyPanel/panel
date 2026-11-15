@@ -46,7 +46,7 @@ return [
     'doesnt_start_with' => 'The :attribute may not start with one of the following: :values.',
     'email' => 'The :attribute must be a valid email address.',
     'ends_with' => 'The :attribute must end with one of the following: :values.',
-    'us_keyboard_characters' => 'The :attribute must contain characters from the US keyboard.',
+    'us_keyboard_characters' => 'The :attribute can only contain characters from a US keyboard.',
     'enum' => 'The selected :attribute is invalid.',
     'exists' => 'The selected :attribute is invalid.',
     'file' => 'The :attribute must be a file.',
@@ -108,7 +108,7 @@ return [
     'not_regex' => 'The :attribute format is invalid.',
     'numeric' => 'The :attribute must be a number.',
     'password' => [
-        'default' => 'The :attribute must contain 8 - 50 characters, 1 uppercase, 1 lowercase, 1 number and 1 special character.',
+        'default' => 'The :attribute must be at least 8 characters, with an uppercase letter, a lowercase letter, a number and one of !@#$%^&*.',
         'letters' => 'The :attribute must contain at least one letter.',
         'mixed' => 'The :attribute must contain at least one uppercase and one lowercase letter.',
         'numbers' => 'The :attribute must contain at least one number.',

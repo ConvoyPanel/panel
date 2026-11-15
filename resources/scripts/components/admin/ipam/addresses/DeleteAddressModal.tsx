@@ -62,7 +62,9 @@ const DeleteAddressModal = ({ address, onClose, mutate }: Props) => {
     return (
         <Modal open={Boolean(address)} onClose={onClose}>
             <Modal.Header>
-                <Modal.Title>{t('delete_modal.title')}</Modal.Title>
+                <Modal.Title>
+                    {t('delete_modal.title', { address: address?.address })}
+                </Modal.Title>
             </Modal.Header>
 
             <form onSubmit={submit}>

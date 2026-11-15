@@ -47,15 +47,9 @@ const DeleteNodeCard = () => {
                         byKey={`admin.nodes.${node.id}.settings.general.delete`}
                     />
 
-                    <p className='description-small my-3'>
-                        The node will be permanently deleted from Convoy. This
-                        action is irreversible and can not be undone.
-                    </p>
-
                     {node.serversCount > 0 && (
                         <MessageBox title='Error' type='error'>
-                            You cannot delete a node that has servers assigned
-                            to it.
+                            Delete or disconnect this node's servers first.
                         </MessageBox>
                     )}
                 </div>

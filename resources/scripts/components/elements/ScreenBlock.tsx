@@ -98,7 +98,7 @@ type ErrorMessageProps = (
 
 export const ErrorMessage = ({ title, ...props }: ErrorMessageProps) => (
     <ScreenBlock
-        title={title || 'Something went wrong'}
+        title={title || "Couldn't Load This Page"}
         center
         icon={ExclamationCircleIcon}
         {...props}
@@ -112,11 +112,8 @@ export const NotFound = ({
     full,
 }: Partial<Pick<BaseProps, 'title' | 'message' | 'onBack' | 'full'>>) => (
     <ScreenBlock
-        title={title || '404'}
-        message={
-            message ||
-            "The link is either broken or doesn't exist on the server."
-        }
+        title={title || 'Page Not Found'}
+        message={message || 'Check the link and try again.'}
         icon={LinkIcon}
         center
         full={full}

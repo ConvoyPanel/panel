@@ -5,8 +5,8 @@ return [
         'title' => 'Server Information',
         'statuses' => [
             'ready' => 'Ready',
-            'installing' => 'Installation In Progress',
-            'install_failed' => 'Recent Installation Failed',
+            'installing' => 'Installing',
+            'install_failed' => 'Installation Failed',
             'suspended' => 'Suspended',
             'restoring_backup' => 'Restoring From a Backup',
             'restoring_snapshot' => 'Restoring From a Snapshot',
@@ -14,7 +14,6 @@ return [
     ],
     'suspension' => [
         'title' => 'Suspension',
-        'description' => 'Toggle the suspension status of the server.',
         'statuses' => [
             'suspended' => 'This server is suspended.',
             'not_suspended' => 'This server isn\'t suspended.'
@@ -23,22 +22,22 @@ return [
         'unsuspend' => 'Unsuspend',
         'confirmation' => [
             'title' => 'Suspend :name?',
-            'description' => 'Suspending :name powers off its virtual machine at once, without a clean shutdown, and its owner can\'t manage it until you unsuspend it.',
+            'description' => 'Suspending this server powers it off immediately without a clean shutdown, and its owner can\'t manage it until you unsuspend it.',
         ],
     ],
     'deletion' => [
         'title' => 'Delete Server',
-        'description' => 'Delete removes the server completely: its backups, its virtual machine on the Proxmox node, and its entry in Convoy. If the virtual machine is already gone from the node, only the Convoy entry is removed. Disconnect removes the server from Convoy only, and leaves the virtual machine and its backups on the node untouched.',
+        'description' => 'Delete removes this server from Convoy and deletes its virtual machine and backups on the Proxmox node. Disconnect only removes it from Convoy.',
         'deleting_status' => 'This server is currently being deleted.',
-        'failed_status' => 'The last attempt to delete this server failed. You can delete it again, or disconnect it to remove it from Convoy only.',
+        'failed_status' => 'Deleting this server failed. Try again, or disconnect it to remove it from Convoy only.',
         'disconnect' => 'Disconnect',
         'confirmation' => [
-            'title' => 'Delete :name',
-            'description' => 'Are you sure you want to delete :name? Its virtual machine and backups will be destroyed on the Proxmox node.'
+            'title' => 'Delete :name?',
+            'description' => 'Deleting this server also deletes its virtual machine and backups on the Proxmox node.'
         ],
         'disconnect_confirmation' => [
-            'title' => 'Disconnect :name',
-            'description' => 'Remove :name from Convoy? Its virtual machine and backups stay on the Proxmox node, and Convoy will no longer manage them.'
+            'title' => 'Disconnect :name?',
+            'description' => 'Disconnecting this server only removes it from Convoy and keeps its virtual machine and backups on the Proxmox node, but Convoy can no longer manage them.'
         ],
     ],
     'build' => [

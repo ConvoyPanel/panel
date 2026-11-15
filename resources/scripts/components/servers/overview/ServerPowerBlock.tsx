@@ -69,7 +69,7 @@ const ServerPowerBlock = () => {
             <ConfirmationModal
                 open={confirmingKill}
                 title={t('kill_confirmation.title', { name })}
-                description={t('kill_confirmation.description', { name })}
+                description={t('kill_confirmation.description')}
                 confirmLabel={t('power_actions.kill')}
                 onConfirm={() => update('kill')}
                 onClose={() => setConfirmingKill(false)}

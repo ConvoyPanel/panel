@@ -113,7 +113,7 @@ const NodeTemplatesContainer = () => {
                     disabled={data!.length >= 50}
                     variant='filled'
                 >
-                    New Template Group
+                    Create Template Group
                 </Button>
             </div>
             {!data ? (
@@ -148,7 +148,7 @@ const NodeTemplatesContainer = () => {
                             onClick={() => setShowCreateModal(true)}
                             className='text-center border border-accent-400 border-dashed bg-transparent active:bg-accent-200 sm:hover:bg-accent-200 hover:text-foreground transition-colors rounded p-12'
                         >
-                            New Template Group
+                            Create Template Group
                         </button>
                     )}
                 </div>

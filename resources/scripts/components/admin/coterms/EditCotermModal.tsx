@@ -119,7 +119,7 @@ const EditCotermModal = ({coterm, onClose, mutate}: Props) => {
                                 />
                                 <CheckboxForm
                                         name={'isTlsEnabled'}
-                                        label={'Is TLS Enabled?'}
+                                        label={'Use TLS'}
                                 />
                             </div>
                             <TextInputForm name='port' label={tStrings('port')}/>

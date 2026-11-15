@@ -18,9 +18,7 @@ const PlainTextTokenModal = ({ value, onClose }: Props) => {
 
             <Modal.Body>
                 <Modal.Description>
-                    Here is your newly created API token. Please take note of
-                    the token's value as this is the only and last time you will
-                    see it.
+                    Copy this token now. You won't be able to see it again.
                 </Modal.Description>
 
                 <Code className={'!mt-3'} block color={'blue'}>
@@ -28,7 +26,7 @@ const PlainTextTokenModal = ({ value, onClose }: Props) => {
                 </Code>
             </Modal.Body>
             <Modal.Actions>
-                <Modal.Action onClick={onClose}>Okay, I got it</Modal.Action>
+                <Modal.Action onClick={onClose}>Done</Modal.Action>
             </Modal.Actions>
         </Modal>
     )

@@ -21,7 +21,7 @@ const LoginContainer = () => {
     const location = useLocation()
 
     useEffect(() => {
-        document.title = 'Login | Convoy'
+        document.title = 'Sign In | Convoy'
     }, [])
 
     const schema = z.object({

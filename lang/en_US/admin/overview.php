@@ -1,8 +1,7 @@
 <?php
 
 return [
-    'description' => 'Live panel health and capacity.',
-    'load_error' => 'Failed to load the realtime dashboard.',
+    'load_error' => 'Couldn\'t load the overview. Reload the page to try again.',
     'ready_installing_detail' => ':ready ready, :installing installing',
     'nodes_locations_detail_one' => 'across :count location',
     'nodes_locations_detail_other' => 'across :count locations',
@@ -21,21 +20,18 @@ return [
     'attention_close' => 'Close',
     'attention_showing' => 'Showing the :shown most recent of :total.',
     'capacity' => 'Capacity',
-    'capacity_description' => 'Convoy allocated resources across all nodes.',
     'allocated_percent' => ':percent% allocated in Convoy',
     'addresses' => 'Addresses',
     'addresses_detail' => ':available available in :pools pools',
     'backup_status_detail' => ':pending pending, :failed failed',
-    'iso_status_detail' => ':pending pending downloads',
+    'iso_status_detail' => ':pending downloading',
     'server_state' => 'Server State',
-    'server_state_description' => 'Current lifecycle states in the panel.',
     'ready' => 'Ready',
     'installing' => 'Installing',
     'restoring' => 'Restoring',
     'deleting' => 'Deleting',
     'failed' => 'Failed',
-    'nodes_description' => 'Per-node Convoy allocation.',
-    'no_nodes' => 'No nodes have been configured.',
+    'no_nodes' => 'No nodes',
     'servers_count_one' => ':count server',
     'servers_count_other' => ':count servers',
 ];

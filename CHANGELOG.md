@@ -5,6 +5,24 @@ This file is a running track of new features and fixes to each version of the pa
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 follows [Semantic Versioning](https://semver.org) guidelines.
 
+## Unreleased
+
+### Changed
+
+- The panel's text follows the new writing guide in `docs/writing.md`:
+  - Descriptions that repeated a title are gone, including those on the admin Overview page and its cards.
+  - Delete and confirmation dialogs say what will happen instead of asking "Are you sure?".
+  - Empty states read "No backups", "No servers" and so on.
+  - Errors end with what to do next.
+  - Create buttons and their dialogs share one name, such as "Create User".
+  - The admin area is called "Admin" everywhere.
+- Form errors read "Required" and "Must be at most 40 characters", with no trailing period, and the password rule names
+  the symbols it accepts.
+
+### Fixed
+
+- The server picker in the address form showed a translation key instead of "No servers" when nothing matched.
+
 ## v4.7.1-rc.1
 
 ### Changed

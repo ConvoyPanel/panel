@@ -54,7 +54,7 @@ export const LoadFailureScreen = ({
     backTo,
 }: {
     failure: LoadFailure
-    /** What the page shows, as in "Node not found". */
+    /** What the page shows, as in "Node Not Found". */
     record: string
     backTo: string
 }) => {
@@ -62,7 +62,7 @@ export const LoadFailureScreen = ({
 
     return failure.notFound ? (
         <NotFound
-            title={`${record} not found`}
+            title={`${record} Not Found`}
             message={`This ${record.toLowerCase()} doesn't exist, or it has been deleted.`}
             onBack={() => navigate(backTo)}
         />

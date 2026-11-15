@@ -23,7 +23,7 @@ const UserServersContainer = () => {
             <UserContentBlock title={'Servers'}>
                 <div className='flex justify-end items-center mb-3'>
                     <Button onClick={() => setOpen(true)} variant='filled'>
-                        New Server
+                        Create Server
                     </Button>
                 </div>
                 <ServersTable userId={user.id} />

@@ -140,7 +140,7 @@ const NodeInformationCard = () => {
                                     label={tIndex('token_id')}
                                     placeholder={
                                         tIndex('override_creds') ??
-                                        'Override credentials'
+                                        'Leave blank to keep the current one'
                                     }
                                 />
                                 <TextInputForm
@@ -148,7 +148,7 @@ const NodeInformationCard = () => {
                                     label={tIndex('secret')}
                                     placeholder={
                                         tIndex('override_creds') ??
-                                        'Override credentials'
+                                        'Leave blank to keep the current one'
                                     }
                                 />
                             </div>
