@@ -51,3 +51,78 @@ it('syncs the server a range of addresses is assigned to', function () {
 
     Queue::assertPushed(SyncNetworkSettings::class);
 });
+
+it('stores an address, gateway and MAC address in lowercase', function () {
+    $this->actingAs($this->admin)->postJson("/api/admin/address-pools/{$this->pool->id}/addresses", [
+        'is_bulk_action' => false,
+        'type' => 'ipv6',
+        'address' => '2001:DB8::10',
+        'cidr' => 64,
+        'gateway' => '2001:DB8::1',
+        'mac_address' => 'AA:BB:CC:DD:EE:FF',
+    ])->assertOk();
+
+    expect(Address::where('address_pool_id', $this->pool->id)->sole())
+        ->address->toBe('2001:db8::10')
+        ->gateway->toBe('2001:db8::1')
+        ->mac_address->toBe('aa:bb:cc:dd:ee:ff');
+});
+
+it('rejects an address that differs from an existing one only in case', function () {
+    Address::factory()->create([
+        'address_pool_id' => $this->pool->id,
+        'type' => 'ipv6',
+        'address' => '2001:db8::10',
+        'cidr' => 64,
+        'gateway' => '2001:db8::1',
+    ]);
+
+    $this->actingAs($this->admin)->postJson("/api/admin/address-pools/{$this->pool->id}/addresses", [
+        'is_bulk_action' => false,
+        'type' => 'ipv6',
+        'address' => '2001:DB8::10',
+        'cidr' => 64,
+        'gateway' => '2001:db8::1',
+    ])->assertUnprocessable()->assertJsonValidationErrors(['address']);
+});
+
+it('stores a range of addresses and its gateway in lowercase', function () {
+    $this->actingAs($this->admin)->postJson("/api/admin/address-pools/{$this->pool->id}/addresses", [
+        'is_bulk_action' => true,
+        'type' => 'ipv6',
+        'starting_address' => '2001:DB8::A',
+        'ending_address' => '2001:DB8::B',
+        'cidr' => 64,
+        'gateway' => '2001:DB8::1',
+    ])->assertNoContent();
+
+    expect(Address::where('address_pool_id', $this->pool->id)->orderBy('address')->get(['address', 'gateway'])->toArray())
+        ->toBe([
+            ['address' => '2001:db8::a', 'gateway' => '2001:db8::1'],
+            ['address' => '2001:db8::b', 'gateway' => '2001:db8::1'],
+        ]);
+});
+
+it('stores an edited address in lowercase', function () {
+    $address = Address::factory()->create([
+        'address_pool_id' => $this->pool->id,
+        'type' => 'ipv6',
+        'address' => '2001:db8::10',
+        'cidr' => 64,
+        'gateway' => '2001:db8::1',
+    ]);
+
+    $this->actingAs($this->admin)->putJson("/api/admin/address-pools/{$this->pool->id}/addresses/{$address->id}", [
+        'type' => 'ipv6',
+        'address' => '2001:DB8::20',
+        'cidr' => 64,
+        'gateway' => '2001:DB8::1',
+        'mac_address' => 'AA:BB:CC:DD:EE:FF',
+        'server_id' => null,
+    ])->assertOk();
+
+    expect($address->fresh())
+        ->address->toBe('2001:db8::20')
+        ->gateway->toBe('2001:db8::1')
+        ->mac_address->toBe('aa:bb:cc:dd:ee:ff');
+});
