@@ -23,6 +23,8 @@ class StoreBackupRequest extends BaseApiRequest
         return [
             'name' => $rules['name'],
             'is_locked' => $rules['is_locked'],
+            // Still accepted: earlier versions of the panel's own UI sent `locked`, and API clients may too.
+            'locked' => 'sometimes|boolean',
             'mode' => ['required', new Enum(BackupMode::class)],
             'compression_type' => ['required', new Enum(BackupCompressionType::class)],
         ];

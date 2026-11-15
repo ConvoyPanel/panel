@@ -5,6 +5,13 @@ This file is a running track of new features and fixes to each version of the pa
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 follows [Semantic Versioning](https://semver.org) guidelines.
 
+## Unreleased
+
+### Fixed
+
+- A backup created through the API with `"is_locked": true` is locked. The request checked `is_locked` but read
+  `locked`, so the backup came out unlocked. `locked` is still accepted.
+
 ## v4.7.1-rc.2
 
 ### Changed
