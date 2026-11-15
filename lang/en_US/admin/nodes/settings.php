@@ -11,13 +11,12 @@ return [
         'tls' => 'TLS/SSL Enabled',
         'token_created' => [
             'title' => 'Token Created',
-            'description' => 'Here is your newly created token. Please take note of the token\'s value as this is the only and
-            last time you will see it.',
-            'action' => 'Okay, I got it'
+            'description' => 'Copy this token now. You won\'t be able to see it again.',
+            'action' => 'Done'
         ],
         'reset' => [
             'title' => 'Reset Token?',
-            'description' => 'Are you sure you want to reset this node\'s Coterm token? Any Coterm instances that are relying on this token will fail.',
+            'description' => 'Resetting the token stops this Coterm instance from working until you update it with the new token.',
             'action' => 'Reset Token',
         ]
     ]

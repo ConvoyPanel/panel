@@ -176,7 +176,7 @@ const AdminServerRouter = () => {
             {!server ? (
                 notFound ? (
                     <NotFound
-                        title='Server not found'
+                        title='Server Not Found'
                         message="This server doesn't exist, or it has been deleted."
                         onBack={() => navigate('/admin/servers')}
                     />
@@ -194,8 +194,8 @@ const AdminServerRouter = () => {
                             icon={ExclamationCircleIcon}
                             message={
                                 server.status === 'deleting'
-                                    ? "This server is being deleted. If you think this is an error, click below to make the server accessible. Clicking the button will not stop the server from being deleted if it's in progress"
-                                    : 'This server failed to delete. Delete it again, disconnect it to remove it from Convoy only, or make it accessible again if you think this is an error. The server MAY not be in a usable state.'
+                                    ? "If this is a mistake, restore access to make the server usable again. That won't stop a deletion that's already running."
+                                    : 'The server might not work anymore. Delete it again, disconnect it to remove it from Convoy only, or restore access if this is a mistake.'
                             }
                             title={
                                 server.status === 'deleting'

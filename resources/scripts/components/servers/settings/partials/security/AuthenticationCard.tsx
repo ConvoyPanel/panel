@@ -111,7 +111,7 @@ const AuthenticationCard = () => {
                                 <TextInputForm
                                     type='password'
                                     name='password'
-                                    label='Password'
+                                    label='New Password'
                                 />
                             )}
                             {type === 'ssh_keys' && (

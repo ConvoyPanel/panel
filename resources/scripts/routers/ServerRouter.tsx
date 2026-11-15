@@ -212,7 +212,7 @@ const ServerRouter = () => {
                     <ScreenBlock
                         center
                         icon={NoSymbolIcon}
-                        message='This server is suspended. Contact your provider or system administrator for help.'
+                        message='Contact your provider or administrator for help.'
                         title='Suspended'
                     />
                 )
@@ -222,7 +222,7 @@ const ServerRouter = () => {
                         center
                         icon={ArrowPathIcon}
                         spin
-                        message='Your server is being installed. This can take from 1-15 minutes.'
+                        message='This can take up to 15 minutes.'
                         title='Installing'
                     />
                 )
@@ -232,7 +232,7 @@ const ServerRouter = () => {
                         center
                         icon={ArrowPathIcon}
                         spin
-                        message='Your server is being restored from a backup. This can take from 1-15 minutes.'
+                        message='This can take up to 15 minutes.'
                         title='Restoring Backup'
                     />
                 )
@@ -242,7 +242,7 @@ const ServerRouter = () => {
                         center
                         icon={ArrowPathIcon}
                         spin
-                        message='Your server is being restored from a snapshot. This can take from 1-15 minutes.'
+                        message='This can take up to 15 minutes.'
                         title='Restoring Snapshot'
                     />
                 )
@@ -265,7 +265,7 @@ const ServerRouter = () => {
                     <ScreenBlock
                         center
                         icon={ExclamationCircleIcon}
-                        message='Your server is in an unusable state. Please contact your administrator.'
+                        message='Contact your administrator for help.'
                         title='Unusable'
                     />
                 )
@@ -290,7 +290,7 @@ const ServerRouter = () => {
                 store when a poll finds it gone. */}
             {missing || (!server && notFound) ? (
                 <NotFound
-                    title='Server not found'
+                    title='Server Not Found'
                     message="This server doesn't exist, or it has been deleted."
                     onBack={() => navigate('/')}
                 />

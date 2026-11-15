@@ -40,7 +40,7 @@ const ServersSelectForm = ({ addressPoolId }: Props) => {
             searchValue={query}
             onSearchChange={val => setQuery(val)}
             loading={isValidating || isLoading}
-            nothingFound={tSIndex('no_server_found')}
+            nothingFound={tSIndex('no_servers_found')}
             clearable
         />
     )

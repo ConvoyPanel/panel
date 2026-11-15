@@ -254,12 +254,7 @@ const AttentionCard = ({ data }: { data: DashboardOverview }) => {
     return (
         <Card className='col-span-12 flex flex-col lg:col-span-5'>
             <div className='flex items-center justify-between gap-3'>
-                <div>
-                    <h2 className='h5'>{t('attention')}</h2>
-                    <p className='description-small mt-1'>
-                        {t('attention_description')}
-                    </p>
-                </div>
+                <h2 className='h5'>{t('attention')}</h2>
                 <ExclamationTriangleIcon
                     className={`h-5 w-5 ${
                         groups.length > 0 ? 'text-error' : 'text-accent-400'
@@ -272,9 +267,6 @@ const AttentionCard = ({ data }: { data: DashboardOverview }) => {
                     <CheckCircleIcon className='h-8 w-8 text-success' />
                     <p className='mt-3 text-sm font-medium text-foreground'>
                         {t('attention_all_clear')}
-                    </p>
-                    <p className='description-small mt-1'>
-                        {t('attention_all_clear_detail')}
                     </p>
                 </div>
             ) : (

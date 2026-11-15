@@ -42,7 +42,7 @@ const ServersSelectFormik = () => {
             searchValue={query}
             onSearchChange={val => setQuery(val)}
             itemComponent={DescriptiveItemComponent}
-            nothingFound='No servers found'
+            nothingFound='No servers'
             loading={isLoading || isValidating}
             clearable
             name='serverId'

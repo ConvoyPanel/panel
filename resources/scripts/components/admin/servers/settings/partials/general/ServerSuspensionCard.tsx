@@ -56,9 +56,7 @@ const ServerSuspensionCard = () => {
                 title={t('suspension.confirmation.title', {
                     name: server.name,
                 })}
-                description={t('suspension.confirmation.description', {
-                    name: server.name,
-                })}
+                description={t('suspension.confirmation.description')}
                 confirmLabel={t('suspension.suspend')}
                 onConfirm={handle}
                 onClose={() => setConfirming(false)}
@@ -69,10 +67,6 @@ const ServerSuspensionCard = () => {
                     <FlashMessageRender
                         byKey={`admin.servers.${server.uuid}.settings.general.suspension`}
                     />
-                    <p className='description-small !text-foreground'>
-                        {t('suspension.description')}
-                    </p>
-
                     <MessageBox
                         title={tStrings('status') ?? 'Status'}
                         type={

@@ -9,7 +9,7 @@ const UserSettingsContainer = () => {
             defaultUrl='/admin/users/:id/settings/general'
             contentBlock={props => (
                 <UserContentBlock
-                    title='Server Settings'
+                    title='Settings'
                     showFlashKey='admin:user:settings'
                     {...props}
                 />

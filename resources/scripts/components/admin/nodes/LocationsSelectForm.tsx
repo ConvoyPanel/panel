@@ -29,7 +29,7 @@ const LocationsSelectForm = () => {
             searchValue={query}
             onSearchChange={val => setQuery(val)}
             loading={isValidating || isLoading}
-            nothingFound='No locations found'
+            nothingFound='No locations'
             name='locationId'
         />
     )

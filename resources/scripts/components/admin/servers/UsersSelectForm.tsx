@@ -37,7 +37,7 @@ const UsersSelectForm = () => {
             // email.
             filter={() => true}
             loading={isValidating || isLoading}
-            nothingFound={'No users found'}
+            nothingFound={'No users'}
             name={'userId'}
             itemComponent={DescriptiveItemComponent}
         />

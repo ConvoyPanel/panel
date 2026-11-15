@@ -39,13 +39,13 @@ const EditTemplateModal = ({ open, onClose, template, group }: Props) => {
         validationSchema: yup.object({
             name: yup
                 .string()
-                .required('Specify a name')
-                .max(40, 'Please limit up to 40 characters'),
+                .required('Required')
+                .max(40, 'Must be at most 40 characters'),
             vmid: yup
                 .number()
-                .required('Specify a VMID')
-                .min(100, 'VMID must be greater than 100')
-                .max(999999999, 'VMID must be less than 999999999'),
+                .required('Required')
+                .min(100, 'VMID must be at least 100')
+                .max(999999999, 'VMID must be at most 999999999'),
             hidden: yup.boolean(),
         }),
         onSubmit: async ({ vmid, ...values }, { setSubmitting }) => {
@@ -133,7 +133,9 @@ const EditTemplateModal = ({ open, onClose, template, group }: Props) => {
     return (
         <Modal open={open} onClose={handleClose}>
             <Modal.Header>
-                <Modal.Title>{template ? 'Edit' : 'New'} Template</Modal.Title>
+                <Modal.Title>
+                    {template ? 'Edit' : 'Create'} Template
+                </Modal.Title>
             </Modal.Header>
 
             <FormikProvider value={form}>
