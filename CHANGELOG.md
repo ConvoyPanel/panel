@@ -5,7 +5,27 @@ This file is a running track of new features and fixes to each version of the pa
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 follows [Semantic Versioning](https://semver.org) guidelines.
 
-## Unreleased
+## v5.0.0-alpha.4
+
+Still an alpha: use it for test installs and to rehearse the upgrade from v4, and keep production panels on v4 until
+5.0 is released. The installer only picks up full releases by default, so name this one:
+
+```bash
+curl -fsSL https://install.convoypanel.com/5 | sudo bash -s -- --version 5.0.0-alpha.4
+```
+
+Use this release to rehearse the move from v4. It downloads everything the import needs before v4 goes into
+maintenance mode, and its output says what each step is doing. The fixes v4 has had since v4.7.0-rc.4 still aren't in
+5.x ([#211](https://github.com/ConvoyPanel/panel/issues/211)).
+
+### Updating from 5.0.0-alpha.3
+
+Point the install at this release and upgrade:
+
+```bash
+sed -i 's/^CONVOY_VERSION=.*/CONVOY_VERSION=5.0.0-alpha.4/' /opt/convoy/.env
+convoy upgrade
+```
 
 ### Changed
 
@@ -27,7 +47,6 @@ follows [Semantic Versioning](https://semver.org) guidelines.
 ### Fixed
 
 - The server picker in the address form showed a translation key instead of "No servers" when nothing matched.
-
 - `convoy import-v4` now downloads everything it needs, including pgloader and MySQL, before putting v4 into
   maintenance mode. They used to be downloaded after v4 was stopped, so a slow download added to the downtime and a
   failed one ended the import with v4 offline.
