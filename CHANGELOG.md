@@ -5,6 +5,13 @@ This file is a running track of new features and fixes to each version of the pa
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 follows [Semantic Versioning](https://semver.org) guidelines.
 
+## Unreleased
+
+### Fixed
+
+- A CD drive whose ISO was deleted shows in Boot Order under the ISO's file name, as it does under Mountable ISOs. It
+  used to have no name.
+
 ## v4.7.1-rc.3
 
 ### Fixed
