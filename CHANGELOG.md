@@ -24,6 +24,9 @@ follows [Semantic Versioning](https://semver.org) guidelines.
   came back on.
 - ISO sizes are stored in bytes, as on v4.7.0, so a 2.95 MiB ISO no longer reads "2 MiB" in the library. When a
   download finishes, the size recorded is the size of the file the node saved.
+- `convoy import-v4` checks, before it touches v4, that every number in v4's unsigned columns fits Postgres, and names
+  the ones that don't. Postgres holds half as much in the same column type, so one too large stopped the import
+  partway, with v4 already stopped.
 
 ## v5.0.0-alpha.2
 
