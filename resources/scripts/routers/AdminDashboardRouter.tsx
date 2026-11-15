@@ -127,7 +127,7 @@ export const AdminBanner = () => (
         <ContentContainer>
             <Link to='/'>
                 <p className='text-background text-xs font-medium uppercase tracking-wide'>
-                    Exit Administration
+                    Exit Admin
                 </p>
             </Link>
         </ContentContainer>

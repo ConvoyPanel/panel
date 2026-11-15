@@ -33,9 +33,6 @@ const ServerTerminalBlock = () => {
     return (
         <Card className='flex flex-col col-span-10 md:col-span-5'>
             <h5 className='h5'>{t('terminal.title')}</h5>
-            <p className='description-small mt-1'>
-                {t('terminal.description')}
-            </p>
             <div className='grid lg:grid-cols-2 mt-6'>
                 <div className='flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-accent-200 lg:pr-5 pb-5 lg:py-5'>
                     <div>

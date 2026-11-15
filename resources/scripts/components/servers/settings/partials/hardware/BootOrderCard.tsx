@@ -251,7 +251,7 @@ const DraggableDiskRow = ({ disk, action }: DiskRowProps) => (
                     <img
                         src={DragVerticalIcon}
                         className='h-6 w-6 dark:invert'
-                        alt='Drag button icon'
+                        alt='Drag to reorder'
                     />
                 </button>
                 <div className='flex justify-between w-full items-center'>

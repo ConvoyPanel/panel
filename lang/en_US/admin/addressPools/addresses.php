@@ -9,10 +9,10 @@ return [
     ],
     'assigned_server' => 'Assigned Server',
     'edit_modal' => [
-        'title' => 'Editing Address',
+        'title' => 'Edit Address',
     ],
     'delete_modal' => [
-        'title' => 'Delete Address?',
-        'description' => 'Are you sure you want to delete :address?',
+        'title' => 'Delete :address?',
+        'description' => 'Deleting :address also removes it from any server it\'s assigned to.',
     ],
 ];

@@ -45,11 +45,11 @@ const AnnouncementRow = ({
                 <AnnouncementMeta announcement={announcement} />
                 {announcement.applies ? (
                     <Badge color={urgent ? 'red' : 'blue'} variant='filled'>
-                        Applies to this panel
+                        Applies to This Panel
                     </Badge>
                 ) : (
                     <Badge color='gray' variant='light'>
-                        Doesn't apply
+                        Doesn't Apply
                     </Badge>
                 )}
             </div>
@@ -137,7 +137,7 @@ const UpdatesContainer = () => {
                                 : panel.version}
                         </Row>
                         <Row label='PHP'>{panel.php}</Row>
-                        <Row label='Latest release'>
+                        <Row label='Latest Release'>
                             {!release.enabled ? (
                                 'Not checked: CONVOY_RELEASES_URL is empty'
                             ) : !release.latest ? (
@@ -154,12 +154,12 @@ const UpdatesContainer = () => {
                                     </a>
                                     {release.updateAvailable === true && (
                                         <Badge color='orange' variant='light'>
-                                            Update available
+                                            Update Available
                                         </Badge>
                                     )}
                                     {release.updateAvailable === false && (
                                         <Badge color='green' variant='light'>
-                                            Up to date
+                                            Up to Date
                                         </Badge>
                                     )}
                                 </span>
@@ -173,10 +173,8 @@ const UpdatesContainer = () => {
                 <FormCard.Body>
                     <FormCard.Title>Announcements</FormCard.Title>
                     <p className='description-small mt-1'>
-                        Security notices and news from the Convoy team, from a
-                        signed feed the panel checks every hour. The panel sends
-                        nothing about itself to get them. Each one is listed
-                        with the reason it does or doesn't apply here.
+                        Security notices and news from the Convoy team. Checking
+                        for them sends nothing about this panel.
                     </p>
                     <div className='mt-3 space-y-1 text-sm'>
                         {!feed.enabled ? (
@@ -202,7 +200,7 @@ const UpdatesContainer = () => {
                     <div className='mt-6'>
                         {announcements.length === 0 ? (
                             <p className='description-small py-4 text-center'>
-                                There are no current announcements.
+                                No announcements
                             </p>
                         ) : (
                             announcements.map(announcement => (
@@ -222,7 +220,7 @@ const UpdatesContainer = () => {
                         disabled={!feed.enabled && !release.enabled}
                         onClick={check}
                     >
-                        Check now
+                        Check Now
                     </Button>
                 </FormCard.Footer>
             </FormCard>

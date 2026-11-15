@@ -124,7 +124,7 @@ const LocationsContainer = () => {
                 <ConfirmationModal
                     open={confirmingDelete}
                     title={`Delete ${locationToDelete?.shortCode}?`}
-                    description={`The ${locationToDelete?.shortCode} location is removed from Convoy. This can't be undone.`}
+                    description="This can't be undone."
                     confirmLabel={tStrings('delete')}
                     onConfirm={handleDelete}
                     onClose={() => setConfirmingDelete(false)}

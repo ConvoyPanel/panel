@@ -82,9 +82,9 @@ const AdminNotices = () => {
                                     Convoy now sends an anonymous usage report
                                     once a day.
                                 </span>{' '}
-                                It holds counts and version numbers under a
-                                random id, and never names, addresses or
-                                anything typed into the panel.
+                                It has counts and version numbers under a random
+                                id, but no names, addresses or anything typed
+                                into the panel.
                             </p>
                             <p className='mt-2 flex flex-wrap gap-x-4 gap-y-1 font-medium'>
                                 <button

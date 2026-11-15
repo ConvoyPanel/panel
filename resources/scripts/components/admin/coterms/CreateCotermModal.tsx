@@ -106,7 +106,7 @@ const CreateCotermModal = ({ open, onClose, mutate }: Props) => {
                                 />
                                 <CheckboxForm
                                     name={'isTlsEnabled'}
-                                    label={'Is TLS Enabled?'}
+                                    label={'Use TLS'}
                                 />
                             </div>
                             <TextInputForm

@@ -26,7 +26,7 @@ const QueryFileButton = () => {
             setError('link', {
                 message:
                     t('create_modal.fail_to_query_remote_file_error') ??
-                    'Failed to query remote file.',
+                    "Couldn't get the file name from this link. Check the link, or enter the file name yourself.",
             })
         }
 

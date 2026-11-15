@@ -83,7 +83,7 @@ const IsoRow = ({ iso }: Props) => {
                     <p className='text-foreground'>{iso.name}</p>
                     {iso.hidden && (
                         <EyeSlashIcon
-                            title='hidden'
+                            title='Hidden'
                             className='h-4 w-4 text-foreground'
                         />
                     )}
