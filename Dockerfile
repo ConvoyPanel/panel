@@ -84,6 +84,14 @@ ARG EXTRA_PHP_EXTENSIONS
 USER root
 RUN install-php-extensions ${EXTRA_PHP_EXTENSIONS}
 
+# The base image sends a year-long HSTS header with includeSubDomains on HTTPS,
+# which v4 never did. Browsers then force HTTPS on every port of the panel's
+# hostname, so a Coterm there without TLS can't open a console. max-age=0 makes
+# browsers that saw the old header forget it.
+RUN sed -i 's/Strict-Transport-Security "[^"]*"/Strict-Transport-Security "max-age=0"/' /etc/frankenphp/Caddyfile \
+    && grep -q 'Strict-Transport-Security "max-age=0"' /etc/frankenphp/Caddyfile \
+    && ! grep -rn 'Strict-Transport-Security' /etc/frankenphp | grep -v '"max-age=0"'
+
 # Our own entrypoint scripts. Numbered below 50 so they run before serversideup's
 # 50-laravel-automations.sh -- the storage skeleton has to exist before
 # `storage:link` and the first log write, and a missing APP_KEY should be a clear
