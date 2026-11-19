@@ -267,3 +267,10 @@ The user may also specify an optional corresponding `$PROXMOX_SSH_TARGET` variab
 `$PROXMOX_FQDN` in the environment.
 If set, you may `ssh $PROXMOX_SSH_TARGET` into the Proxmox node for enhanced testing
 (e.g., for cases where using the Proxmox API isn't sufficient).
+
+## Issue references
+
+When a change has a GitHub issue, end both its changelog entry and its commit body with it:
+
+- Changelog: `([#123](https://github.com/ConvoyPanel/panel/issues/123))`, or `([#123](…), in part)` when the change covers only some of the issue.
+- Commit body: `Closes #123` on its own last line, or `Refs #123` when the change covers only some of the issue.
