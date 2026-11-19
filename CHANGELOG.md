@@ -9,8 +9,8 @@ follows [Semantic Versioning](https://semver.org) guidelines.
 
 ### Fixed
 
-- Fixed Boot Order showing a blank name for a CD drive whose ISO was deleted from Convoy while still mounted. It now
-  shows the ISO's file name, as Mountable ISOs does.
+- CD drives in the boot order now show the mounted ISO's file name when the ISO isn't in Convoy's library. Previously,
+  Convoy would show a blank CD drive in the boot order if its mounted ISO wasn't in Convoy's library.
 
 ## v5.0.0-alpha.5
 
