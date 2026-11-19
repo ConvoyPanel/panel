@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\SystemActor;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Http\FormRequest;
@@ -18,7 +19,10 @@ abstract class BaseApiRequest extends FormRequest
 
     public function authorize(): bool
     {
-        return $this->user()->isAdmin();
+        $actor = $this->user();
+
+        // An application token has no role to check. EnforceTokenAbilities has already scoped it.
+        return $actor instanceof SystemActor || $actor->isAdmin();
     }
 
     /**

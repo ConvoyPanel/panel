@@ -5,6 +5,7 @@ namespace App\Http\Requests\Admin;
 use App\Enums\Admin\AdminPermission;
 use App\Http\Requests\BaseApiRequest;
 use App\Models\AdminRole;
+use App\Models\SystemActor;
 use Illuminate\Validation\Validator;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
@@ -17,10 +18,14 @@ class AdminRoleFormRequest extends BaseApiRequest
      * role is not: three of the permissions (`tokens.manage`, `settings.manage`,
      * `users.impersonate`) are each a path back to full control, so an operator who could mint a
      * role holding them could promote themselves in one step.
+     *
+     * An application token passes for the same reason: minting one already takes `tokens.manage`.
      */
     public function authorize(): bool
     {
-        if (! $this->user()->root_admin) {
+        $actor = $this->user();
+
+        if (! $actor instanceof SystemActor && ! $actor->root_admin) {
             throw new AccessDeniedHttpException('Only a full administrator can author roles.');
         }
 
