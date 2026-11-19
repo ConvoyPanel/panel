@@ -54,6 +54,19 @@ it('returns a zero count for a freshly created interface', function () {
     $response->assertCreated()->assertJsonPath('data.serversCount', 0);
 });
 
+it('creates an interface that is not vlan-aware when the field is left out', function () {
+    $response = $this->actingAs($this->user)->postJson(
+        "/api/admin/nodes/{$this->node->id}/network-interfaces",
+        ['name' => 'vmbr2'],
+    );
+
+    $response->assertCreated()
+        ->assertJsonPath('data.isVlanAware', false)
+        ->assertJsonPath('data.vlanTag', null)
+        ->assertJsonPath('data.vlans', []);
+    expect(NetworkInterface::find($response->json('data.id'))->is_vlan_aware)->toBeFalse();
+});
+
 it('lists declared and undeclared vlans together', function () {
     $trunk = NetworkInterface::factory()->for($this->node)->trunk(100)->create();
     Vlan::factory()->for($trunk, 'networkInterface')->create(['tag' => 205, 'name' => 'Customer A']);

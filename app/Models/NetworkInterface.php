@@ -40,6 +40,10 @@ class NetworkInterface extends Model
         'id',
     ];
 
+    protected $attributes = [
+        'is_vlan_aware' => false,
+    ];
+
     public static array $validationRules = [
         'node_id' => 'required|integer|exists:nodes,id',
         'name' => 'required|string|min:1|max:40',
