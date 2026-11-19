@@ -5,7 +5,23 @@ This file is a running track of new features and fixes to each version of the pa
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 follows [Semantic Versioning](https://semver.org) guidelines.
 
-## Unreleased
+## v5.0.0-alpha.6
+
+Still an alpha: use it for test installs and to rehearse the upgrade from v4, and keep production panels on v4 until
+5.0 is released. The installer only picks up full releases by default, so name this one:
+
+```bash
+curl -fsSL https://install.convoypanel.com/5 | sudo bash -s -- --version 5.0.0-alpha.6
+```
+
+### Updating from 5.0.0-alpha.5
+
+Point the install at this release and upgrade:
+
+```bash
+sed -i 's/^CONVOY_VERSION=.*/CONVOY_VERSION=5.0.0-alpha.6/' /opt/convoy/.env
+convoy upgrade
+```
 
 ### Security
 
