@@ -23,7 +23,7 @@ class AdminRoleFormRequest extends BaseApiRequest
      */
     public function authorize(): bool
     {
-        $actor = $this->user();
+        $actor = $this->actor();
 
         if (! $actor instanceof SystemActor && ! $actor->root_admin) {
             throw new AccessDeniedHttpException('Only a full administrator can author roles.');

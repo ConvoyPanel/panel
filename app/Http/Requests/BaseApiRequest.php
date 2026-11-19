@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\SystemActor;
+use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Http\FormRequest;
@@ -19,10 +20,19 @@ abstract class BaseApiRequest extends FormRequest
 
     public function authorize(): bool
     {
-        $actor = $this->user();
+        $actor = $this->actor();
 
         // An application token has no role to check. EnforceTokenAbilities has already scoped it.
         return $actor instanceof SystemActor || $actor->isAdmin();
+    }
+
+    /**
+     * The caller. `user()` is typed as a User, but on /api/application Sanctum resolves an
+     * application token to the SystemActor that owns it.
+     */
+    protected function actor(): User|SystemActor|null
+    {
+        return $this->user();
     }
 
     /**
