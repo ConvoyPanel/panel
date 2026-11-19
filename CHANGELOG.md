@@ -9,8 +9,8 @@ follows [Semantic Versioning](https://semver.org) guidelines.
 
 ### Security
 
-- The php, workers and workspace images are built on PHP 8.2.36, which fixes the security bugs PHP disclosed on
-  19 November, including three that can let someone run their own code on the panel's server
+- The php, workers and workspace images run PHP 8.2.36, the 19 November security release. It fixes 12 security bugs,
+  three of which can let someone run their own code on the panel's server
   ([PHP's changelog](https://www.php.net/ChangeLog-8.php#8.2.36)).
 
 ### Fixed
