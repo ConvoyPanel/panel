@@ -94,35 +94,23 @@ jobs:
     # PROXMOX_* credentials, which CI doesn't have).
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:17
-        env:
-          POSTGRES_DB: convoy
-          POSTGRES_USER: convoy_user
-          POSTGRES_PASSWORD: YzLa2BCBwDGWVkpG
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd="pg_isready -U convoy_user -d convoy"
-          --health-interval=5s
-          --health-timeout=5s
-          --health-retries=20
-
-      redis:
-        image: redis:7.0-alpine
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd="redis-cli ping"
-          --health-interval=5s
-          --health-timeout=5s
-          --health-retries=20
-
     env:
       E2E_BASE_URL: http://127.0.0.1:8000
 
     steps:
+      - name: Start Postgres and Redis
+        # Not under `services:`, which the runner pulls and waits on before the first step. The
+        # output is redirected so this step can end without waiting for the pull.
+        run: |
+          (
+            docker run -d --name postgres -p 5432:5432 \
+              -e POSTGRES_DB=convoy \
+              -e POSTGRES_USER=convoy_user \
+              -e POSTGRES_PASSWORD=YzLa2BCBwDGWVkpG \
+              postgres:17
+            docker run -d --name redis -p 6379:6379 redis:7.0-alpine
+          ) > "$RUNNER_TEMP/services.log" 2>&1 < /dev/null &
+
       - uses: actions/checkout@v4
 
       - name: Set up PHP
@@ -151,26 +139,54 @@ jobs:
           # .env.ci has no trailing newline, so start a fresh line before appending.
           printf '\nIMAGE_REGISTRY_URL=http://127.0.0.1:4174/registry.json\n' >> .env
 
-      - name: Install Composer dependencies
-        run: composer install --prefer-dist --no-interaction --no-progress
+      - name: Install Composer and NPM dependencies
+        run: |
+          composer install --prefer-dist --no-interaction --no-progress > "$RUNNER_TEMP/composer.log" 2>&1 < /dev/null &
+          composer=$!
+          npm ci
+          status=0
+          wait "$composer" || status=$?
+          cat "$RUNNER_TEMP/composer.log"
+          exit "$status"
 
-      - name: Install NPM dependencies
-        run: npm ci
+      - name: Start installing Playwright's Chromium
+        # The slowest setup step, so it runs in the background while the build and the migrations
+        # run. The output is redirected so this step can end without waiting for it, and the `||`
+        # keeps bash -e from exiting before a failed install writes its status.
+        run: |
+          (
+            status=0
+            npx playwright install --with-deps --only-shell chromium || status=$?
+            echo "$status" > "$RUNNER_TEMP/playwright-install.status"
+          ) > "$RUNNER_TEMP/playwright-install.log" 2>&1 < /dev/null &
 
       - name: Build frontend assets
         run: npm run build
 
+      - name: Wait for Postgres and Redis
+        # Over TCP, because the server Postgres runs while it creates the database and user only
+        # listens on its socket.
+        run: |
+          if ! timeout 120 sh -c 'until docker exec postgres pg_isready -h 127.0.0.1 -U convoy_user -d convoy && docker exec redis redis-cli ping; do sleep 1; done' > /dev/null 2>&1; then
+            cat "$RUNNER_TEMP/services.log"
+            docker logs postgres || true
+            exit 1
+          fi
+
       - name: Run database migrations
         run: php artisan migrate --force
-
-      - name: Install Playwright's Chromium
-        run: npx playwright install --with-deps --only-shell chromium
 
       - name: Start the panel
         # Without --no-reload, artisan serve ignores PHP_CLI_SERVER_WORKERS and runs a single worker.
         run: |
           PHP_CLI_SERVER_WORKERS=4 php artisan serve --no-reload --host=127.0.0.1 --port=8000 > storage/logs/serve.log 2>&1 &
           timeout 30 sh -c 'until curl -sf -o /dev/null "$E2E_BASE_URL/auth/login"; do sleep 1; done'
+
+      - name: Finish installing Playwright's Chromium
+        run: |
+          timeout 300 sh -c 'until [ -s "$RUNNER_TEMP/playwright-install.status" ]; do sleep 1; done'
+          cat "$RUNNER_TEMP/playwright-install.log"
+          exit "$(cat "$RUNNER_TEMP/playwright-install.status")"
 
       - name: Run end-to-end tests
         run: npm run test:e2e
