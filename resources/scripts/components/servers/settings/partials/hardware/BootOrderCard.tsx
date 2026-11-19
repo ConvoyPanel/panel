@@ -306,7 +306,7 @@ const getLabel = (disk: Disk, tStrings: (key: string) => string) => {
         return tStrings('primary_disk')
     }
     if (disk.isMedia) {
-        return disk.mediaName
+        return disk.mediaName ?? disk.mediaFile ?? disk.interface
     }
     return disk.interface
 }
@@ -316,7 +316,7 @@ const getName = (disk: Disk) => {
         return <Translate ns={'strings'} i18nKey={'primary_disk'} />
     }
     if (disk.isMedia) {
-        return disk.mediaName
+        return disk.mediaName ?? disk.mediaFile ?? disk.interface
     }
     return disk.interface
 }
