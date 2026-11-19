@@ -51,7 +51,10 @@ done < <(env_each "$fixtures/redact.env")
 pass "no secret value from the .env survives"
 
 for pattern in '9f0c2e1a-3b4d-4e5f-8a9b-0c1d2e3f4a5b' 'Hunter2' 'abc123def456' 'hex0123456789' 'dXNlcjpwYXNzd29yZA' \
-               'abcdefghijklmnopqrstuvwxyz0123456789' 'eyJpdiI6' 'b2xkLWtleS1vbGQta2V5' 'abcdef123456' 'k_9876543210' 'Old\\"Pass' 'c2lnbmF0dXJl'; do
+               'abcdefghijklmnopqrstuvwxyz0123456789' 'eyJpdiI6' 'b2xkLWtleS1vbGQta2V5' 'abcdef123456' 'k_9876543210' 'Old\\"Pass' 'c2lnbmF0dXJl' \
+               'fakeCsrfTokenForTheRedactionFixtureNo1' 'ak_5f2e8c1d9b7a' 'tk_7f3a9c2e5b1d' 'cHJveHk6c2VjcmV0' 'Snd0U2lnbmF0dXJl' \
+               'rememberme123' 'fakeCsrfTokenForTheRedactionFixtureNo2' 'Second4csrf5value6here7' 'escapedbearer123' 'escapednegotiate456' 'escapedtoken321' \
+               'OneSlashTail' 'TwoSlashTail' '6629fae49393a05397450978507c4ef1'; do
     if grep -qF -- "$pattern" "$out/redact.log"; then
         fail "pattern-matched secret survives: $pattern"
     fi
@@ -60,10 +63,40 @@ pass "no pattern-matched secret survives"
 
 # What diagnosis needs is still there.
 for keep in 'https://panel.example.com' 'pve1.example.com:8006' 'root@pam!convoy=' 'theme=dark' 'GuzzleHttp\\Exception\\ConnectException(code: 0)' \
-            'Basic checks passed' 'mail username null' '"remember":true' '"name\":\"x\"' 'CurlFactory.php:275'; do
+            'Basic checks passed' 'mail username null' '"remember":true' '"name\":\"x\"' 'CurlFactory.php:275' \
+            '"uri": "/login"' '"Accept": ["application/json"]' '"X-Inertia-Version":["7c1e5f0a"]' '"X-Ratelimit-Remaining":["59"]' \
+            '"Authorization":["Token [redacted]"]' '"Proxy-Authorization":["Basic [redacted]"]' '"authorization":"Digest [redacted]"' '\"accept\":[\"application'; do
     grep -qF -- "$keep" "$out/redact.log" || fail "redaction removed something it should keep: $keep"
 done
 pass "non-secrets survive"
+
+# A redacted line of JSON is still JSON, and so is JSON nested in one of its
+# strings: replacing a value mustn't take the \ of an escaped quote with it.
+if command -v python3 >/dev/null 2>&1; then
+    if python3 - "$fixtures/redact.input.log" "$out/redact.log" <<'PY'
+import json, sys
+
+def parses(line):
+    try:
+        value = json.loads(line)
+        for field in value.values() if isinstance(value, dict) else []:
+            if isinstance(field, str) and field.startswith("{"):
+                json.loads(field)
+    except ValueError:
+        return False
+    return True
+
+with open(sys.argv[1]) as before, open(sys.argv[2]) as after:
+    for number, (a, b) in enumerate(zip(before, after), 1):
+        if parses(a) and not parses(b):
+            sys.exit(f"line {number} is no longer JSON: {b.strip()}")
+PY
+    then
+        pass "JSON stays valid"
+    else
+        fail "redaction broke a line of JSON"
+    fi
+fi
 
 support_env_json "$fixtures/redact.env" > "$out/env.json"
 compare "env.json matches fixtures/redact.env.json" "$fixtures/redact.env.json" "$out/env.json"

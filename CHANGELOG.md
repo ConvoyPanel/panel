@@ -12,6 +12,10 @@ follows [Semantic Versioning](https://semver.org) guidelines.
 - The image runs PHP 8.4.28, the 19 November security release. It fixes 14 security bugs, three of which can let
   someone run their own code on the panel's server ([PHP's changelog](https://www.php.net/ChangeLog-8.php#8.4.28)).
   Earlier 5.0 alphas ran PHP 8.4.23, which also lacks the PHP2Shell fix in 8.4.27 (CVE-2026-109618, CVE-2026-109619).
+- `convoy support` removes the `X-XSRF-TOKEN` header from the web container's log. Bundles from earlier 5.0 alphas
+  have it on every request a signed-in browser made. It holds that browser session's CSRF token, which can't sign
+  anyone in, and signing out replaces it. Other headers that carry a credential, such as `X-CSRF-TOKEN` and
+  `Authorization`, are removed too.
 
 ### Changed
 
