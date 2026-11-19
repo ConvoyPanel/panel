@@ -7,6 +7,19 @@ follows [Semantic Versioning](https://semver.org) guidelines.
 
 ## Unreleased
 
+### Security
+
+- The image runs PHP 8.4.28, the 19 November security release. It fixes 14 security bugs, three of which can let
+  someone run their own code on the panel's server ([PHP's changelog](https://www.php.net/ChangeLog-8.php#8.4.28)).
+  Earlier 5.0 alphas ran PHP 8.4.23, which also lacks the PHP2Shell fix in 8.4.27 (CVE-2026-109618, CVE-2026-109619).
+
+### Changed
+
+- The image is built on serversideup/php v5.1.5 instead of v4.5.1, since v4 has no PHP 8.4.28 build. That also
+  updates FrankenPHP to 1.13.5 and Caddy to 2.11.9, both with security fixes.
+- Requests with large headers, usually from big cookies, are now refused. The limit is about 16 KiB over HTTP/2 and
+  20 KiB over HTTP/1.1. The browser gets a `431` error, or over HTTP/2 the connection may close with no response.
+
 ### Fixed
 
 - CD drives in the boot order now show the mounted ISO's file name when the ISO isn't in Convoy's library. Previously,

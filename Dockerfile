@@ -14,8 +14,8 @@
 # Both stages that only produce architecture-independent output (PHP sources and
 # compiled JS) are pinned to BUILDPLATFORM: running them once natively instead of
 # under emulation is the difference between a 4-minute and a 40-minute arm64 build.
-ARG PHP_CLI_IMAGE=serversideup/php:8.4-cli-alpine-v4.5.1@sha256:968edae34d871b593e77e629686d3f664c9a017e6946af19babbe5a5382c2331
-ARG PHP_RUNTIME_IMAGE=serversideup/php:8.4-frankenphp-alpine-v4.5.1@sha256:2e41d837255dae28b5c3ea44a2f0817bab3adc903c9e35e795326608198fdfd7
+ARG PHP_CLI_IMAGE=serversideup/php:8.4-cli-alpine-v5.1.5@sha256:fcc1035b180c950797cb55883e81fb91fafd0bd00da05ae73651b287911a1fd1
+ARG PHP_RUNTIME_IMAGE=serversideup/php:8.4-frankenphp-alpine-v5.1.5@sha256:a774355e34efde1ee7e17ae0602b608b0a1bd726800562307d04249cfef07cae
 
 # The frontend is built on Node 22 in CI and ddev, and the build that ships
 # should be the one that is tested.
@@ -98,6 +98,15 @@ ENV APP_ENV=production \
     # alongside Caddy's own output. Raise to debug when chasing something.
     LOG_CHANNEL=stderr \
     LOG_LEVEL=info \
+    # Caddy writes JSON when there's no terminal, which in a container is
+    # always. People read `convoy logs web`, so keep its lines plain text.
+    CADDY_LOG_FORMAT=console \
+    # The base image defaults to trusting Cloudflare and every private range to
+    # name the client, and hands that address to PHP as REMOTE_ADDR. Visitors
+    # over IPv6, a LAN or a VPN arrive from a private address, so they could
+    # pick their own IP with a header and skip the login rate limit. Proxies
+    # are trusted in Laravel instead, through TRUSTED_PROXIES.
+    TRUSTED_PROXY=off \
     # routes/base.php answers /up after checking the database and Redis. The
     # image default is /healthcheck, which Caddy answers itself without ever
     # touching PHP -- a container that reports healthy while the app is broken
