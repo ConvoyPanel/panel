@@ -9,16 +9,15 @@ follows [Semantic Versioning](https://semver.org) guidelines.
 
 ### Security
 
-- The image is built on PHP 8.4.28, which fixes the security bugs PHP disclosed on 19 November, including three that
-  can let someone run their own code on the panel's server
-  ([PHP's changelog](https://www.php.net/ChangeLog-8.php#8.4.28)). Earlier 5.0 alphas ran PHP 8.4.23, so they also
-  missed the PHP2Shell fix in 8.4.27 (CVE-2026-109618, CVE-2026-109619).
+- The image runs PHP 8.4.28, the 19 November security release. It fixes 14 security bugs, three of which can let
+  someone run their own code on the panel's server ([PHP's changelog](https://www.php.net/ChangeLog-8.php#8.4.28)).
+  Earlier 5.0 alphas ran PHP 8.4.23, which also lacks the PHP2Shell fix in 8.4.27 (CVE-2026-109618, CVE-2026-109619).
 
 ### Changed
 
-- The image is built on serversideup/php v5.1.5 instead of v4.5.1, since v4 has no PHP 8.4.28 build. It brings
-  FrankenPHP 1.13.5 and Caddy 2.11.9, which have security fixes of their own. Requests with more than 16 KiB of
-  headers now get a `431` error.
+- The image is built on serversideup/php v5.1.5 instead of v4.5.1, since v4 has no PHP 8.4.28 build. That also
+  updates FrankenPHP to 1.13.5 and Caddy to 2.11.9, both with security fixes. Requests with more than 16 KiB of headers
+  now get a `431` error.
 
 ### Fixed
 
