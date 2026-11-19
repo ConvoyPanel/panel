@@ -5,7 +5,7 @@ This file is a running track of new features and fixes to each version of the pa
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 follows [Semantic Versioning](https://semver.org) guidelines.
 
-## Unreleased
+## v4.7.1
 
 ### Security
 
@@ -13,10 +13,48 @@ follows [Semantic Versioning](https://semver.org) guidelines.
   three of which can let someone run their own code on the panel's server
   ([PHP's changelog](https://www.php.net/ChangeLog-8.php#8.2.36)).
 
+### Changed
+
+- The panel's text follows the new writing guide in `docs/writing.md`:
+  - Descriptions that repeated a title are gone, including those on the admin Overview page and its cards.
+  - Delete and confirmation dialogs say what will happen instead of asking "Are you sure?".
+  - Empty states read "No backups", "No servers" and so on.
+  - Errors end with what to do next.
+  - Create buttons and their dialogs share one name, such as "Create User".
+  - The admin area is called "Admin" everywhere.
+- Form errors read "Required" and "Must be at most 40 characters", with no trailing period, and the password rule names
+  the symbols it accepts.
+- Deleting a node, a location, a template or a template group asks for confirmation first, as do Kill on a server's
+  overview and Suspend in its admin settings. Each used to act on the first click, and Kill and Suspend both cut the
+  server's power without a clean shutdown.
+
 ### Fixed
 
+- A backup created through the API with `"is_locked": true` is locked. The request checked `is_locked` but read
+  `locked`, so the backup came out unlocked. The request now takes only `is_locked`, the column's name; `locked` is
+  ignored.
+- Creating a server through the API with `"should_create_server": false` accepts `"account_password": null`, as it
+  already accepted `"template_uuid": null`. It used to fail validation, and only leaving the field out worked.
+- Creating addresses through the API without `server_id` or `mac_address` works. Both are optional, but leaving
+  either out failed with a 500.
+- A range of addresses assigned to a server updates the server's network settings, as a single address already did.
+- Addresses, gateways and MAC addresses are stored in lowercase again, when created and when edited. Since
+  v4.0.0-beta they were stored as typed, so an IPv6 address differing only in case from an existing one was accepted
+  as a duplicate. Addresses already stored with capitals aren't changed.
+- Deleting an ISO ejects it from every server it's mounted on first. It used to stay in their CD drives, and Proxmox
+  then refused to start them ("volume ... does not exist").
+- A server whose CD drive holds an ISO that was already deleted lists it under Mountable ISOs as "Deleted", with an
+  Unmount button. It used to be hidden there, so the server couldn't start and nothing in Convoy could eject it.
 - CD drives in the boot order now show the mounted ISO's file name when the ISO isn't in Convoy's library. Previously,
   Convoy would show a blank CD drive in the boot order if its mounted ISO wasn't in Convoy's library.
+- The server picker in the address form showed a translation key instead of "No servers" when nothing matched.
+- A server's memory, disk or bandwidth, or a node's memory or disk, above 2,147,483,647 MiB (just under 2 PiB) is
+  rejected with a validation error. It used to fail with a server error, or be saved where 5.x can't import it.
+- Sizes of 1 PiB and more read "PiB" or "EiB" instead of "undefined".
+- A failed ISO or location delete now shows the error. It used to be dropped, so nothing seemed to happen and the row
+  stayed put.
+- The user and ISO delete confirmations can no longer be dismissed once Delete is clicked. Cancel used to close them
+  while the delete still went ahead.
 
 ## v4.7.1-rc.3
 
