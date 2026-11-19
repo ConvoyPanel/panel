@@ -5,6 +5,15 @@ This file is a running track of new features and fixes to each version of the pa
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 follows [Semantic Versioning](https://semver.org) guidelines.
 
+## Unreleased
+
+### Fixed
+
+- A Coterm without TLS on the panel's hostname opens consoles again. Earlier 5.0 alphas sent a
+  `Strict-Transport-Security` header, which v4 never did, so browsers used HTTPS on every port of the panel's hostname
+  and its subdomains for a year. The panel now sends `max-age=0`, so a browser drops that rule the next time it loads
+  the panel.
+
 ## v5.0.0-alpha.6
 
 Still an alpha: use it for test installs and to rehearse the upgrade from v4, and keep production panels on v4 until
