@@ -174,7 +174,8 @@ return [
             'maxJobs' => 0,
             'memory' => 128,
             'tries' => 1,
-            'timeout' => 3600,
+            // For jobs that set none. Has to stay below the queue's retry_after (config/queue.php).
+            'timeout' => 300,
             'nice' => 0,
         ],
     ],
