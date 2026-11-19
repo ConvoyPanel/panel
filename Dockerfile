@@ -101,6 +101,12 @@ ENV APP_ENV=production \
     # Caddy writes JSON when there's no terminal, which in a container is
     # always. People read `convoy logs web`, so keep its lines plain text.
     CADDY_LOG_FORMAT=console \
+    # The base image defaults to trusting Cloudflare and every private range to
+    # name the client, and hands that address to PHP as REMOTE_ADDR. Visitors
+    # over IPv6, a LAN or a VPN arrive from a private address, so they could
+    # pick their own IP with a header and skip the login rate limit. Proxies
+    # are trusted in Laravel instead, through TRUSTED_PROXIES.
+    TRUSTED_PROXY=off \
     # routes/base.php answers /up after checking the database and Redis. The
     # image default is /healthcheck, which Caddy answers itself without ever
     # touching PHP -- a container that reports healthy while the app is broken
