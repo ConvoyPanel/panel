@@ -1,4 +1,4 @@
-FROM php:8.2.35-bookworm
+FROM php:8.2.36-bookworm
 
 ARG PHP_XDEBUG
 ARG PHP_XDEBUG_MODE='debug'

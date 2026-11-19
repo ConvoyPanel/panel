@@ -1,4 +1,4 @@
-FROM php:8.2.35-fpm-alpine
+FROM php:8.2.36-fpm-alpine
 
 ARG PHP_XDEBUG
 ARG PHP_XDEBUG_MODE='debug'
