@@ -7,6 +7,12 @@ follows [Semantic Versioning](https://semver.org) guidelines.
 
 ## Unreleased
 
+### Security
+
+- The php, workers and workspace images run PHP 8.2.36, the 19 November security release. It fixes 12 security bugs,
+  three of which can let someone run their own code on the panel's server
+  ([PHP's changelog](https://www.php.net/ChangeLog-8.php#8.2.36)).
+
 ### Fixed
 
 - CD drives in the boot order now show the mounted ISO's file name when the ISO isn't in Convoy's library. Previously,
