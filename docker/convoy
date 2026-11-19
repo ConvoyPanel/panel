@@ -428,10 +428,15 @@ cmd_upgrade() {
 #   * Proxmox API tokens: PVEAPIToken=... and user@realm!tokenid=<uuid>;
 #   * Bearer and Basic credentials;
 #   * Laravel keys (base64: and 40 or more base64 characters);
-#   * session and XSRF cookies;
+#   * session and XSRF cookies, values Laravel encrypted (eyJpdiI6...), which is
+#     what those cookies and the X-XSRF-TOKEN header carry, and JWTs;
 #   * JSON fields and query parameters named password, secret, token or
-#     api_key, or ending in one of them;
+#     api_key, or ending in one of them, and Cookie and Set-Cookie in JSON;
+#   * Authorization and Proxy-Authorization in JSON, keeping the scheme;
 #   * credentials in URLs (scheme://user:password@host) and in query strings.
+#
+# A JSON value is a string, or a list of strings the way Caddy's access log
+# writes headers: "X-Xsrf-Token": ["..."].
 
 REDACT_SED=""
 
@@ -469,18 +474,30 @@ redact_init() {
     fi
 
     # Field names: the four words, alone or as a suffix (current_password,
-    # client_secret, remember_token, _token), and *_confirmation. Not as a
-    # prefix: token_id names a Proxmox token without being one.
+    # client_secret, remember_token, _token, X-Xsrf-Token, X-Api-Key), and
+    # *_confirmation. Not as a prefix: token_id names a Proxmox token without
+    # being one. JSON can sit escaped inside another JSON string, and a / in it
+    # can be escaped once or twice. Inside [...] GNU sed reads \/ as both
+    # characters, which would also take the \ of a closing \", so a / that may
+    # be escaped is matched outside one, as \\*\/.
     cat >> "$REDACT_SED" <<'SED'
 s/([A-Za-z0-9._-]+@[A-Za-z0-9._-]+![A-Za-z0-9._-]+[=:])[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}/\1[redacted]/g
 s/(PVEAPIToken=[^][:space:]"',;=]*=)[A-Za-z0-9][^][:space:]"',;]*/\1[redacted]/g
 s/(PVEAPIToken=)[^][:space:]"',;=]+([[:space:]"',;]|$)/\1[redacted]\2/g
-s/\b(Bearer|Basic)([[:space:]]+)[A-Za-z0-9._~+\/|-]{8,}=*/\1\2[redacted]/Ig
+s/\b(Bearer|Basic)([[:space:]]+)([A-Za-z0-9._~+|-]|\\*\/){8,}=*/\1\2[redacted]/Ig
 s/base64:[A-Za-z0-9+\/]{40,}={0,2}/[redacted]/g
 s/([A-Za-z0-9_-]*_session|XSRF-TOKEN)=[^;[:space:]"',]+/\1=[redacted]/Ig
-s/(\\?"[A-Za-z0-9_-]*(password|secret|token|api_key)(_confirmation)?\\?"[[:space:]]*:[[:space:]]*)\\"([^\\]|\\[^"])*\\"/\1\\"[redacted]\\"/Ig
-s/("[A-Za-z0-9_-]*(password|secret|token|api_key)(_confirmation)?"[[:space:]]*:[[:space:]]*)"([^"\\]|\\.)*"/\1"[redacted]"/Ig
-s/([?&][A-Za-z0-9_-]*(password|secret|token|api_key)(_confirmation)?=)[^&[:space:]"']+/\1[redacted]/Ig
+s/eyJpdiI6([A-Za-z0-9+=%]|\\*\/)+/[redacted]/g
+s/eyJ[A-Za-z0-9_-]+\.eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/[redacted]/g
+s/(\\?"([A-Za-z0-9_-]*(password|secret|token|api[_-]key)(_confirmation)?|(set-)?cookie)\\?"[[:space:]]*:[[:space:]]*)\\"([^\\]|\\[^"])*\\"/\1\\"[redacted]\\"/Ig
+s/(\\?"([A-Za-z0-9_-]*(password|secret|token|api[_-]key)(_confirmation)?|(set-)?cookie)\\?"[[:space:]]*:[[:space:]]*)\[[[:space:]]*\\"([^\\]|\\[^"])*\\"([[:space:]]*,[[:space:]]*\\"([^\\]|\\[^"])*\\")*[[:space:]]*]/\1[\\"[redacted]\\"]/Ig
+s/("([A-Za-z0-9_-]*(password|secret|token|api[_-]key)(_confirmation)?|(set-)?cookie)"[[:space:]]*:[[:space:]]*)"([^"\\]|\\.)*"/\1"[redacted]"/Ig
+s/("([A-Za-z0-9_-]*(password|secret|token|api[_-]key)(_confirmation)?|(set-)?cookie)"[[:space:]]*:[[:space:]]*)\[[[:space:]]*"([^"\\]|\\.)*"([[:space:]]*,[[:space:]]*"([^"\\]|\\.)*")*[[:space:]]*]/\1["[redacted]"]/Ig
+s/("(proxy-)?authorization"[[:space:]]*:[[:space:]]*")(PVEAPIToken=([^"\\=]*=)?|[A-Za-z][A-Za-z0-9._~+-]*[[:space:]]+)?([^"\\]|\\.)*"/\1\3[redacted]"/Ig
+s/("(proxy-)?authorization"[[:space:]]*:[[:space:]]*\[[[:space:]]*")(PVEAPIToken=([^"\\=]*=)?|[A-Za-z][A-Za-z0-9._~+-]*[[:space:]]+)?([^"\\]|\\.)*"([[:space:]]*,[[:space:]]*"([^"\\]|\\.)*")*[[:space:]]*]/\1\3[redacted]"]/Ig
+s/(\\"(proxy-)?authorization\\"[[:space:]]*:[[:space:]]*\\")(PVEAPIToken=([^"\\=]*=)?|[A-Za-z][A-Za-z0-9._~+-]*[[:space:]]+)?([^\\]|\\[^"])*\\"/\1\3[redacted]\\"/Ig
+s/(\\"(proxy-)?authorization\\"[[:space:]]*:[[:space:]]*\[[[:space:]]*\\")(PVEAPIToken=([^"\\=]*=)?|[A-Za-z][A-Za-z0-9._~+-]*[[:space:]]+)?([^\\]|\\[^"])*\\"([[:space:]]*,[[:space:]]*\\"([^\\]|\\[^"])*\\")*[[:space:]]*]/\1\3[redacted]\\"]/Ig
+s/([?&][A-Za-z0-9_-]*(password|secret|token|api[_-]key)(_confirmation)?=)[^&[:space:]"']+/\1[redacted]/Ig
 s/([A-Za-z][A-Za-z0-9+.-]*:\/\/[^:\/@[:space:]"']+:)[^@\/[:space:]"']+@/\1[redacted]@/g
 SED
 }

@@ -45,10 +45,16 @@ Before anything is written to the archive, every collected file is passed throug
 
 - the exact value of every secret `.env` key listed above, wherever it appears;
 - Proxmox API tokens: `PVEAPIToken=…` and `user@realm!tokenid=<uuid>`;
-- `Authorization: Bearer …` and `Basic …` values;
+- `Authorization: Bearer …` and `Basic …` values, and any other `Authorization` or `Proxy-Authorization`
+  value in JSON, keeping only its scheme (`Token [redacted]`);
 - Laravel keys (`base64:` followed by 40 or more base64 characters);
 - session and XSRF cookies (`convoy_session=…`, `XSRF-TOKEN=…`, `laravel_session=…`);
-- the values of JSON fields named `password`, `secret`, `token` or `api_key`.
+- anything Laravel encrypted (`eyJpdiI6…`), which is what its cookies and the `X-XSRF-TOKEN` header carry,
+  and JSON Web Tokens;
+- the values of JSON fields named `password`, `secret`, `token` or `api_key`, or ending in one of them
+  (`X-Xsrf-Token`, `X-Csrf-Token`, `X-Api-Key`), and of `Cookie` and `Set-Cookie`. A value can be a string
+  or a list of strings, which is how the web container's access log writes request and response headers:
+  `"X-Xsrf-Token": ["[redacted]"]`.
 
 Redaction is a safety net, not a licence: the collector still never reads anything it doesn't need.
 
