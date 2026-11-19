@@ -28,6 +28,9 @@ follows [Semantic Versioning](https://semver.org) guidelines.
 
 - CD drives in the boot order now show the mounted ISO's file name when the ISO isn't in Convoy's library. Previously,
   Convoy would show a blank CD drive in the boot order if its mounted ISO wasn't in Convoy's library.
+- A new install starts on the first try. The web, worker and scheduler containers used to fill the new `storage`
+  volume at once, so one of them sometimes didn't start (`failed to mkdir .../convoy_storage/_data/...: file exists`)
+  and the installer stopped at "Starting Convoy". The worker and scheduler now start after the web container.
 
 ## v5.0.0-alpha.5
 

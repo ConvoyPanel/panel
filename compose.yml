@@ -77,6 +77,11 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      # Docker fills the new, empty storage volume from the image of each
+      # container it creates with it, and two at once collide. Waiting for web
+      # leaves that to web.
+      web:
+        condition: service_started
     healthcheck:
       # The image's built-in check asks the web server, which is not running
       # here. This exits non-zero when the queue is stopped or paused.
@@ -105,6 +110,9 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      # See the worker's.
+      web:
+        condition: service_started
     healthcheck:
       # There is nothing to ask this container, and the image's built-in check
       # would report it permanently unhealthy.
