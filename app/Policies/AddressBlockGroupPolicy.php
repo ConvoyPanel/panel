@@ -6,6 +6,7 @@ use App\Enums\Admin\AdminPermission;
 use App\Models\AddressBlockGroup;
 use App\Models\Node;
 use App\Models\Server;
+use App\Models\SystemActor;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Auth\Access\Response;
@@ -17,14 +18,14 @@ class AddressBlockGroupPolicy
     /**
      * Determine whether the user can delete the model.
      */
-    public function attachNode(User $user, AddressBlockGroup $addressBlockGroup): bool
+    public function attachNode(User|SystemActor $user, AddressBlockGroup $addressBlockGroup): bool
     {
-        return $user->hasAdminPermission(AdminPermission::ADDRESS_BLOCK_GROUPS_MANAGE);
+        return $user instanceof SystemActor || $user->hasAdminPermission(AdminPermission::ADDRESS_BLOCK_GROUPS_MANAGE);
     }
 
-    public function detachNode(User $user, AddressBlockGroup $addressBlockGroup): Response
+    public function detachNode(User|SystemActor $user, AddressBlockGroup $addressBlockGroup): Response
     {
-        if (! $user->hasAdminPermission(AdminPermission::ADDRESS_BLOCK_GROUPS_MANAGE)) {
+        if (! $user instanceof SystemActor && ! $user->hasAdminPermission(AdminPermission::ADDRESS_BLOCK_GROUPS_MANAGE)) {
             return $this->deny('Your role cannot change address block groups.');
         }
 
@@ -69,7 +70,7 @@ class AddressBlockGroupPolicy
         return $this->allow();
     }
 
-    public function delete(User $user, AddressBlockGroup $addressBlockGroup): Response
+    public function delete(User|SystemActor $user, AddressBlockGroup $addressBlockGroup): Response
     {
         $isInUse = $addressBlockGroup->addressBlocks()
             ->whereHas('addresses', function ($query) {

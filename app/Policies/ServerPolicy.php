@@ -6,14 +6,15 @@ use App\Enums\Admin\AdminPermission;
 use App\Enums\Server\PowerCommand;
 use App\Enums\Server\ServerPermission;
 use App\Models\Server;
+use App\Models\SystemActor;
 use App\Models\User;
 
 /**
  * Who may do what on one server, in the client area.
  *
- * Three kinds of caller reach this: the owner, an operator with `servers.manage`, and a sub-user.
- * The first two are answered by {@see before()}; everything else falls through to the sub-user's
- * stored grant.
+ * Four kinds of caller reach this: the owner, an operator with `servers.manage`, an application
+ * token on the admin power endpoint, and a sub-user. The first three are answered by
+ * {@see before()}; everything else falls through to the sub-user's stored grant.
  *
  * Ability names stay the camelCase ones the request classes already use, and
  * {@see ServerPermission::abilityMap()} is what ties them to the stored permission values. An
@@ -23,8 +24,13 @@ use App\Models\User;
  */
 class ServerPolicy
 {
-    public function before(User $user, string $ability, Server $server): ?bool
+    public function before(User|SystemActor $user, string $ability, Server $server): ?bool
     {
+        // The admin power endpoint is the only admin route that asks this policy.
+        if ($user instanceof SystemActor) {
+            return $ability === 'sendPowerCommand';
+        }
+
         if ($user->id === $server->user_id) {
             return true;
         }

@@ -5,6 +5,7 @@ namespace App\Http\Middleware\Client\Server;
 use App\Enums\Admin\AdminPermission;
 use App\Exceptions\Http\Server\ServerUnavailableException;
 use App\Models\Server;
+use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -36,10 +37,13 @@ class AuthenticateServerAccess
         }
 
         // 404 rather than 403 for all three misses: whether a server exists is itself something
-        // only the people who can reach it should learn.
-        $reachable = $user->id === $server->user_id
+        // only the people who can reach it should learn. The system actor behind an application
+        // token isn't a user, even when its id matches the owner's.
+        $reachable = $user instanceof User && (
+            $user->id === $server->user_id
             || $server->subuserFor($user) !== null
-            || $user->hasAdminPermission(AdminPermission::SERVERS_READ);
+            || $user->hasAdminPermission(AdminPermission::SERVERS_READ)
+        );
 
         if (! $reachable) {
             throw new NotFoundHttpException('Server not found');

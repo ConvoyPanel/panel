@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Models\AddressBlock;
+use App\Models\SystemActor;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Auth\Access\Response;
@@ -11,7 +12,7 @@ class AddressBlockPolicy
 {
     use HandlesAuthorization;
 
-    public function delete(User $user, AddressBlock $addressBlock): Response
+    public function delete(User|SystemActor $user, AddressBlock $addressBlock): Response
     {
         $isInUse = $addressBlock->addresses()
             ->whereNotNull('server_id')
