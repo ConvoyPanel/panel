@@ -19,13 +19,13 @@ Convoy 5 runs as a container image on a dedicated host with Docker. It is in alp
 rehearse your upgrade, and keep production panels on v4 until 5.0 is released. Until then, name the release:
 
 ```bash
-curl -fsSL https://install.convoypanel.com/5 | sudo bash -s -- --version 5.0.0-alpha.6
+curl -fsSL https://install.convoypanel.com/5 | sudo bash -s -- --version 5.0.0-alpha.7
 ```
 
 To upgrade a v4 install, test the import on a copy of its data first (v4 stays online), then run it for real:
 
 ```bash
-curl -fsSL https://install.convoypanel.com/5 | sudo bash -s -- --version 5.0.0-alpha.6 --import /var/www/convoy --dry-run
+curl -fsSL https://install.convoypanel.com/5 | sudo bash -s -- --version 5.0.0-alpha.7 --import /var/www/convoy --dry-run
 convoy import-v4 /var/www/convoy
 ```
 
