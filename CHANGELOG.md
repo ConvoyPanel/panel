@@ -16,8 +16,9 @@ follows [Semantic Versioning](https://semver.org) guidelines.
 ### Changed
 
 - The image is built on serversideup/php v5.1.5 instead of v4.5.1, since v4 has no PHP 8.4.28 build. That also
-  updates FrankenPHP to 1.13.5 and Caddy to 2.11.9, both with security fixes. Requests with more than 16 KiB of headers
-  now get a `431` error.
+  updates FrankenPHP to 1.13.5 and Caddy to 2.11.9, both with security fixes.
+- Requests with large headers, usually from big cookies, are now refused. The limit is about 16 KiB over HTTP/2 and
+  20 KiB over HTTP/1.1. The browser gets a `431` error, or over HTTP/2 the connection may close with no response.
 
 ### Fixed
 
