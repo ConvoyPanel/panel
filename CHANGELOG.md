@@ -5,6 +5,13 @@ This file is a running track of new features and fixes to each version of the pa
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 follows [Semantic Versioning](https://semver.org) guidelines.
 
+## Unreleased
+
+### Fixed
+
+- CD drives in the boot order now show the mounted ISO's file name when the ISO isn't in Convoy's library. Previously,
+  Convoy would show a blank CD drive in the boot order if its mounted ISO wasn't in Convoy's library.
+
 ## v5.0.0-alpha.5
 
 Still an alpha: use it for test installs and to rehearse the upgrade from v4, and keep production panels on v4 until

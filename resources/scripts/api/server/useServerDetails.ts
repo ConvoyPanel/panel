@@ -13,12 +13,14 @@ export interface BaseDisk {
 
 export interface DiskWithMedia extends BaseDisk {
     isMedia: true
-    mediaName: string
+    mediaName: string | null
+    mediaFile: string | null
 }
 
 export interface DiskWithoutMedia extends BaseDisk {
     isMedia: false
     mediaName?: null
+    mediaFile?: null
 }
 
 export type Disk = DiskWithMedia | DiskWithoutMedia
@@ -52,6 +54,7 @@ export const rawDataToDisk = (data: any): Disk => ({
     isPrimaryDisk: data.is_primary_disk,
     isMedia: data.is_media,
     mediaName: data?.media_name,
+    mediaFile: data?.media_file ?? null,
     size: data.size,
 })
 
