@@ -154,7 +154,9 @@ Point `DB_*` and `REDIS_*` at your own hosts in `/opt/convoy/.env`, then edit
 `/opt/convoy/compose.yml` and delete:
 
 - the `postgres` and `redis` services,
-- the `depends_on:` block from `web`, `worker` and `scheduler`,
+- the `depends_on:` block from `web`,
+- the `postgres:` and `redis:` entries under `depends_on:` in `worker` and
+  `scheduler` (leave `web:` there, so neither starts before the web container),
 - the `postgres:` and `redis:` entries under `volumes:`.
 
 Then apply it:
