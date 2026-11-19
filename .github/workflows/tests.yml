@@ -78,6 +78,7 @@ jobs:
       - name: Install NPM dependencies
         run: npm ci
 
+      # Tests that render the app page need the Vite manifest.
       - name: Build frontend assets
         run: npm run build
 
@@ -90,21 +91,110 @@ jobs:
       - name: Run unit tests
         run: vendor/bin/pest --bootstrap vendor/autoload.php tests/Unit
 
-      - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
+  e2e:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Started here rather than under `services:`, which the runner pulls and
+      # waits on before the first step. The output is redirected so this step
+      # can end without waiting for the pull.
+      - name: Start MySQL and Redis
+        run: |
+          (
+            docker run -d --name mysql -p 3306:3306 \
+              -e MYSQL_RANDOM_ROOT_PASSWORD=yes \
+              -e MYSQL_DATABASE=convoy \
+              -e MYSQL_USER=convoy_user \
+              -e MYSQL_PASSWORD=YzLa2BCBwDGWVkpG \
+              mysql:8.0
+            docker run -d --name redis -p 6379:6379 redis:7.0-alpine
+          ) > "$RUNNER_TEMP/services.log" 2>&1 < /dev/null &
+
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: gmp, pcntl, redis, pdo_mysql, bcmath, intl
+          coverage: none
+          tools: composer:v2
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Create environment file
+        run: |
+          cp .env.example .env
+          sed -i 's/^DB_HOST=.*/DB_HOST=127.0.0.1/' .env
+          sed -i 's/^DB_PASSWORD=.*/DB_PASSWORD=YzLa2BCBwDGWVkpG/' .env
+          sed -i 's/^REDIS_HOST=.*/REDIS_HOST=127.0.0.1/' .env
+
+      - name: Install Composer and NPM dependencies
+        run: |
+          composer install --prefer-dist --no-interaction --no-progress > "$RUNNER_TEMP/composer.log" 2>&1 < /dev/null &
+          composer=$!
+          npm ci
+          status=0
+          wait "$composer" || status=$?
+          cat "$RUNNER_TEMP/composer.log"
+          exit "$status"
+
+      # The slowest setup step, so it runs in the background while the build
+      # and the seeder run. The output is redirected so this step can end
+      # without waiting for it, and the `||` keeps bash -e from exiting before
+      # a failed install writes its status.
+      - name: Start installing Playwright's Chromium
+        run: |
+          (
+            status=0
+            npx playwright install --with-deps --only-shell chromium || status=$?
+            echo "$status" > "$RUNNER_TEMP/playwright-install.status"
+          ) > "$RUNNER_TEMP/playwright-install.log" 2>&1 < /dev/null &
+
+      - name: Generate application key
+        run: php artisan key:generate
+
+      - name: Build frontend assets
+        run: npm run build
+
+      # Over TCP, because the server MySQL runs while it creates the database
+      # and user only listens on its socket.
+      - name: Wait for MySQL and Redis
+        run: |
+          for i in $(seq 120); do
+            docker exec mysql mysql -h127.0.0.1 -uconvoy_user -pYzLa2BCBwDGWVkpG -e 'SELECT 1' convoy > /dev/null 2>&1 \
+              && docker exec redis redis-cli ping > /dev/null 2>&1 \
+              && exit 0
+            sleep 1
+          done
+          cat "$RUNNER_TEMP/services.log"
+          docker logs mysql || true
+          exit 1
 
       # 127.0.0.1:8000 rather than localhost: it is one of Sanctum's default
-      # stateful domains, so the session from logging in is honoured.
+      # stateful domains, so the session from logging in is honoured. Without
+      # --no-reload, artisan serve ignores PHP_CLI_SERVER_WORKERS and answers
+      # the parallel Playwright workers one request at a time.
       - name: Seed and serve the panel
         run: |
           php artisan migrate:fresh --seed --seeder=E2eSeeder --force
-          php artisan serve --host=127.0.0.1 --port=8000 > storage/logs/serve.log 2>&1 &
+          PHP_CLI_SERVER_WORKERS=4 php artisan serve --no-reload --host=127.0.0.1 --port=8000 > storage/logs/serve.log 2>&1 &
           for i in $(seq 30); do
             curl -sf -o /dev/null http://127.0.0.1:8000/auth/login && exit 0
             sleep 1
           done
           cat storage/logs/serve.log
           exit 1
+
+      - name: Finish installing Playwright's Chromium
+        run: |
+          timeout 300 sh -c 'until [ -s "$RUNNER_TEMP/playwright-install.status" ]; do sleep 1; done'
+          cat "$RUNNER_TEMP/playwright-install.log"
+          exit "$(cat "$RUNNER_TEMP/playwright-install.status")"
 
       - name: Run Playwright tests
         run: npm run test:e2e
