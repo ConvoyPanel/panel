@@ -27,23 +27,24 @@ beforeEach(function () {
     $this->cache = Cache::store('array');
 });
 
-it('gives the lock a finite lifetime', function () {
-    $middleware = new ExpiringWithoutOverlapping('7');
+it('expires the lock shortly after the job would have been killed', function () {
+    $middleware = new ExpiringWithoutOverlapping('7', 60);
 
-    // The bug this class exists for: Laravel's default of 0 means a Redis lock that never
-    // expires, so a worker killed mid-job strands the key and wedges that server for good.
-    expect($middleware->expiresAfter)->toBe(ExpiringWithoutOverlapping::EXPIRES_AFTER)
-        ->and($middleware->expiresAfter)->toBeGreaterThan(0);
+    // Laravel's default of 0 means a Redis lock that never expires, so a worker killed mid-job
+    // strands the key and wedges that server for good. A lock that expires before the job's
+    // timeout lets a second copy start while the first is still running.
+    expect($middleware->expiresAfter)->toBe(60 + ExpiringWithoutOverlapping::EXPIRY_MARGIN)
+        ->and(ExpiringWithoutOverlapping::EXPIRY_MARGIN)->toBeGreaterThan(0);
 });
 
 it('keeps its locks out of the keyspace the unfixed version used', function () {
     // Locks stranded by an earlier release have no TTL and are still sitting in Valkey. A
     // separate prefix orphans them instead of inheriting them.
-    expect((new ExpiringWithoutOverlapping('7'))->prefix)->not->toBe('laravel-queue-overlap:');
+    expect((new ExpiringWithoutOverlapping('7', 60))->prefix)->not->toBe('laravel-queue-overlap:');
 });
 
 it('releases the lock when the job throws', function () {
-    $middleware = new ExpiringWithoutOverlapping('7');
+    $middleware = new ExpiringWithoutOverlapping('7', 60);
     $job = overlappingJob();
 
     expect(fn () => $middleware->handle($job, fn () => throw new RuntimeException('boom')))
@@ -53,10 +54,10 @@ it('releases the lock when the job throws', function () {
 });
 
 it('holds a blocked job off instead of spinning on the lock', function () {
-    $middleware = new ExpiringWithoutOverlapping('7');
+    $middleware = new ExpiringWithoutOverlapping('7', 60);
     $job = overlappingJob();
 
-    $this->cache->lock($middleware->getLockKey($job), ExpiringWithoutOverlapping::EXPIRES_AFTER)->get();
+    $this->cache->lock($middleware->getLockKey($job), $middleware->expiresAfter)->get();
 
     $ran = false;
     $middleware->handle($job, function () use (&$ran) {
@@ -71,14 +72,14 @@ it('holds a blocked job off instead of spinning on the lock', function () {
 });
 
 it('lets a later job through once an abandoned lock has aged out', function () {
-    $middleware = new ExpiringWithoutOverlapping('7');
+    $middleware = new ExpiringWithoutOverlapping('7', 60);
     $job = overlappingJob();
 
     // Stand in for the worker SIGKILLed while holding this: the lock is taken and nothing is
     // left running to release it. Before the expiry was set, this wedged the server forever.
-    $this->cache->lock($middleware->getLockKey($job), ExpiringWithoutOverlapping::EXPIRES_AFTER)->get();
+    $this->cache->lock($middleware->getLockKey($job), $middleware->expiresAfter)->get();
 
-    $this->travel(ExpiringWithoutOverlapping::EXPIRES_AFTER + 1)->seconds();
+    $this->travel($middleware->expiresAfter + 1)->seconds();
 
     $ran = false;
     $middleware->handle($job, function () use (&$ran) {
@@ -99,5 +100,27 @@ it('is used by every job that guards against overlap', function () {
     }
 
     // Laravel's version locks forever. Reaching for it directly reintroduces the wedge.
+    expect($offenders)->toBe([]);
+});
+
+it('only guards jobs that set a timeout of their own', function () {
+    $offenders = [];
+
+    foreach (Finder::create()->files()->in(base_path('app/Jobs'))->name('*.php') as $file) {
+        if (! str_contains($file->getContents(), 'new ExpiringWithoutOverlapping(')) {
+            continue;
+        }
+
+        $class = 'App\\Jobs\\'.str_replace(['/', '.php'], ['\\', ''], $file->getRelativePathname());
+        $timeout = (new ReflectionClass($class))->getDefaultProperties()['timeout'] ?? null;
+
+        if (! is_int($timeout) || $timeout <= 0) {
+            $offenders[] = $class;
+        }
+    }
+
+    // A missing timeout fails the job outright. One of 0 makes the worker use Horizon's hour-long
+    // timeout instead, which the lock knows nothing about, so it would expire under a job that is
+    // still running.
     expect($offenders)->toBe([]);
 });

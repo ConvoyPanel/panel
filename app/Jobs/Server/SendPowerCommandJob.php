@@ -25,7 +25,7 @@ class SendPowerCommandJob implements ShouldQueue
 
     public int $tries = 3;
 
-    public int $timeout = 15;
+    public int $timeout = 30;
 
     public function __construct(
         #[WithoutRelations]
@@ -37,7 +37,7 @@ class SendPowerCommandJob implements ShouldQueue
     {
         return [
             new SkipIfBatchCancelled,
-            new ExpiringWithoutOverlapping((string) $this->step->deployment->server->id),
+            new ExpiringWithoutOverlapping((string) $this->step->deployment->server->id, $this->timeout),
         ];
     }
 

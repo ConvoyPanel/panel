@@ -52,19 +52,19 @@ if (config('audit.prune_days')) {
 // writes -- checking live state per request costs one PVE call per row, and an
 // unreachable node burns the whole connect timeout rather than failing fast.
 // `withoutOverlapping` so a fleet that is slow to answer never piles passes up.
-Schedule::command(PollNodeStatusesCommand::class)->everyMinute()->withoutOverlapping();
+Schedule::command(PollNodeStatusesCommand::class)->everyMinute()->withoutOverlapping(5);
 
 // Anchors normally push heartbeats, so this only picks up the ones that have gone
 // quiet -- an Anchor that cannot reach the panel but is reachable *from* it would
 // otherwise sit at "Offline" forever. Same reasoning as node polling: the admin
 // list must never probe per row, so a background pass keeps it truthful instead.
-Schedule::command(PollAnchorLivenessCommand::class)->everyMinute()->withoutOverlapping();
+Schedule::command(PollAnchorLivenessCommand::class)->everyMinute()->withoutOverlapping(5);
 
 // Whether a newer release of the panel exists. Same rule as the pollers above:
 // the admin area reads only what this writes, so nothing an admin loads ever
 // waits on GitHub. Hourly is far below the API's rate limit and well inside how
 // quickly anyone needs to hear about a release.
-Schedule::command(CheckForUpdatesCommand::class)->hourly()->withoutOverlapping();
+Schedule::command(CheckForUpdatesCommand::class)->hourly()->withoutOverlapping(5);
 
 // Bandwidth quota + rate limiting (see docs/bandwidth-rate-limiting-plan.md).
 // Usage must accumulate for quotas to ever trip, so all three run together:

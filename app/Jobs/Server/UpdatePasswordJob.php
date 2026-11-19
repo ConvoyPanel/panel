@@ -20,7 +20,7 @@ class UpdatePasswordJob implements ShouldQueue
 
     public int $tries = 3;
 
-    public int $timeout = 10;
+    public int $timeout = 30;
 
     public function __construct(
         #[WithoutRelations]
@@ -33,7 +33,8 @@ class UpdatePasswordJob implements ShouldQueue
         return [
             new SkipIfBatchCancelled,
             new ExpiringWithoutOverlapping(
-                (string) $this->step->deployment->server->id
+                (string) $this->step->deployment->server->id,
+                $this->timeout,
             ),
         ];
     }

@@ -27,11 +27,6 @@ class ConfigureVmJob implements ShouldQueue
      * primary disk's grow -- now waits for PVE's resize task and retries it once
      * if the node times out on it, which is worth up to 70s on its own. Twenty
      * seconds used to be enough and no longer is.
-     *
-     * Kept below {@see ExpiringWithoutOverlapping::EXPIRES_AFTER} so the order of
-     * events under a genuinely stuck node is the safe one: the job is killed
-     * while it still holds the server's overlap lock, rather than the lock
-     * expiring out from under a job that is still writing to the guest.
      */
     public int $timeout = 110;
 
@@ -44,7 +39,7 @@ class ConfigureVmJob implements ShouldQueue
     {
         return [
             new SkipIfBatchCancelled,
-            new ExpiringWithoutOverlapping((string) $this->step->deployment->server_id),
+            new ExpiringWithoutOverlapping((string) $this->step->deployment->server_id, $this->timeout),
         ];
     }
 

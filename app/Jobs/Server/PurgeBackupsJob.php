@@ -31,6 +31,7 @@ class PurgeBackupsJob implements ShouldQueue
     {
         return [new SkipIfBatchCancelled, new ExpiringWithoutOverlapping(
             (string) $this->server->id,
+            $this->timeout,
         )];
     }
 

@@ -22,6 +22,8 @@ class MonitorBackupJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public int $timeout = 60;
+
     public function retryUntil(): Carbon
     {
         return now()->addDay();
@@ -35,7 +37,7 @@ class MonitorBackupJob implements ShouldQueue
 
     public function middleware(): array
     {
-        return [new ExpiringWithoutOverlapping((string) $this->backup->id)];
+        return [new ExpiringWithoutOverlapping((string) $this->backup->id, $this->timeout)];
     }
 
     public function handle(ProxmoxActivityClient $client, ProxmoxBackupClient $backupClient): void
