@@ -15,17 +15,17 @@ Stop paying hundreds of dollars for unreliable and slow software. Subscribe to a
 
 ## Install
 
-Convoy 5 runs as a container image on a dedicated host with Docker. It is in alpha: use it for test installs and to
+Convoy 5 runs as a container image on a dedicated host with Docker. It is in beta: use it for test installs and to
 rehearse your upgrade, and keep production panels on v4 until 5.0 is released. Until then, name the release:
 
 ```bash
-curl -fsSL https://install.convoypanel.com/5 | sudo bash -s -- --version 5.0.0-alpha.7
+curl -fsSL https://install.convoypanel.com/5 | sudo bash -s -- --version 5.0.0-beta.1
 ```
 
 To upgrade a v4 install, test the import on a copy of its data first (v4 stays online), then run it for real:
 
 ```bash
-curl -fsSL https://install.convoypanel.com/5 | sudo bash -s -- --version 5.0.0-alpha.7 --import /var/www/convoy --dry-run
+curl -fsSL https://install.convoypanel.com/5 | sudo bash -s -- --version 5.0.0-beta.1 --import /var/www/convoy --dry-run
 convoy import-v4 /var/www/convoy
 ```
 

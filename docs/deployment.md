@@ -131,7 +131,7 @@ the cause, and run `convoy up`.
 the release you are upgrading to, before running `convoy upgrade`:
 
 ```bash
-curl -fsSL https://github.com/ConvoyPanel/panel/releases/download/v5.0.0-alpha.2/convoy -o /usr/local/bin/convoy
+curl -fsSL https://github.com/ConvoyPanel/panel/releases/download/v5.0.0-beta.1/convoy -o /usr/local/bin/convoy
 chmod 755 /usr/local/bin/convoy
 ```
 
