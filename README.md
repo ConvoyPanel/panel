@@ -1,4 +1,4 @@
-![Version 4 release announcement banner](https://github.com/ConvoyPanel/panel/assets/37554696/4629321b-7214-4eb1-8cc5-85c89229b5bf)
+![Convoy 5 banner](.github/convoy-5-banner.png)
 
 
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/convoypanel/panel/tests.yml?branch=develop)
