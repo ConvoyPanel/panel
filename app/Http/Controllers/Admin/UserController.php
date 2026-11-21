@@ -45,6 +45,8 @@ class UserController
                     AllowedFilter::exact('id'),
                     'name',
                     AllowedFilter::exact('email'),
+                    AllowedFilter::exact('externalId', 'external_id'),
+                    AllowedFilter::exact('external_id'),
                     // Guests are provisioned by a customer sharing a server rather than by the
                     // operator, and conflating the two is exactly what this filter exists to
                     // prevent. `admin_role_id` filters staff the same way.
@@ -94,6 +96,7 @@ class UserController
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
+            'external_id' => $request->input('external_id'),
             // An invited account still needs a value in a NOT NULL column, so it gets 64 random
             // characters nobody has ever seen. It is not a password anyone can use — the account
             // is unreachable until the invite is redeemed, which is the intended state.
@@ -219,6 +222,8 @@ class UserController
                 'email' => $request->email,
                 'type' => $type,
                 'admin_role_id' => $roleId,
+                // Left alone unless sent, so the panel's form need not echo it back.
+                ...($request->has('external_id') ? ['external_id' => $request->input('external_id')] : []),
                 ...(is_null($request->password) ? [] : ['password' => $request->password]),
             ]);
 

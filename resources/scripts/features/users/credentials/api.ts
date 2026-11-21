@@ -2,10 +2,10 @@ import type { ApiKey } from '@/features/account/api-keys/api.ts'
 import type { OAuthConnection } from '@/features/account/oauth/api.ts'
 import { rawDataToPasskey } from '@/features/account/transforms.ts'
 import type { Passkey, SSHKey } from '@/features/account/types.ts'
+import UserCredentialController from '@/wayfinder/actions/App/Http/Controllers/Admin/UserCredentialController'
 import { queryOptions, useQuery } from '@tanstack/react-query'
 
-import { apiFetch, type DataResponse } from '@/lib/api'
-import UserCredentialController from '@/wayfinder/actions/App/Http/Controllers/Admin/UserCredentialController'
+import { type DataResponse, apiFetch } from '@/lib/api'
 
 /*
  * UserCredentialController is served under both `/api/admin` and `/api/application`, so Wayfinder
@@ -13,17 +13,20 @@ import UserCredentialController from '@/wayfinder/actions/App/Http/Controllers/A
  * the same way features/tokens does.
  */
 const routes = {
-    apiKeys: UserCredentialController.apiKeys['/api/admin/users/{user}/api-keys'],
+    apiKeys:
+        UserCredentialController.apiKeys['/api/admin/users/{user}/api-keys'],
     destroyApiKey:
         UserCredentialController.destroyApiKey[
             '/api/admin/users/{user}/api-keys/{apiKey}'
         ],
-    sshKeys: UserCredentialController.sshKeys['/api/admin/users/{user}/ssh-keys'],
+    sshKeys:
+        UserCredentialController.sshKeys['/api/admin/users/{user}/ssh-keys'],
     destroySshKey:
         UserCredentialController.destroySshKey[
             '/api/admin/users/{user}/ssh-keys/{sshKey}'
         ],
-    passkeys: UserCredentialController.passkeys['/api/admin/users/{user}/passkeys'],
+    passkeys:
+        UserCredentialController.passkeys['/api/admin/users/{user}/passkeys'],
     destroyPasskey:
         UserCredentialController.destroyPasskey[
             '/api/admin/users/{user}/passkeys/{passkey}'
@@ -47,6 +50,7 @@ const rawDataToApiKey = (data: App.Data.User.ApiKeyData): ApiKey => ({
     name: data.name,
     abilities: data.abilities,
     lastUsedAt: data.lastUsedAt ? new Date(data.lastUsedAt) : null,
+    expiresAt: data.expiresAt ? new Date(data.expiresAt) : null,
 })
 
 const rawDataToSSHKey = (data: App.Data.User.SSHKeyData): SSHKey => ({
@@ -126,17 +130,26 @@ export const userCredentialQueries = {
     all: (userId: number) => ['admin', 'users', userId, 'credentials'] as const,
     apiKeys: (userId: number) =>
         queryOptions({
-            queryKey: [...userCredentialQueries.all(userId), 'api-keys'] as const,
+            queryKey: [
+                ...userCredentialQueries.all(userId),
+                'api-keys',
+            ] as const,
             queryFn: () => getUserApiKeys(userId),
         }),
     sshKeys: (userId: number) =>
         queryOptions({
-            queryKey: [...userCredentialQueries.all(userId), 'ssh-keys'] as const,
+            queryKey: [
+                ...userCredentialQueries.all(userId),
+                'ssh-keys',
+            ] as const,
             queryFn: () => getUserSSHKeys(userId),
         }),
     passkeys: (userId: number) =>
         queryOptions({
-            queryKey: [...userCredentialQueries.all(userId), 'passkeys'] as const,
+            queryKey: [
+                ...userCredentialQueries.all(userId),
+                'passkeys',
+            ] as const,
             queryFn: () => getUserPasskeys(userId),
         }),
     oauthConnections: (userId: number) =>

@@ -30,6 +30,7 @@ const STEP_MAPPINGS: Record<string, { label: string; isBytes?: boolean }> = {
     'clone': { label: 'Cloning image', isBytes: true },
     'update-password': { label: 'Updating password' },
     'prepare-provisioners': { label: 'Preparing setup scripts' },
+    'update-ssh-keys': { label: 'Adding SSH keys' },
     'delete-backups': { label: 'Deleting backups' },
     'stop-vm': { label: 'Stopping VM' },
     'delete-vm': { label: 'Deleting VM' },

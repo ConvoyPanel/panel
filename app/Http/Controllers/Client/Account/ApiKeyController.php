@@ -33,7 +33,12 @@ class ApiKeyController
 
     public function store(StoreApiKeyRequest $request)
     {
-        $newToken = $this->createAccountToken->handle($request->user(), $request->name, $request->abilities());
+        $newToken = $this->createAccountToken->handle(
+            $request->user(),
+            $request->name,
+            $request->abilities(),
+            $request->expiresAt(),
+        );
 
         if (! $newToken->accessToken instanceof PersonalAccessToken) {
             throw new LogicException('Sanctum is not using the application personal access token model.');
@@ -45,6 +50,7 @@ class ApiKeyController
             properties: [
                 'name' => $newToken->accessToken->name,
                 'abilities' => $newToken->accessToken->abilities,
+                'expires_at' => $newToken->accessToken->expires_at?->toIso8601String(),
             ],
         );
 

@@ -6,6 +6,7 @@ use App\Data\User\UserInviteData;
 use App\Enums\User\UserType;
 use App\Models\Server;
 use App\Models\ServerSubuser;
+use App\Models\SystemActor;
 use App\Models\User;
 use App\Notifications\UserInvited;
 use App\Services\Mail\MailConfigurator;
@@ -40,7 +41,7 @@ class SubuserService
      * @param  list<string>  $permissions
      * @return array{subuser: ServerSubuser, invite: ?UserInviteData}
      */
-    public function share(Server $server, User $actor, string $email, array $permissions): array
+    public function share(Server $server, User|SystemActor $actor, string $email, array $permissions): array
     {
         return $this->connection->transaction(function () use ($server, $actor, $email, $permissions) {
             $user = $this->resolve($email);
@@ -56,7 +57,8 @@ class SubuserService
                 'server_id' => $server->id,
                 'user_id' => $user->id,
                 'permissions' => array_values(array_unique($permissions)),
-                'created_by' => $actor->id,
+                // Null for an application token: the column points at a person.
+                'created_by' => $actor instanceof User ? $actor->id : null,
             ]);
 
             return ['subuser' => $subuser, 'invite' => $invite];

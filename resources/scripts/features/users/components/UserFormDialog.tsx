@@ -69,6 +69,7 @@ const UserFormDialog = ({ user, currentUserId, close, refresh }: Props) => {
             email: current?.email ?? '',
             type: current?.type ?? 'standard',
             adminRoleId: current?.adminRole ? String(current.adminRole.id) : '',
+            externalId: current?.externalId ?? '',
             password: '',
         },
     })
@@ -217,6 +218,11 @@ const UserFormDialog = ({ user, currentUserId, close, refresh }: Props) => {
                                 autoComplete={'off'}
                             />
                             <InputForm
+                                name={'externalId'}
+                                label={'External ID'}
+                                autoComplete={'off'}
+                            />
+                            <InputForm
                                 name={'password'}
                                 label={'Password'}
                                 type={'password'}
@@ -252,7 +258,10 @@ const UserFormDialog = ({ user, currentUserId, close, refresh }: Props) => {
                                     name={'type'}
                                     label={'Account'}
                                     items={[
-                                        { value: 'standard', label: 'Customer' },
+                                        {
+                                            value: 'standard',
+                                            label: 'Customer',
+                                        },
                                         { value: 'guest', label: 'Guest' },
                                     ]}
                                     description={

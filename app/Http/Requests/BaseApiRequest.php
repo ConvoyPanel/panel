@@ -111,7 +111,16 @@ abstract class BaseApiRequest extends FormRequest
      */
     public function parameter(string $key, string $expect): Model
     {
-        $value = $this->route()->parameter($key);
+        $route = $this->route();
+
+        // Only outside routing, which is how the API reference reads rules() to document a
+        // request body. An empty model gives it the rule shapes; a real request always has a
+        // route and its bound model.
+        if ($route === null) {
+            return new $expect;
+        }
+
+        $value = $route->parameter($key);
 
         Assert::isInstanceOf($value, $expect);
         Assert::true($value->exists);

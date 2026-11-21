@@ -8,6 +8,7 @@ use App\Enums\Server\ConsoleType;
 use App\Models\Node;
 use App\Models\Relay;
 use App\Models\Server;
+use App\Models\SystemActor;
 use App\Models\User;
 use App\Services\Api\JWTService;
 use App\Support\Anchor\AnchorProtocol;
@@ -22,7 +23,7 @@ class AnchorSessionService
         private AnchorLivenessService $liveness,
     ) {}
 
-    public function create(Server $server, User $user, ConsoleType $type): ConsoleSessionData
+    public function create(Server $server, User|SystemActor $user, ConsoleType $type): ConsoleSessionData
     {
         // The node *is* the agent now, so there is no link to be missing --
         // only an agent that was never installed on it, which is the v4 shape
@@ -82,22 +83,25 @@ class AnchorSessionService
     private function issue(
         Node|Relay $anchor,
         Server $server,
-        User $user,
+        User|SystemActor $user,
         array $console,
         CarbonImmutable $expiresAt,
         ?array $relay = null,
     ): string {
+        // An application token's console belongs to no person, so it is issued to the panel.
+        $subject = $user instanceof User ? $user->uuid : 'system';
+
         return $this->jwt->issue(
             signingKey: $anchor->anchorSecret(),
             audience: $anchor->anchorUuid(),
-            identifier: $user->uuid.$server->uuid.$anchor->anchorUuid().Str::random(),
+            identifier: $subject.$server->uuid.$anchor->anchorUuid().Str::random(),
             claims: array_filter([
                 'protocol' => AnchorProtocol::VERSION,
                 'console' => $console,
                 'relay' => $relay,
             ], fn (mixed $value) => $value !== null),
             expiresAt: $expiresAt,
-            subject: $user->uuid,
+            subject: $subject,
         )->toString();
     }
 

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin;
+use App\Http\Middleware\Admin\Server\RequireReadyServer;
 use App\Http\Middleware\Admin\Server\ValidateServerLifecycleMiddleware;
 use App\Http\Middleware\DenyApiTokenAccess;
 use Illuminate\Support\Facades\Route;
@@ -267,6 +268,76 @@ Route::prefix('/servers')->group(function () {
                     '/unflag',
                     [Admin\ServerController::class, 'unflag'],
                 );
+            });
+
+            /*
+             * The client area's per-server operations, on the same paths as under
+             * /api/client/servers/{server}, so an integration holding an application token
+             * can rebuild a server, reset its credentials or take a backup without a
+             * customer's account. The controllers are the client ones (see
+             * Admin\Servers\BackupController for why they are subclasses).
+             */
+            Route::get('/deployment', [Admin\Servers\DeploymentController::class, 'getDeployment']);
+            Route::post('/retry-installation', [Admin\Servers\DeploymentController::class, 'retryInstallation']);
+            Route::post('/settings/reinstall', [Admin\Servers\SettingsController::class, 'reinstall']);
+
+            Route::middleware(RequireReadyServer::class)->group(function () {
+                Route::post('/create-console-session', [Admin\Servers\ConsoleController::class, 'createConsoleSession']);
+
+                Route::get('/statistics', Admin\Servers\StatisticController::class);
+                Route::get('/resources', Admin\Servers\ResourceController::class);
+
+                Route::prefix('/backups')->group(function () {
+                    Route::get('/', [Admin\Servers\BackupController::class, 'index']);
+                    Route::post('/', [Admin\Servers\BackupController::class, 'store']);
+                    Route::post('/{backup}/restore', [Admin\Servers\BackupController::class, 'restore']);
+                    Route::delete('/{backup}', [Admin\Servers\BackupController::class, 'destroy']);
+                });
+
+                // A rule's position is an index into the remote ruleset, not a model, so
+                // there is nothing to scope through the server.
+                Route::prefix('/firewall')->withoutScopedBindings()->group(function () {
+                    Route::get('/options', [Admin\Servers\FirewallController::class, 'options']);
+                    Route::put('/options', [Admin\Servers\FirewallController::class, 'updateOptions']);
+                    Route::get('/rules', [Admin\Servers\FirewallController::class, 'index']);
+                    Route::post('/rules', [Admin\Servers\FirewallController::class, 'store']);
+                    Route::put('/rules/{position}', [Admin\Servers\FirewallController::class, 'update'])
+                        ->whereNumber('position');
+                    Route::put('/rules/{position}/move', [Admin\Servers\FirewallController::class, 'move'])
+                        ->whereNumber('position');
+                    Route::delete('/rules/{position}', [Admin\Servers\FirewallController::class, 'destroy'])
+                        ->whereNumber('position');
+                    Route::get('/refs', [Admin\Servers\FirewallController::class, 'refs']);
+                    Route::get('/macros', [Admin\Servers\FirewallController::class, 'macros']);
+                    Route::get('/log', [Admin\Servers\FirewallController::class, 'log']);
+                });
+
+                Route::prefix('/subusers')->group(function () {
+                    Route::get('/', [Admin\Servers\SubuserController::class, 'index']);
+                    Route::post('/', [Admin\Servers\SubuserController::class, 'store']);
+                    Route::patch('/{subuser}', [Admin\Servers\SubuserController::class, 'update']);
+                    Route::delete('/{subuser}', [Admin\Servers\SubuserController::class, 'destroy']);
+                });
+
+                Route::prefix('/settings')->group(function () {
+                    Route::get('/hardware/storage', [Admin\Servers\SettingsController::class, 'getStorage']);
+                    Route::put('/hardware/boot-order', [Admin\Servers\SettingsController::class, 'updateBootOrder']);
+                    Route::get('/hardware/serial-console', [Admin\Servers\SettingsController::class, 'getSerialConsole']);
+                    Route::post('/hardware/serial-console', [Admin\Servers\SettingsController::class, 'enableSerialConsole']);
+                    Route::get('/hardware/display-console', [Admin\Servers\SettingsController::class, 'getDisplayConsole']);
+                    Route::post('/hardware/display-console', [Admin\Servers\SettingsController::class, 'enableDisplayConsole']);
+                    Route::get('/hardware/isos', [Admin\Servers\SettingsController::class, 'getMedia']);
+                    // The ISO library is panel-wide; see the client route for why this
+                    // cannot scope through the server.
+                    Route::post('/hardware/isos/{iso}/mount', [Admin\Servers\SettingsController::class, 'mountMedia'])
+                        ->withoutScopedBindings();
+                    Route::post('/hardware/isos/{iso}/unmount', [Admin\Servers\SettingsController::class, 'unmountMedia'])
+                        ->withoutScopedBindings();
+                    Route::get('/network', [Admin\Servers\SettingsController::class, 'getNetworkSettings']);
+                    Route::put('/network', [Admin\Servers\SettingsController::class, 'updateNetworkSettings']);
+                    Route::get('/auth', [Admin\Servers\SettingsController::class, 'getAuthSettings']);
+                    Route::put('/auth', [Admin\Servers\SettingsController::class, 'updateAuthSettings']);
+                });
             });
         }
         );
@@ -575,6 +646,35 @@ Route::prefix('/settings')->group(function () {
         '/mail/test',
         [Admin\Settings\MailSettingsController::class, 'test'],
     );
+});
+
+/*
+|--------------------------------------------------------------------------
+| Webhook Routes
+|--------------------------------------------------------------------------
+|
+| Endpoint: /api/admin/webhooks
+|
+| Addresses the panel POSTs events to, and what it sent each one. Governed by
+| the `settings` permission resource: a webhook receives every audit entry it
+| subscribes to, logins included, so it is panel configuration rather than a
+| surface of its own.
+|
+*/
+Route::prefix('/webhooks')->group(function () {
+    // Before /{webhook}, or "events" would be taken for a webhook's uuid.
+    Route::get('/events', [Admin\WebhookController::class, 'events']);
+    Route::get('/', [Admin\WebhookController::class, 'index']);
+    Route::post('/', [Admin\WebhookController::class, 'store']);
+
+    Route::prefix('/{webhook}')->group(function () {
+        Route::get('/', [Admin\WebhookController::class, 'show']);
+        Route::put('/', [Admin\WebhookController::class, 'update']);
+        Route::delete('/', [Admin\WebhookController::class, 'destroy']);
+        Route::post('/test', [Admin\WebhookController::class, 'test']);
+        Route::get('/deliveries', [Admin\WebhookDeliveryController::class, 'index']);
+        Route::post('/deliveries/{delivery}/redeliver', [Admin\WebhookDeliveryController::class, 'redeliver']);
+    });
 });
 
 /*

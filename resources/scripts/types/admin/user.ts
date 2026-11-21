@@ -2,6 +2,8 @@ import { BaseUser } from '@/types/user.ts'
 import { PaginatedResult } from '@/utils/http.ts'
 
 export interface AdminUser extends BaseUser {
+    /** The id an integration knows this account by. */
+    externalId: string | null
     serversCount: number
     createdAt: string | null
 }

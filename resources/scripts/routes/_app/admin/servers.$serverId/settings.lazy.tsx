@@ -9,6 +9,7 @@ import {
     updateServerBuild,
     useServer,
 } from '@/features/servers/admin/api.ts'
+import ServerGeneralCard from '@/features/servers/components/admin/detail/ServerGeneralCard.tsx'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
 import { Server } from '@/types/server.ts'
 import { handleFormErrors } from '@/utils/http.ts'
@@ -26,12 +27,6 @@ import { InputForm } from '@/components/ui/Forms'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 import { toast } from '@/components/ui/Toast'
 import { Heading } from '@/components/ui/Typography'
-
-export const Route = createLazyFileRoute(
-    '/_app/admin/servers/$serverId/settings'
-)({
-    component: ServerBuildSettings,
-})
 
 const MEBIBYTE = 1024 * 1024
 
@@ -58,7 +53,7 @@ const defaultsFromServer = (
     ...overagePenaltyDefaults(server.bandwidth.overagePenalty),
 })
 
-function ServerBuildSettings() {
+const ServerBuildSettings = () => {
     const { serverId } = Route.useParams()
     const numericServerId = Number(serverId)
     const { data: server, isLoading } = useServer(numericServerId)
@@ -123,6 +118,8 @@ function ServerBuildSettings() {
     return (
         <div className={'@container space-y-4'}>
             <Heading>Build & limits</Heading>
+
+            <ServerGeneralCard server={server} />
 
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(submit as any)}>
@@ -243,3 +240,9 @@ function ServerBuildSettings() {
         </div>
     )
 }
+
+export const Route = createLazyFileRoute(
+    '/_app/admin/servers/$serverId/settings'
+)({
+    component: ServerBuildSettings,
+})

@@ -30,6 +30,7 @@ class StoreUserRequest extends FormRequest
         return [
             'name' => $rules['name'],
             'email' => $rules['email'],
+            'external_id' => $rules['external_id'],
             // Optional now: omitting it invites the account instead, which is the flow that
             // exists so nobody has to pick — or email — a password on someone else's behalf.
             'password' => ['nullable', ...PasswordPolicy::rules()],
