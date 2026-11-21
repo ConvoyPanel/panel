@@ -20,6 +20,8 @@ which leaves less to do here.
   [`database/cutover/RUNBOOK.md`](database/cutover/RUNBOOK.md) copies the data across and runs the renaming migrations.
 - **Add an image for every OS you offer.** Templates are gone and are not migrated. A template row is only a VMID,
   while an image needs the disks and their hardware profile.
+- **Snapshots are gone.** Proxmox keeps existing snapshots, but the panel no longer takes or rolls them back. A server
+  in the middle of a snapshot rollback comes back as ready.
 - **Enroll each Proxmox host with Anchor.** Coterm is gone. Nodes carried over from 4.x or 5.x work for everything
   except the console until their host is enrolled.
 - **Update your billing module and other API clients** for the changes in the table below.
@@ -242,7 +244,7 @@ which leaves less to do here.
 
 ### Removed
 
-- **Templates, Coterm, and adding nodes by hand.** See [Upgrading](#upgrading).
+- **Templates, snapshots, Coterm, and adding nodes by hand.** See [Upgrading](#upgrading).
 
 ### Fixed
 
@@ -257,6 +259,8 @@ which leaves less to do here.
   waits and retries.
 - **Personal access tokens could only read.** Every other client API request made with one failed with 419 "CSRF token
   mismatch". The panel's CSRF check, which lets a valid token through, was never applied to those routes.
+- **Progress bars drew the square of their value.** A 50% meter filled a quarter of its track, so storage, memory,
+  bandwidth and capacity meters all read low. The bar was sized to the value and then shifted left by the remainder.
 
 ### Security
 
