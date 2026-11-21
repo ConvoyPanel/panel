@@ -14,6 +14,7 @@ use App\Console\Commands\Server\UpdateRateLimitsCommand;
 use App\Console\Commands\Server\UpdateUsagesCommand;
 use App\Jobs\Telemetry\SendTelemetryReportJob;
 use App\Models\SessionRecord;
+use App\Models\WebhookDelivery;
 use App\Services\Telemetry\TelemetryService;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Console\PruneCommand;
@@ -31,6 +32,12 @@ if (config('metrics.victoriametrics.url')) {
 // Garbage-collect session metadata rows whose underlying session has aged out (see
 // SessionRecord::prunable) so the table stays bounded even for sessions never listed.
 Schedule::command(PruneCommand::class, ['--model' => [SessionRecord::class]])->daily();
+
+// An expired token can never authenticate again; drop it a day after it lapses.
+Schedule::command('sanctum:prune-expired', ['--hours' => 24])->daily();
+
+// Webhook deliveries are kept for WebhookDelivery::RETENTION_DAYS, then dropped.
+Schedule::command(PruneCommand::class, ['--model' => [WebhookDelivery::class]])->daily();
 
 if (config('deployments.stuck_age') || config('deployments.retention_period')) {
     Schedule::command(PruneDeploymentsCommand::class)->hourly();

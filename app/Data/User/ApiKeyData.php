@@ -23,6 +23,8 @@ class ApiKeyData extends Data
         /** @var list<string> */
         public array $allowedNetworks,
         public ?CarbonImmutable $lastUsedAt,
+        /** Null for a token that never expires. Sanctum refuses it from this moment on. */
+        public ?CarbonImmutable $expiresAt,
         public Optional|string $plainTextToken,
         // The admin who minted the token (audit). Null once that admin is deleted — the token lives on.
         #[LoadRelation]
@@ -39,6 +41,9 @@ class ApiKeyData extends Data
             allowedNetworks: $token->allowed_networks ?? [],
             lastUsedAt: $token->last_used_at
                 ? CarbonImmutable::parse($token->last_used_at)
+                : null,
+            expiresAt: $token->expires_at
+                ? CarbonImmutable::parse($token->expires_at)
                 : null,
             plainTextToken: $plainTextToken ?? Optional::create(),
             createdBy: Lazy::whenLoaded(

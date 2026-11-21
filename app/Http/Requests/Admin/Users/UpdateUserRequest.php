@@ -44,6 +44,7 @@ class UpdateUserRequest extends BaseApiRequest
         return [
             'name' => $rules['name'],
             'email' => $rules['email'],
+            'external_id' => $rules['external_id'],
             'password' => ['nullable', ...PasswordPolicy::rules()],
             'type' => $rules['type'],
             'admin_role_id' => $rules['admin_role_id'],

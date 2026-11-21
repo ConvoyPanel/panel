@@ -4,6 +4,7 @@ namespace App\Data\Audit;
 
 use App\Enums\Audit\AuditEvent;
 use App\Models\AuditLog;
+use App\Models\SystemActor;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
@@ -35,9 +36,26 @@ class AuditLogData extends Data
     {
         $request ??= request();
 
-        /** @var User|null $viewer */
-        $viewer = $request->user() instanceof User ? $request->user() : null;
-        $viewerIsAdmin = (bool) $viewer?->isAdmin();
+        /** @var User|SystemActor|null $actor */
+        $actor = $request->user();
+        $viewer = $actor instanceof User ? $actor : null;
+        // An application token reads the audit log as the panel itself, which is an admin view.
+        $viewerIsAdmin = $actor instanceof SystemActor || (bool) $viewer?->isAdmin();
+
+        return self::build($model, $viewer, $viewerIsAdmin);
+    }
+
+    /**
+     * The entry as an administrator sees it, nothing masked. For places with no viewer to ask,
+     * like a webhook delivery.
+     */
+    public static function forStaff(AuditLog $model): self
+    {
+        return self::build($model, null, true);
+    }
+
+    private static function build(AuditLog $model, ?User $viewer, bool $viewerIsAdmin): self
+    {
 
         // An address is personal data about whoever acted. Admins investigating need it; everyone
         // else only ever sees their own.

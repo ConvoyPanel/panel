@@ -166,6 +166,24 @@ which leaves less to do here.
   or `*`. Write includes read.
 - **Token network restrictions.** An application token can be limited to the networks it may be used from.
 - **Personal access tokens** for the client API. They can't reach account settings.
+- **API reference.** Generated from the code and served at `/api/docs` and `/api/docs/client`. See
+  [`docs/api.md`](docs/api.md).
+- **Server operations for application tokens.** Rebuilds, backups, firewall, credentials, hardware, consoles,
+  sub-users and install progress are under `/api/application/servers/{server}/...`, on the same paths as the client
+  API. Tokens skip identity confirmation, which only a browser session can complete.
+- **Webhooks.** The panel POSTs signed events to a URL: any audit event, plus finished and failed installs,
+  migrations and backups. Failed deliveries are retried and can be sent again. Manage them under Admin → Webhooks.
+- **Idempotency keys.** A write sent again with the same `Idempotency-Key` returns the first response instead of
+  running twice.
+- **Rate limits.** 240 requests a minute for each token (`API_RATE_LIMIT`). Application tokens restricted to an IP
+  allowlist aren't limited.
+- **Token expiry** for application and personal tokens.
+- **`tokens:create`.** Creates an application token on the command line, so a new install can be set up without a
+  browser.
+- **External IDs** on servers and users, unique, and usable as a list filter.
+- **Placement on create.** A server can be created with a `location_id` and the panel picks the node, storage and
+  bridge. With a `node_id` alone it picks the storage and bridge. `server_preset_uuid` fills in a saved preset.
+- **SSH keys on create and rebuild,** in place of a password.
 - **Safe config writes.** Writes carry Proxmox's config digest, so a change made on the node in between gets a 409
   instead of being overwritten.
 
@@ -264,6 +282,11 @@ which leaves less to do here.
   Convoy now waits for the Proxmox task and retries one that timed out.
 - **A killed worker could leave a server's jobs stuck forever.** Job locks now expire, and a job that finds one held
   waits and retries.
+- **Setting SSH keys on a server failed with a 500** after the keys had been written, so the change went unaudited.
+- **Application tokens saw the audit log and server lists the way a customer does**, with staff names, IP addresses
+  and placement flags hidden.
+- **Token requests to the client API started a session**, which stored a session row and set cookies on every call.
+- **A personal access token scoped to `servers` couldn't call `GET /api/client/user`.**
 - **Personal access tokens could only read.** Every other client API request made with one failed with 419 "CSRF token
   mismatch". The panel's CSRF check, which lets a valid token through, was never applied to those routes.
 - **Progress bars drew the square of their value.** A 50% meter filled a quarter of its track, so storage, memory,

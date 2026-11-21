@@ -157,6 +157,16 @@ Applied to calls out to Proxmox and Anchor.
 | --- | --- | --- |
 | `VICTORIAMETRICS_URL` | unset | Endpoint backing the admin dashboard's metric history (deltas and sparklines). Leave unset to disable; the dashboard works without it. |
 
+## API
+
+See [`api.md`](api.md).
+
+| Variable | Default | Notes |
+| --- | --- | --- |
+| `API_RATE_LIMIT` | `240` | Requests per minute for each API token. Application tokens restricted to an IP allowlist aren't limited. `0` turns the limit off. |
+| `API_IDEMPOTENCY_TTL_HOURS` | `24` | How long a write sent with an `Idempotency-Key` is remembered. |
+| `API_DOCS_PUBLIC` | `false` | Serve the API reference at `/api/docs` without signing in. |
+
 ## SSO deep links (optional)
 
 Minted via `POST /api/application/users/{user}/generate-sso-token`.

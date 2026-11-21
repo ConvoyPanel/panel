@@ -21,6 +21,8 @@ class UserData extends Data
         public int $id,
         public string $name,
         public string $email,
+        /** The id an integration knows this account by. */
+        public ?string $externalId,
         public ?string $avatarUrl,
         /**
          * Where the account came from. A guest exists only because somebody shared a server with
@@ -72,6 +74,7 @@ class UserData extends Data
             id: $user->id,
             name: $user->name,
             email: $user->email,
+            externalId: $user->external_id,
             avatarUrl: $user->avatarUrl(),
             type: $user->type,
             rootAdmin: (bool) $user->root_admin,

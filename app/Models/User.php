@@ -53,6 +53,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         'password',
         'type',
         'admin_role_id',
+        'external_id',
         // Not a column. See the root_admin attribute below: it reads and writes the Superadmin
         // role, so `create(['root_admin' => true])` still means what it always meant.
         'root_admin',
@@ -64,6 +65,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     public static array $validationRules = [
         'email' => 'required|email|between:1,191|unique:users,email',
         'name' => 'required|string|between:1,191',
+        'external_id' => 'sometimes|nullable|string|max:191|unique:users,external_id',
         'password' => ['sometimes', 'min:8', 'max:191', 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/u', 'string'],
         'type' => 'sometimes|string|in:standard,guest',
         'admin_role_id' => 'sometimes|nullable|integer|exists:admin_roles,id',

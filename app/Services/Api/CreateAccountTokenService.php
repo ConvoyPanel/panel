@@ -5,6 +5,7 @@ namespace App\Services\Api;
 use App\Enums\Api\ApiKeyType;
 use App\Models\PersonalAccessToken;
 use App\Models\User;
+use Carbon\CarbonInterface;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\NewAccessToken;
 
@@ -17,13 +18,14 @@ class CreateAccountTokenService
      *
      * @param  list<string>  $abilities
      */
-    public function handle(User $user, string $name, array $abilities = ['*']): NewAccessToken
+    public function handle(User $user, string $name, array $abilities = ['*'], ?CarbonInterface $expiresAt = null): NewAccessToken
     {
         $token = new PersonalAccessToken([
             'type' => ApiKeyType::ACCOUNT,
             'name' => $name,
             'token' => hash('sha256', $plainTextToken = Str::random(40)),
             'abilities' => $abilities,
+            'expires_at' => $expiresAt,
         ]);
 
         $token->tokenable()->associate($user);

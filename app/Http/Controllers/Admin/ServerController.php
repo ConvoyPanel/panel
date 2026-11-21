@@ -58,6 +58,7 @@ class ServerController
                     AllowedFilter::custom('*', new FiltersServerWildcard),
                     AllowedFilter::exact('node_id'),
                     AllowedFilter::exact('user_id'),
+                    AllowedFilter::exact('external_id'),
                     'name',
                     'hostname',
                 ],
