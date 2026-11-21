@@ -60,6 +60,7 @@ convoy backup             dump the database to /opt/convoy/backups
 convoy artisan <cmd>      run an Artisan command
 convoy shell              open a shell in the panel container
 convoy horizon            queue worker status
+convoy support            send logs and diagnostics to the Convoy team
 ```
 
 Nothing here is magic — if you know Docker, `cd /opt/convoy` and use

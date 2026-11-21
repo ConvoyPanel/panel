@@ -2,10 +2,13 @@
 #
 # convoy -- day-two operations for a Convoy install.
 #
-# Everything here is a thin wrapper over `docker compose` in the install
+# Almost everything here is a thin wrapper over `docker compose` in the install
 # directory. That is deliberate: an operator who knows Docker can ignore this
 # script entirely, and one who does not never has to learn which of the five
 # containers to exec into.
+#
+# One command does more than wrap: `support` collects a redacted bundle of logs
+# and diagnostics for the Convoy team.
 #
 # Same name, path and upgrade contract as 5.x's `convoy`, so `convoy upgrade`
 # on a 5.x install replaces that command with this one. A v4 install goes
@@ -15,14 +18,15 @@ set -euo pipefail
 
 # Stamped by .github/workflows/release.yml and the Dockerfile.
 CONVOY_CLI_VERSION="canary"
+CONVOY_SUPPORT_URL="${CONVOY_SUPPORT_URL:-https://convoypanel.com}"
 
 # Where an install lives unless CONVOY_DIR says otherwise.
 DEFAULT_DIR=/opt/convoy
 
 if [[ -t 2 ]]; then
-    RED=$'\033[0;31m' GREEN=$'\033[0;32m' YELLOW=$'\033[0;33m' RESET=$'\033[0m'
+    RED=$'\033[0;31m' GREEN=$'\033[0;32m' YELLOW=$'\033[0;33m' BOLD=$'\033[1m' RESET=$'\033[0m'
 else
-    RED='' GREEN='' YELLOW='' RESET=''
+    RED='' GREEN='' YELLOW='' BOLD='' RESET=''
 fi
 
 # Messages for the person running the command go to stderr, so stdout carries
@@ -65,6 +69,16 @@ env_unquote() {
         value="${value%"${value##*[![:space:]]}"}"
     fi
     printf '%s' "$value"
+}
+
+# Every KEY=value line of a dotenv file, as "KEY<TAB>unquoted value".
+env_each() {
+    local file="$1" line
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        line="${line%$'\r'}"
+        [[ "$line" =~ ^[[:space:]]*(export[[:space:]]+)?([A-Za-z_][A-Za-z0-9_]*)[[:space:]]*=(.*)$ ]] || continue
+        printf '%s\t%s\n' "${BASH_REMATCH[2]}" "$(env_unquote "${BASH_REMATCH[3]}")"
+    done < "$file"
 }
 
 ##########################################################################
@@ -346,6 +360,703 @@ cmd_upgrade() {
 }
 
 ##########################################################################
+# Redaction
+##########################################################################
+#
+# Everything `convoy support` puts in a bundle goes through redact() first, and
+# nothing else in this file decides what is secret. tests/cli/redact.sh runs
+# fixtures through it in CI. Rules, per docs/support-bundle.md:
+#
+#   * the exact value of every .env key ending in _KEY, _SECRET, _PASSWORD or
+#     _TOKEN (and APP_KEY), wherever it appears, also as it looks JSON-escaped;
+#   * Proxmox API tokens: PVEAPIToken=... and user@realm!tokenid=<uuid>;
+#   * Bearer and Basic credentials;
+#   * Laravel keys (base64: and 40 or more base64 characters);
+#   * session and XSRF cookies, values Laravel encrypted (eyJpdiI6...), which is
+#     what those cookies and the X-XSRF-TOKEN header carry, and JWTs;
+#   * JSON fields and query parameters named password, secret, token or
+#     api_key, or ending in one of them, and Cookie and Set-Cookie in JSON;
+#   * Authorization and Proxy-Authorization in JSON, keeping the scheme;
+#   * credentials in URLs (scheme://user:password@host) and in query strings.
+#
+# A JSON value is a string, or a list of strings the way Caddy's access log
+# writes headers: "X-Xsrf-Token": ["..."].
+
+REDACT_SED=""
+
+is_secret_key() {
+    [[ "$1" == "APP_KEY" || "$1" =~ _(KEY|SECRET|PASSWORD|TOKEN)$ ]]
+}
+
+# Escapes a literal string for use as a GNU sed -E regex.
+ere_escape() {
+    printf '%s' "$1" | sed -e 's/[][\.^$*+?(){}|/]/\\&/g'
+}
+
+# Builds the sed program from the install's .env. Call once before redact().
+redact_init() {
+    local env_file="${1:-}" key value escaped placeholder
+    REDACT_SED="$(mktemp)"
+
+    if [[ -n "$env_file" && -r "$env_file" ]]; then
+        while IFS=$'\t' read -r key value; do
+            is_secret_key "$key" || continue
+            # Placeholders 4.x's .env.example shipped with, which are not secrets
+            # and would otherwise redact every "null" in every log.
+            placeholder="$(printf '%s' "$value" | tr '[:upper:]' '[:lower:]')"
+            [[ -z "$value" || "$placeholder" =~ ^(null|true|false|\(null\)|empty)$ ]] && continue
+            # Shorter than this matches inside ordinary words; no real secret is.
+            (( ${#value} >= 4 )) || continue
+            escaped="$(ere_escape "$value")"
+            printf 's/%s/[redacted]/g\n' "$escaped"
+            # As it appears inside JSON, where / is written \/.
+            if [[ "$value" == */* ]]; then
+                printf 's/%s/[redacted]/g\n' "$(ere_escape "${value//\//\\/}")"
+            fi
+        # Longest first, so a secret that contains another is replaced whole.
+        done < <(env_each "$env_file") | awk '!seen[$0]++ { print length($0) "\t" $0 }' | sort -rn | cut -f2- >> "$REDACT_SED"
+    fi
+
+    # Field names: the four words, alone or as a suffix (current_password,
+    # client_secret, remember_token, _token, X-Xsrf-Token, X-Api-Key), and
+    # *_confirmation. Not as a prefix: token_id names a Proxmox token without
+    # being one. JSON can sit escaped inside another JSON string, and a / in it
+    # can be escaped once or twice. Inside [...] GNU sed reads \/ as both
+    # characters, which would also take the \ of a closing \", so a / that may
+    # be escaped is matched outside one, as \\*\/.
+    cat >> "$REDACT_SED" <<'SED'
+s/([A-Za-z0-9._-]+@[A-Za-z0-9._-]+![A-Za-z0-9._-]+[=:])[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}/\1[redacted]/g
+s/(PVEAPIToken=[^][:space:]"',;=]*=)[A-Za-z0-9][^][:space:]"',;]*/\1[redacted]/g
+s/(PVEAPIToken=)[^][:space:]"',;=]+([[:space:]"',;]|$)/\1[redacted]\2/g
+s/\b(Bearer|Basic)([[:space:]]+)([A-Za-z0-9._~+|-]|\\*\/){8,}=*/\1\2[redacted]/Ig
+s/base64:[A-Za-z0-9+\/]{40,}={0,2}/[redacted]/g
+s/([A-Za-z0-9_-]*_session|XSRF-TOKEN)=[^;[:space:]"',]+/\1=[redacted]/Ig
+s/eyJpdiI6([A-Za-z0-9+=%]|\\*\/)+/[redacted]/g
+s/eyJ[A-Za-z0-9_-]+\.eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/[redacted]/g
+s/(\\?"([A-Za-z0-9_-]*(password|secret|token|api[_-]key)(_confirmation)?|(set-)?cookie)\\?"[[:space:]]*:[[:space:]]*)\\"([^\\]|\\[^"])*\\"/\1\\"[redacted]\\"/Ig
+s/(\\?"([A-Za-z0-9_-]*(password|secret|token|api[_-]key)(_confirmation)?|(set-)?cookie)\\?"[[:space:]]*:[[:space:]]*)\[[[:space:]]*\\"([^\\]|\\[^"])*\\"([[:space:]]*,[[:space:]]*\\"([^\\]|\\[^"])*\\")*[[:space:]]*]/\1[\\"[redacted]\\"]/Ig
+s/("([A-Za-z0-9_-]*(password|secret|token|api[_-]key)(_confirmation)?|(set-)?cookie)"[[:space:]]*:[[:space:]]*)"([^"\\]|\\.)*"/\1"[redacted]"/Ig
+s/("([A-Za-z0-9_-]*(password|secret|token|api[_-]key)(_confirmation)?|(set-)?cookie)"[[:space:]]*:[[:space:]]*)\[[[:space:]]*"([^"\\]|\\.)*"([[:space:]]*,[[:space:]]*"([^"\\]|\\.)*")*[[:space:]]*]/\1["[redacted]"]/Ig
+s/("(proxy-)?authorization"[[:space:]]*:[[:space:]]*")(PVEAPIToken=([^"\\=]*=)?|[A-Za-z][A-Za-z0-9._~+-]*[[:space:]]+)?([^"\\]|\\.)*"/\1\3[redacted]"/Ig
+s/("(proxy-)?authorization"[[:space:]]*:[[:space:]]*\[[[:space:]]*")(PVEAPIToken=([^"\\=]*=)?|[A-Za-z][A-Za-z0-9._~+-]*[[:space:]]+)?([^"\\]|\\.)*"([[:space:]]*,[[:space:]]*"([^"\\]|\\.)*")*[[:space:]]*]/\1\3[redacted]"]/Ig
+s/(\\"(proxy-)?authorization\\"[[:space:]]*:[[:space:]]*\\")(PVEAPIToken=([^"\\=]*=)?|[A-Za-z][A-Za-z0-9._~+-]*[[:space:]]+)?([^\\]|\\[^"])*\\"/\1\3[redacted]\\"/Ig
+s/(\\"(proxy-)?authorization\\"[[:space:]]*:[[:space:]]*\[[[:space:]]*\\")(PVEAPIToken=([^"\\=]*=)?|[A-Za-z][A-Za-z0-9._~+-]*[[:space:]]+)?([^\\]|\\[^"])*\\"([[:space:]]*,[[:space:]]*\\"([^\\]|\\[^"])*\\")*[[:space:]]*]/\1\3[redacted]\\"]/Ig
+s/([?&][A-Za-z0-9_-]*(password|secret|token|api[_-]key)(_confirmation)?=)[^&[:space:]"']+/\1[redacted]/Ig
+s/([A-Za-z][A-Za-z0-9+.-]*:\/\/[^:\/@[:space:]"']+:)[^@\/[:space:]"']+@/\1[redacted]@/g
+SED
+}
+
+redact() {
+    [[ -n "$REDACT_SED" ]] || die "redact_init hasn't run."
+    LC_ALL=C sed -E -f "$REDACT_SED"
+}
+
+##########################################################################
+# JSON (no jq on a stock host)
+##########################################################################
+
+json_str() {
+    local s="$1"
+    s="${s//\\/\\\\}"
+    s="${s//\"/\\\"}"
+    s="${s//$'\n'/\\n}"
+    s="${s//$'\r'/\\r}"
+    s="${s//$'\t'/\\t}"
+    s="$(printf '%s' "$s" | tr -d '\000-\010\013\014\016-\037')"
+    printf '"%s"' "$s"
+}
+
+# A string, or null when empty.
+json_str_or_null() {
+    if [[ -n "$1" ]]; then json_str "$1"; else printf 'null'; fi
+}
+
+json_int_or_null() {
+    if [[ "$1" =~ ^[0-9]+$ ]]; then printf '%s' "$1"; else printf 'null'; fi
+}
+
+# The value of a string field in a flat JSON object (Laravel writes / as \/).
+json_field() {
+    sed -nE "s/.*\"$2\"[[:space:]]*:[[:space:]]*\"([^\"]*)\".*/\1/p" <<< "$1" | head -1 | sed 's#\\/#/#g'
+}
+
+##########################################################################
+# convoy support
+##########################################################################
+
+SUPPORT_LOG_CAP=$(( 5 * 1024 * 1024 ))
+
+# Non-secret settings that are sent with their value. Everything else in .env is
+# reported only as set or unset. Keep in step with docs/support-bundle.md.
+SUPPORT_ENV_ALLOWLIST=(
+    APP_ENV APP_DEBUG APP_URL APP_DOMAIN APP_TIMEZONE APP_LOCALE CONVOY_VERSION
+    CONVOY_AUTO_HTTPS CONVOY_HTTP_PORT CONVOY_HTTPS_PORT TRUSTED_PROXIES
+    DB_CONNECTION DB_HOST DB_PORT REDIS_HOST REDIS_PORT CACHE_DRIVER
+    CACHE_STORE QUEUE_CONNECTION SESSION_DRIVER SESSION_LIFETIME LOG_CHANNEL LOG_LEVEL
+    MAIL_MAILER MAIL_HOST MAIL_PORT MAIL_ENCRYPTION CONVOY_TELEMETRY_ENABLED
+    CONVOY_ANNOUNCEMENTS_URL
+)
+
+SUPPORT_SKIPPED=()
+
+support_skip() {
+    SUPPORT_SKIPPED+=("{\"item\": $(json_str "$1"), \"reason\": $(json_str "$2")}")
+}
+
+# Keeps the last SUPPORT_LOG_CAP bytes of a file, dropping the partial line a
+# cut leaves at the top.
+cap_file() {
+    local file="$1" tmp
+    if (( $(wc -c < "$file") > SUPPORT_LOG_CAP )); then
+        tmp="$(mktemp)"
+        tail -c "$SUPPORT_LOG_CAP" "$file" | tail -n +2 > "$tmp"
+        mv "$tmp" "$file"
+    fi
+}
+
+valid_bundle_name() {
+    [[ "$1" =~ ^[a-z0-9][a-z0-9_.-]{0,63}$ ]]
+}
+
+support_env_json() {
+    local env_file="$1" key value first=1 allowed a
+    printf '{'
+    while IFS=$'\t' read -r key value; do
+        allowed=0
+        for a in "${SUPPORT_ENV_ALLOWLIST[@]}"; do [[ "$a" == "$key" ]] && allowed=1 && break; done
+        (( first )) || printf ','
+        first=0
+        if (( allowed )); then
+            printf '\n    %s: %s' "$(json_str "$key")" "$(json_str "$value")"
+        elif [[ -n "$value" ]]; then
+            printf '\n    %s: {"set": true}' "$(json_str "$key")"
+        else
+            printf '\n    %s: {"set": false}' "$(json_str "$key")"
+        fi
+    done < <(env_each "$env_file" | awk -F'\t' '!seen[$1]++ { order[++n] = $1 } { last[$1] = $0 } END { for (i = 1; i <= n; i++) print last[order[i]] }')
+    printf '\n}\n'
+}
+
+support_host_json() {
+    local os kernel arch cpus mem swap disk_install disk_docker docker_root docker_v compose_v
+    # shellcheck source=/dev/null
+    os="$( (. /etc/os-release 2>/dev/null && printf '%s' "${PRETTY_NAME:-}") || true)"
+    kernel="$(uname -r 2>/dev/null || true)"
+    arch="$(uname -m 2>/dev/null || true)"
+    cpus="$(nproc 2>/dev/null || true)"
+    mem="$(awk '/^MemTotal:/ { printf "%d", $2 / 1024 }' /proc/meminfo 2>/dev/null || true)"
+    swap="$(awk '/^SwapTotal:/ { printf "%d", $2 / 1024 }' /proc/meminfo 2>/dev/null || true)"
+    disk_install="$(df -Pm "$INSTALL_DIR" 2>/dev/null | awk 'NR == 2 { print $4 }' || true)"
+    docker_root="$(docker info -f '{{.DockerRootDir}}' 2>/dev/null || true)"
+    disk_docker=""
+    [[ -n "$docker_root" ]] && disk_docker="$(df -Pm "$docker_root" 2>/dev/null | awk 'NR == 2 { print $4 }' || true)"
+    docker_v="$(docker version -f '{{.Server.Version}}' 2>/dev/null || true)"
+    compose_v="$(docker compose version --short 2>/dev/null || true)"
+
+    printf '{\n'
+    printf '        "os": %s,\n' "$(json_str_or_null "$os")"
+    printf '        "kernel": %s,\n' "$(json_str_or_null "$kernel")"
+    printf '        "arch": %s,\n' "$(json_str_or_null "$arch")"
+    printf '        "cpus": %s,\n' "$(json_int_or_null "$cpus")"
+    printf '        "memory_mib": %s,\n' "$(json_int_or_null "$mem")"
+    printf '        "swap_mib": %s,\n' "$(json_int_or_null "$swap")"
+    printf '        "disk_free_mib": { "install": %s, "docker": %s },\n' "$(json_int_or_null "$disk_install")" "$(json_int_or_null "$disk_docker")"
+    printf '        "docker": %s,\n' "$(json_str_or_null "$docker_v")"
+    printf '        "compose": %s\n' "$(json_str_or_null "${compose_v#v}")"
+    printf '    }'
+}
+
+# The services a compose file defines, read from the file so that a .env
+# Compose cannot interpolate does not hide them.
+compose_services() {
+    awk '/^services:/ { in_services = 1; next }
+         /^[^[:space:]#]/ { in_services = 0 }
+         in_services && /^  [a-z0-9][a-z0-9_.-]*:[[:space:]]*$/ { sub(/^  /, ""); sub(/:.*/, ""); print }' "$INSTALL_DIR/compose.yml"
+}
+
+# One manifest entry per service in the compose file, created or not.
+support_containers_json() {
+    local service line state health image id started first=1
+    printf '['
+    for service in $(compose_services); do
+        # `|`, not a tab: read collapses adjacent tabs, and Health is empty for
+        # a service without a healthcheck.
+        line="$(compose ps -a --format '{{.State}}|{{.Health}}|{{.Image}}|{{.ID}}' "$service" 2>/dev/null | head -1 || true)"
+        IFS='|' read -r state health image id <<< "$line"
+        started=""
+        [[ -n "${id:-}" ]] && started="$(docker inspect -f '{{.State.StartedAt}}' "$id" 2>/dev/null || true)"
+        # Docker gives nanoseconds; the manifest wants plain RFC 3339 UTC.
+        started="${started%Z}"
+        started="${started%%.*}"
+        [[ "$started" == 0001-* ]] && started=""
+        (( first )) || printf ','
+        first=0
+        printf '\n        { "service": %s, "state": %s, "health": %s, "image": %s, "started_at": %s }' \
+            "$(json_str "$service")" \
+            "$(json_str "${state:-missing}")" \
+            "$(json_str_or_null "${health:-}")" \
+            "$(json_str_or_null "${image:-}")" \
+            "$(json_str_or_null "${started:+${started}Z}")"
+    done
+    printf '\n    ]'
+}
+
+# Runs a diagnostic through APP_CMD into FILE. Text diagnostics keep whatever
+# the command printed, failing or not ("Horizon is inactive." exits 1 and is the
+# answer); JSON ones are kept only when the command succeeded and printed JSON.
+# Anything left out is recorded in the manifest with the last line of stderr.
+support_diagnostic() {
+    local item="$1" file="$2" status=0 reason
+    shift 2
+    timeout 120 "${APP_CMD[@]}" "$@" > "$file" 2> "$file.err" < /dev/null || status=$?
+    case "$file" in
+        *.json) (( status == 0 )) && grep -qE '^[[:space:]]*[{[]' "$file" && { rm -f "$file.err"; return 0; } ;;
+        *)      [[ -s "$file" ]] && { rm -f "$file.err"; return 0; } ;;
+    esac
+    # The message of the first Laravel error logged (LOG_CHANNEL=stderr), else
+    # the last line of stderr, else of stdout (tinker prints a failed query
+    # there and exits 0).
+    reason="$(sed -nE 's/^\[[^]]*\] [A-Za-z]+\.(ERROR|CRITICAL|ALERT|EMERGENCY): (.*) \{"exception".*/\2/p' "$file.err" 2>/dev/null | head -1 || true)"
+    [[ -n "$reason" ]] || reason="$(grep -v '^[[:space:]]*$' "$file.err" 2>/dev/null | grep -vE '^ *(Container|Network|Volume) ' | tail -1 || true)"
+    [[ -n "$reason" ]] || reason="$(grep -v '^[[:space:]]*$' "$file" 2>/dev/null | tail -1 || true)"
+    reason="$(printf '%s' "$reason" | sed -E 's/\x1b\[[0-9;]*m//g; s/^[[:space:]]+//' | cut -c1-300)"
+    (( status == 124 )) && reason="timed out after 120 seconds"
+    support_skip "$item" "${reason:-exited with status $status}"
+    rm -f "$file" "$file.err"
+    return 0
+}
+
+panel_version_from_tree() {
+    sed -nE "s/^[[:space:]]*'version' => '([^']*)',.*/\1/p" "$1" 2>/dev/null | head -1
+}
+
+support_failed_jobs_php() {
+    cat <<'PHP'
+$q = Illuminate\Support\Facades\DB::table('failed_jobs');
+echo json_encode([
+    'count' => (clone $q)->count(),
+    'recent' => (clone $q)->orderByDesc('failed_at')->limit(20)->get()->map(fn ($job) => [
+        'failed_at' => Illuminate\Support\Carbon::parse($job->failed_at)->utc()->format('Y-m-d\TH:i:s\Z'),
+        'queue' => $job->queue,
+        'job' => json_decode($job->payload, true)['displayName'] ?? null,
+        'exception' => strtok((string) $job->exception, "\n"),
+    ])->all(),
+], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), PHP_EOL;
+PHP
+}
+
+SUPPORT_WORK=""
+support_cleanup() {
+    [[ -n "$SUPPORT_WORK" ]] && rm -rf "$SUPPORT_WORK"
+    [[ -n "$REDACT_SED" ]] && rm -f "$REDACT_SED"
+    return 0
+}
+
+cmd_support() {
+    local since="48h" upload=ask dir="" sub="${1:-}" visibility="" password_stdin=0
+
+    case "$sub" in
+        delete)     shift; cmd_support_delete "$@"; return ;;
+        visibility) shift; cmd_support_visibility "$@"; return ;;
+    esac
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --since)          since="${2:?--since needs a value, e.g. 48h}"; shift 2 ;;
+            --no-upload)      upload=no; shift ;;
+            --yes|-y)         upload=yes; shift ;;
+            --visibility)     visibility="${2:?--visibility needs staff, password or public}"; shift 2 ;;
+            --password-stdin) password_stdin=1; shift ;;
+            --dir)            dir="${2:?--dir needs a path}"; shift 2 ;;
+            -h|--help)        support_usage; return 0 ;;
+            *)                support_usage; die "unknown option: $1" ;;
+        esac
+    done
+    [[ "$since" =~ ^[0-9]+[smhd]$|^[0-9]{4}-[0-9]{2}-[0-9]{2} ]] || die "--since takes a duration such as 48h or 7d, or a date such as 2026-11-01."
+    # Docker reads durations the way Go does, which stops at hours: `7d` fails
+    # in `docker compose logs`, and every log in the bundle would be that error.
+    if [[ "$since" =~ ^([0-9]+)d$ ]]; then since="$((10#${BASH_REMATCH[1]} * 24))h"; fi
+    [[ -z "$visibility" ]] || valid_visibility "$visibility" || die "--visibility takes staff, password or public."
+    (( ! password_stdin )) || [[ "$visibility" == password ]] || die "--password-stdin goes with --visibility password."
+
+    # Read before collecting: the docker commands below would otherwise get
+    # stdin, and with it the password.
+    local password=""
+    if (( password_stdin )); then
+        password="$(support_read_password 1)"
+    fi
+
+    use_install "$dir"
+    command -v docker >/dev/null 2>&1 || die "docker isn't installed."
+
+    local out_dir="$INSTALL_DIR/backups/support" stamp collected_at work raw bundle archive
+    collected_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    stamp="$(date -u +%Y%m%dT%H%M%SZ)"
+    mkdir -p "$out_dir"
+    chmod 700 "$INSTALL_DIR/backups" "$out_dir" 2>/dev/null || true
+    work="$(mktemp -d "$out_dir/.collect-XXXXXX")"
+    SUPPORT_WORK="$work"
+    trap support_cleanup EXIT
+    raw="$work/raw"
+    bundle="$work/bundle"
+    mkdir -p "$raw/logs/storage" "$raw/diagnostics" "$bundle"
+    archive="$out_dir/convoy-support-$stamp.tar.gz"
+
+    redact_init "$INSTALL_DIR/.env"
+
+    info "Collecting from $INSTALL_DIR"
+
+    # Container logs.
+    local service
+    for service in $(compose_services); do
+        valid_bundle_name "$service" || continue
+        if [[ -z "$(compose ps -a -q "$service" 2>/dev/null)" ]]; then
+            support_skip "logs/$service.log" "no $service container"
+            continue
+        fi
+        compose logs --timestamps --no-color --no-log-prefix --since "$since" "$service" < /dev/null > "$raw/logs/$service.log" 2>&1 || true
+        cap_file "$raw/logs/$service.log"
+    done
+
+    # Laravel log files in the storage volume. The image logs to stderr, so
+    # these are only there if someone changed LOG_CHANNEL.
+    local f name
+    if app_running; then
+        # shellcheck disable=SC2016 # expanded inside the container
+        compose exec -T web sh -c 'cd storage/logs 2>/dev/null || exit 0; ls -t -- *.log 2>/dev/null | head -20' < /dev/null 2>/dev/null \
+            | while IFS= read -r f; do
+                name="${f%.log}"
+                valid_bundle_name "$name" || continue
+                compose exec -T web tail -c "$SUPPORT_LOG_CAP" "storage/logs/$f" < /dev/null > "$raw/logs/storage/$name.log" 2>/dev/null || rm -f "$raw/logs/storage/$name.log"
+            done
+    else
+        support_skip "logs/storage" "web container not running"
+    fi
+    for f in "$raw"/logs/storage/*.log; do [[ -f "$f" ]] && cap_file "$f"; done
+
+    # Diagnostics, through the app image so they work with the stack down.
+    info "Running diagnostics"
+    app_cmd -T
+    support_diagnostic diagnostics/about.json "$raw/diagnostics/about.json" php artisan about --json
+    support_diagnostic diagnostics/horizon-status.txt "$raw/diagnostics/horizon-status.txt" php artisan horizon:status --no-ansi
+    support_diagnostic diagnostics/migrate-status.txt "$raw/diagnostics/migrate-status.txt" php artisan migrate:status --no-ansi
+    support_diagnostic diagnostics/failed-jobs.json "$raw/diagnostics/failed-jobs.json" env HOME=/tmp php artisan tinker --execute "$(support_failed_jobs_php)"
+
+    # Panel version: what the app says, else the image tag.
+    local panel=""
+    panel="$(timeout 60 "${APP_CMD[@]}" env HOME=/tmp php artisan tinker --execute 'echo config("app.version"), PHP_EOL;' < /dev/null 2>/dev/null | tr -d '\r' | grep -v '^$' | tail -1 || true)"
+    if [[ -z "$panel" || ! "$panel" =~ ^[A-Za-z0-9._+-]+$ ]]; then
+        panel="$(compose config --images 2>/dev/null | grep -m1 -E '/panel:' | sed 's/.*://' || true)"
+    fi
+
+    # Settings and the manifest.
+    if [[ -r "$INSTALL_DIR/.env" ]]; then
+        support_env_json "$INSTALL_DIR/.env" > "$raw/env.json"
+    else
+        support_skip env.json "no readable .env in $INSTALL_DIR"
+    fi
+
+    local skipped_json="[" entry sep=""
+    for entry in "${SUPPORT_SKIPPED[@]}"; do
+        skipped_json+="$sep"$'\n        '"$entry"
+        sep=","
+    done
+    skipped_json+="${sep:+$'\n    '}]"
+    {
+        printf '{\n'
+        printf '    "schema": 1,\n'
+        printf '    "collector": %s,\n' "$(json_str "$CONVOY_CLI_VERSION")"
+        printf '    "panel": %s,\n' "$(json_str_or_null "$panel")"
+        # The compose layout 5.x introduced and this release keeps (web, worker,
+        # scheduler, postgres, redis). The console reads `panel` for the version.
+        printf '    "layout": "5.x",\n'
+        printf '    "collected_at": %s,\n' "$(json_str "$collected_at")"
+        printf '    "since": %s,\n' "$(json_str "$since")"
+        printf '    "host": %s,\n' "$(support_host_json)"
+        printf '    "containers": %s,\n' "$(support_containers_json)"
+        printf '    "skipped": %s\n' "$skipped_json"
+        printf '}\n'
+    } > "$raw/manifest.json"
+
+    # Redaction: the one pass between what was collected and what is archived.
+    local rel
+    while IFS= read -r -d '' f; do
+        rel="${f#"$raw"/}"
+        [[ -s "$f" ]] || continue
+        mkdir -p "$bundle/$(dirname "$rel")"
+        redact < "$f" > "$bundle/$rel"
+    done < <(find "$raw" -type f -print0)
+    rm -rf "$raw"
+
+    ( umask 077; tar -C "$bundle" --owner=0 --group=0 --numeric-owner -czf "$archive" . )
+
+    printf '\n%s\n' "${BOLD}Collected:${RESET}" >&2
+    ( cd "$bundle" && find . -type f -printf '%s\t%P\n' | sort -k2 ) | while IFS=$'\t' read -r size rel; do
+        printf '  %10s  %s\n' "$(human_size "$size")" "$rel" >&2
+    done
+    printf '\n  %s (%s)\n\n' "$archive" "$(human_size "$(wc -c < "$archive")")" >&2
+    printf '%s\n' "$archive"
+
+    if [[ "$upload" == no ]]; then
+        info "Not uploaded (--no-upload). Open the archive to see exactly what it contains."
+        return 0
+    fi
+    if [[ "$upload" == ask && ! -t 0 && -z "$visibility" ]]; then
+        info "Not uploaded: no terminal to ask on. Run 'convoy support' again with --visibility and --yes to upload."
+        return 0
+    fi
+
+    # Who can open it, then the password for `password`, then consent worded
+    # for the choice. docs/support-bundle.md, "Consent".
+    if [[ -z "$visibility" ]]; then
+        if [[ -t 0 ]]; then
+            local choice=""
+            printf '\nWho can open these logs?\n  staff     the Convoy team only (default)\n  password  anyone with the link and a password you choose\n  public    anyone with the link\n' >&2
+            read -rp "Visibility [staff]: " choice
+            visibility="${choice:-staff}"
+            valid_visibility "$visibility" || die "visibility must be staff, password or public."
+        else
+            visibility=staff
+        fi
+    fi
+
+    if [[ "$visibility" == password && -z "$password" ]]; then
+        password="$(support_read_password 0)"
+    fi
+
+    if [[ "$upload" == ask ]]; then
+        [[ -t 0 ]] || { info "Not uploaded: no terminal to ask on. Run 'convoy support' again with --yes to upload."; return 0; }
+        local answer=""
+        printf '\n%s\n' "$(support_consent_text "$visibility")" >&2
+        read -rp "Upload? [y/N] " answer
+        [[ "$answer" =~ ^[Yy]([Ee][Ss])?$ ]] || { info "Not uploaded."; return 0; }
+    fi
+
+    support_upload "$archive" "$out_dir" "$panel" "$visibility" "$password"
+}
+
+human_size() {
+    local bytes="$1"
+    if (( bytes >= 1048576 )); then
+        awk -v b="$bytes" 'BEGIN { printf "%.1f MiB", b / 1048576 }'
+    elif (( bytes >= 1024 )); then
+        awk -v b="$bytes" 'BEGIN { printf "%.1f KiB", b / 1024 }'
+    else
+        printf '%d B' "$bytes"
+    fi
+}
+
+valid_code() {
+    [[ "$1" =~ ^CVY-[0-9A-HJKMNP-TV-Z]{4}-[0-9A-HJKMNP-TV-Z]{4}$ ]]
+}
+
+valid_visibility() {
+    [[ "$1" =~ ^(staff|password|public)$ ]]
+}
+
+support_consent_text() {
+    local exposed="Secrets are removed, but the logs still show your panel's address, the IP addresses of people who used it, your nodes' addresses, and occasionally a customer's email."
+    case "$1" in
+        staff)    printf '%s' "Only the Convoy team can open these logs. They're deleted after 30 days." ;;
+        password) printf '%s' "Anyone with the link and the password can open these logs. $exposed" ;;
+        public)   printf '%s' "Anyone with the link can open these logs. $exposed" ;;
+    esac
+}
+
+# A bundle password, never from an argument (shell history, the process list):
+# the first line of stdin with --password-stdin, else asked twice unechoed.
+support_read_password() {
+    local from_stdin="$1" password="" again=""
+    if (( from_stdin )); then
+        IFS= read -r password || true
+    else
+        [[ -t 0 ]] || die "a password is needed for --visibility password. Pass it with --password-stdin."
+        IFS= read -rsp "Password for the link (8 to 128 characters): " password; printf '\n' >&2
+        IFS= read -rsp "Again: " again; printf '\n' >&2
+        [[ "$password" == "$again" ]] || die "the passwords don't match."
+    fi
+    (( ${#password} >= 8 && ${#password} <= 128 )) || die "the password must be 8 to 128 characters."
+    printf '%s' "$password"
+}
+
+# Escapes a value for a double-quoted curl config string.
+curl_config_str() {
+    local s="${1//\\/\\\\}"
+    printf '"%s"' "${s//\"/\\\"}"
+}
+
+support_upload() {
+    local archive="$1" out_dir="$2" panel="$3" visibility="$4" password="$5" response status body code url manage_url
+
+    (( $(wc -c < "$archive") <= 20 * 1024 * 1024 )) \
+        || die "the bundle is larger than the 20 MiB upload limit. Try a shorter window, e.g. --since 12h."
+
+    info "Uploading"
+    response="$(mktemp)"
+    # The password goes in through a config on a file descriptor, never on the
+    # command line where `ps` would show it.
+    status="$(curl -sS -o "$response" -w '%{http_code}' \
+        --connect-timeout 10 --max-time 120 \
+        -H 'Accept: application/json' \
+        -A "Convoy/${panel:-unknown} convoy-cli/$CONVOY_CLI_VERSION" \
+        -F "bundle=@$archive;type=application/gzip" \
+        -F "visibility=$visibility" \
+        --config <(if [[ -n "$password" ]]; then printf 'form-string = %s\n' "$(curl_config_str "password=$password")"; fi) \
+        "$CONVOY_SUPPORT_URL/api/v1/support-bundles")" || { rm -f "$response"; die "couldn't reach $CONVOY_SUPPORT_URL. The bundle is still at $archive."; }
+    body="$(cat "$response")"
+    rm -f "$response"
+
+    case "$status" in
+        201) ;;
+        413) die "the upload failed because the bundle is too large. Try a shorter window, e.g. --since 12h." ;;
+        422) die "the upload failed: $(json_field "$body" message)" ;;
+        429) die "too many uploads from this address. The bundle is still at $archive. Wait an hour and try again." ;;
+        *)   die "the upload failed with HTTP $status. The bundle is still at $archive." ;;
+    esac
+
+    code="$(json_field "$body" code | tr '[:lower:]' '[:upper:]')"
+    valid_code "$code" || die "the response from $CONVOY_SUPPORT_URL didn't include a support code."
+    url="$(json_field "$body" url)"
+    manage_url="$(json_field "$body" manage_url)"
+    ( umask 077; printf '%s\n' "$body" > "$out_dir/$code.json" )
+
+    printf '\n  %s\n\n' "${BOLD}${url:-$code}${RESET}" >&2
+    printf '  Share this link in Discord or your GitHub issue (code %s).\n\n' "$code" >&2
+    printf '  Keep this link private. Anyone with it can change who sees the logs or delete them:\n  %s\n\n' "$manage_url" >&2
+    printf '  Or from this host: convoy support visibility %s <staff|password|public>\n                     convoy support delete %s\n\n' "$code" "$code" >&2
+}
+
+# The manage token kept from the upload, for CODE (normalised) in this install.
+support_record_token() {
+    local code="$1" record="$INSTALL_DIR/backups/support/$1.json" token
+    [[ -r "$record" ]] || die "no record of $code in $INSTALL_DIR/backups/support. Use the manage link from the upload instead."
+    token="$(json_field "$(cat "$record")" manage_token)"
+    # Bundles uploaded before the console had visibility kept a delete token.
+    [[ -n "$token" ]] || token="$(json_field "$(cat "$record")" delete_token)"
+    [[ -n "$token" ]] || die "$record has no manage token."
+    printf '%s' "$token"
+}
+
+support_parse_code() {
+    local code
+    code="$(printf '%s' "$1" | tr '[:lower:]' '[:upper:]')"
+    valid_code "$code" || return 1
+    printf '%s' "$code"
+}
+
+cmd_support_delete() {
+    local code dir="" token status
+    code="$(support_parse_code "${1:-}")" || die "usage: convoy support delete CVY-XXXX-XXXX"
+    shift
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --dir) dir="${2:?--dir needs a path}"; shift 2 ;;
+            *)     die "unknown option: $1" ;;
+        esac
+    done
+
+    use_install "$dir"
+    token="$(support_record_token "$code")"
+
+    status="$(curl -sS -o /dev/null -w '%{http_code}' \
+        --connect-timeout 10 --max-time 120 \
+        -X DELETE \
+        -H 'Accept: application/json' \
+        -A "convoy-cli/$CONVOY_CLI_VERSION" \
+        --config <(printf 'header = %s\n' "$(curl_config_str "Authorization: Bearer $token")") \
+        "$CONVOY_SUPPORT_URL/api/v1/support-bundles/$code")" || die "couldn't reach $CONVOY_SUPPORT_URL."
+
+    [[ "$status" == "204" ]] || die "deleting $code failed with HTTP $status."
+    rm -f "$INSTALL_DIR/backups/support/$code.json"
+    info "Deleted $code."
+}
+
+cmd_support_visibility() {
+    local code visibility="${2:-}" dir="" password_stdin=0 token password="" payload response status body record
+    code="$(support_parse_code "${1:-}")" || die "usage: convoy support visibility CVY-XXXX-XXXX <staff|password|public>"
+    valid_visibility "$visibility" || die "usage: convoy support visibility $code <staff|password|public>"
+    shift 2
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --password-stdin) password_stdin=1; shift ;;
+            --dir)            dir="${2:?--dir needs a path}"; shift 2 ;;
+            *)                die "unknown option: $1" ;;
+        esac
+    done
+
+    use_install "$dir"
+    token="$(support_record_token "$code")"
+
+    payload="{\"visibility\": $(json_str "$visibility")"
+    if [[ "$visibility" == password ]]; then
+        password="$(support_read_password "$password_stdin")"
+        payload+=", \"password\": $(json_str "$password")"
+    elif [[ "$visibility" == public && -t 0 ]]; then
+        local answer=""
+        printf '%s\n' "$(support_consent_text public)" >&2
+        read -rp "Make it public? [y/N] " answer
+        [[ "$answer" =~ ^[Yy]([Ee][Ss])?$ ]] || die "cancelled, so $code wasn't changed."
+    fi
+    payload+="}"
+
+    response="$(mktemp)"
+    status="$(curl -sS -o "$response" -w '%{http_code}' \
+        --connect-timeout 10 --max-time 120 \
+        -X PATCH \
+        -H 'Accept: application/json' \
+        -H 'Content-Type: application/json' \
+        -A "convoy-cli/$CONVOY_CLI_VERSION" \
+        --config <(printf 'header = %s\n' "$(curl_config_str "Authorization: Bearer $token")") \
+        --data-binary @<(printf '%s' "$payload") \
+        "$CONVOY_SUPPORT_URL/api/v1/support-bundles/$code")" || { rm -f "$response"; die "couldn't reach $CONVOY_SUPPORT_URL."; }
+    body="$(cat "$response")"
+    rm -f "$response"
+
+    case "$status" in
+        200) ;;
+        404) die "couldn't find $code with this host's manage token. It may have expired or been deleted." ;;
+        422) die "changing the visibility of $code failed: $(json_field "$body" message)" ;;
+        *)   die "changing the visibility of $code failed with HTTP $status." ;;
+    esac
+
+    record="$INSTALL_DIR/backups/support/$code.json"
+    sed -i -E "s/(\"visibility\"[[:space:]]*:[[:space:]]*)\"[^\"]*\"/\1\"$visibility\"/" "$record"
+    info "$code: $(support_consent_text "$visibility" | cut -d. -f1)."
+}
+
+support_usage() {
+    cat <<'EOF'
+convoy support -- send logs and diagnostics to the Convoy team
+
+  convoy support [options]
+  convoy support visibility <code> <staff|password|public> [--password-stdin]
+  convoy support delete <code>
+
+Collects container logs, Laravel logs, host details and a few Artisan
+diagnostics into a .tar.gz under <install>/backups/support,
+with secrets removed. Shows you what it collected, then asks who can open it
+and whether to upload it. You get a link to share and a private manage link.
+
+  --since <window>     how far back container logs go (default 48h)
+  --no-upload          stop after writing the archive
+  --visibility <who>   staff (the Convoy team only; the default), password
+                       (anyone with the link and a password) or public
+  --password-stdin     read the password for --visibility password from stdin
+  --yes                upload without asking
+  --dir <path>         the install to collect from (default: CONVOY_DIR, else
+                       /opt/convoy)
+
+Examples:
+  convoy support
+  convoy support --no-upload
+  convoy support --since 12h --yes
+  convoy support visibility CVY-XXXX-XXXX staff
+
+EOF
+}
+
+
+##########################################################################
 # Entry point
 ##########################################################################
 
@@ -363,6 +1074,7 @@ convoy -- manage a Convoy installation
   convoy artisan <args>        Run an Artisan command
   convoy shell [service]       Open a shell (default: web)
   convoy horizon               Show queue worker status
+  convoy support               Send logs and diagnostics to the Convoy team
   convoy version               Show this command's version
 
 The install is in /opt/convoy unless CONVOY_DIR names another directory.
@@ -372,6 +1084,8 @@ Examples:
   convoy artisan users:create
   convoy upgrade
 
+Run 'convoy support --help' for its options.
+
 EOF
 }
 
@@ -380,6 +1094,7 @@ main() {
     [[ $# -gt 0 ]] && shift
 
     case "$cmd" in
+        support)          cmd_support "$@" ;;
         version|--version) printf 'convoy %s\n' "$CONVOY_CLI_VERSION" ;;
         help|-h|--help)   usage ;;
         up)               require_install; compose up -d --remove-orphans ;;
@@ -397,4 +1112,7 @@ main() {
     esac
 }
 
-main "$@"
+# Sourced by tests/cli/redact.sh for the redaction functions; run otherwise.
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    main "$@"
+fi

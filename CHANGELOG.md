@@ -52,7 +52,9 @@ which leaves less to do here.
   - `latest` moves only on a release. Set `CONVOY_VERSION` to pin one.
 - **`convoy`.** The same command as 5.x's. `convoy upgrade` updates the command and `compose.yml` from the new
   release, lets the worker finish its jobs, backs up the database, then starts the new release and waits for it to report
-  healthy. It also has `backup`, `logs`, `ps`, `artisan`, `shell`, `horizon` and `version`.
+  healthy. It also has `backup`, `logs`, `ps`, `artisan`, `shell`, `horizon` and `version`. `convoy support` sends a
+  bundle of logs and diagnostics to the Convoy team, with secrets removed on the host first. See
+  [`docs/support-bundle.md`](docs/support-bundle.md).
 - **Configuration reference.** Every setting and its default is in `.env.reference` and explained in
   [`docs/configuration.md`](docs/configuration.md). `.env.example` keeps only what an install must set.
 - **Update notices.** An hourly check of GitHub releases shows a newer version in Settings, on the dashboard and as a
