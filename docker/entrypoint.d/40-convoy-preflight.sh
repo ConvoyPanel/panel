@@ -43,7 +43,7 @@ done
 # be identical across web, worker and scheduler, which is why it is generated
 # once by the installer into .env rather than per-container at boot.
 if [ -z "$APP_KEY" ]; then
-    fail "APP_KEY is not set. Generate one with 'convoyctl artisan key:generate --show' and put it in your .env, then restart. All three Convoy containers must share the same key."
+    fail "APP_KEY is not set. Generate one with 'convoy artisan key:generate --show' and put it in your .env, then restart. All three Convoy containers must share the same key."
 fi
 
 ##########################################################################

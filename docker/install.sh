@@ -55,7 +55,7 @@ done
 ##########################################################################
 [[ "$(id -u)" -eq 0 ]] || die "run this as root (prefix the command with sudo)."
 
-[[ -e "$CONVOY_DIR/.env" ]] && die "a Convoy install already exists at $CONVOY_DIR. Use 'convoyctl upgrade' to update it, or pass --dir to install elsewhere."
+[[ -e "$CONVOY_DIR/.env" ]] && die "a Convoy install already exists at $CONVOY_DIR. Use 'convoy upgrade' to update it, or pass --dir to install elsewhere."
 
 command -v curl >/dev/null 2>&1 || die "curl is required but not installed."
 
@@ -156,9 +156,17 @@ set_env MAIL_FROM_ADDRESS "convoy@$DOMAIN"
 
 chmod 600 "$CONVOY_DIR/.env"
 
-info "installing convoyctl"
-curl -fsSL "$CONVOY_REPO/$ref/docker/convoyctl" -o /usr/local/bin/convoyctl \
-    && chmod 755 /usr/local/bin/convoyctl
+# A released command comes from the release assets, where it carries its
+# version; a branch build from the tree.
+info "installing the convoy command"
+cli_tmp="$(mktemp)"
+if [[ "$ref" =~ ^v[0-9] ]] && curl -fsSL "https://github.com/ConvoyPanel/panel/releases/download/$ref/convoy" -o "$cli_tmp" 2>/dev/null; then
+    :
+else
+    curl -fsSL "$CONVOY_REPO/$ref/docker/convoy" -o "$cli_tmp" || die "could not download the convoy command for $ref."
+fi
+install -m 755 "$cli_tmp" /usr/local/bin/convoy
+rm -f "$cli_tmp"
 
 ##########################################################################
 # Start
@@ -190,7 +198,7 @@ docker compose exec -T web php artisan users:create \
     --email "$ADMIN_EMAIL" \
     --name "Administrator" \
     --password "$admin_password" \
-    --admin true >/dev/null || die "could not create the administrator. The panel is running; create one with: convoyctl artisan users:create"
+    --admin true >/dev/null || die "could not create the administrator. The panel is running; create one with: convoy artisan users:create"
 
 cat <<EOF
 
@@ -202,12 +210,12 @@ ${GREEN}${BOLD}Convoy is installed.${RESET}
 
   ${DIM}Change this password after signing in. It is not stored anywhere else.${RESET}
 
-Manage the install with ${BOLD}convoyctl${RESET}:
+Manage the install with ${BOLD}convoy${RESET}:
 
-  convoyctl ps                status of every container
-  convoyctl logs web          follow the panel's logs
-  convoyctl upgrade           back up, pull, restart
-  convoyctl artisan <cmd>     run an Artisan command
+  convoy ps                   status of every container
+  convoy logs web             follow the panel's logs
+  convoy upgrade              back up, pull, restart
+  convoy artisan <cmd>        run an Artisan command
 
 Configuration lives in ${BOLD}$CONVOY_DIR/.env${RESET}.
 EOF

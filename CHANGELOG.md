@@ -50,8 +50,9 @@ which leaves less to do here.
   - `scheduler`: runs the node and Anchor polls.
   - PostgreSQL 17 and Redis 8 are bundled, and either can be swapped for your own.
   - `latest` moves only on a release. Set `CONVOY_VERSION` to pin one.
-- **`convoyctl`.** `convoyctl upgrade` backs up the database, pulls new images, restarts and waits for the panel to
-  report healthy. It also has `backup`, `logs`, `ps`, `artisan`, `shell` and `horizon`.
+- **`convoy`.** The same command as 5.x's. `convoy upgrade` updates the command and `compose.yml` from the new
+  release, lets the worker finish its jobs, backs up the database, then starts the new release and waits for it to report
+  healthy. It also has `backup`, `logs`, `ps`, `artisan`, `shell`, `horizon` and `version`.
 - **Configuration reference.** Every setting and its default is in `.env.reference` and explained in
   [`docs/configuration.md`](docs/configuration.md). `.env.example` keeps only what an install must set.
 - **Update notices.** An hourly check of GitHub releases shows a newer version in Settings, on the dashboard and as a
@@ -257,6 +258,8 @@ which leaves less to do here.
   waits and retries.
 - **Personal access tokens could only read.** Every other client API request made with one failed with 419 "CSRF token
   mismatch". The panel's CSRF check, which lets a valid token through, was never applied to those routes.
+- **Progress bars drew the square of their value.** A 50% meter filled a quarter of its track, so storage, memory,
+  bandwidth and capacity meters all read low. The bar was sized to the value and then shifted left by the remainder.
 
 ### Security
 

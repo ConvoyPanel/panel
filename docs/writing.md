@@ -1,6 +1,6 @@
 # Writing interface and CLI text
 
-These rules cover every string a person reads in Convoy: page and card text, dialogs, toasts, form errors, the installer, and `convoyctl`. Check new or changed text against them before committing it.
+These rules cover every string a person reads in Convoy: page and card text, dialogs, toasts, form errors, the installer, and `convoy`. Check new or changed text against them before committing it.
 
 ## Checklist
 
@@ -25,7 +25,7 @@ These rules cover every string a person reads in Convoy: page and card text, dia
 
 ## Command-line output
 
-The installer, `convoyctl` and the container start-up scripts follow the checklist, plus these rules (from [clig.dev](https://clig.dev/)):
+The installer, `convoy` and the container start-up scripts follow the checklist, plus these rules (from [clig.dev](https://clig.dev/)):
 
 - **Keep other programs' output out of the terminal.** Compose, pgloader, migrations and PHP warnings go to the log. When a command fails, show the end of its output above the error.
 - **Status lines are short phrases.** Examples: `==> Downloading images` and `Saving the backup to <path> ... done`. They start with a capital letter. After `error:` or `warning:`, the text starts in lowercase.

@@ -50,16 +50,16 @@ appears to Convoy as the proxy.
 
 ## Day-to-day
 
-`convoyctl` wraps the underlying `docker compose` commands:
+`convoy` wraps the underlying `docker compose` commands:
 
 ```
-convoyctl ps                 status of every container
-convoyctl logs web           follow the panel's logs
-convoyctl upgrade            back up, pull new images, restart, verify
-convoyctl backup             dump the database to /opt/convoy/backups
-convoyctl artisan <cmd>      run an Artisan command
-convoyctl shell              open a shell in the panel container
-convoyctl horizon            queue worker status
+convoy ps                 status of every container
+convoy logs web           follow the panel's logs
+convoy upgrade            back up, pull new images, restart, verify
+convoy backup             dump the database to /opt/convoy/backups
+convoy artisan <cmd>      run an Artisan command
+convoy shell              open a shell in the panel container
+convoy horizon            queue worker status
 ```
 
 Nothing here is magic — if you know Docker, `cd /opt/convoy` and use
@@ -68,12 +68,18 @@ Nothing here is magic — if you know Docker, `cd /opt/convoy` and use
 ## Upgrading
 
 ```bash
-convoyctl upgrade
+convoy upgrade
 ```
 
-This takes a database backup, pulls the new images, restarts the stack, and
-waits for the panel to report healthy. Migrations run automatically when the web
-container starts.
+This pulls the new images and replaces the `convoy` command with the new
+release's copy. It updates `compose.yml` too, unless you've edited it: then the
+new one is saved next to it as `compose.yml.new`. It stops the scheduler, lets
+the worker finish its current jobs and takes a database backup. Then it starts
+the web container, which runs the migrations, waits for the panel to report
+healthy, and starts the worker and scheduler again.
+
+A 5.x install upgrades the same way: 5.x's `convoy upgrade` swaps itself for
+this release's command and hands over to it.
 
 To control exactly which version you run, pin `CONVOY_VERSION` in
 `/opt/convoy/.env` to a release tag instead of `latest`, and change it when you
@@ -113,21 +119,21 @@ cd /opt/convoy
 docker compose up -d --remove-orphans
 ```
 
-The image is identical either way. Your edits to `compose.yml` survive upgrades,
-which only pull new images — but they are yours to re-apply if a future release
-changes the file.
+The image is identical either way. Your edits to `compose.yml` survive upgrades.
+When a release changes the file, `convoy upgrade` leaves yours alone and saves
+the new one as `compose.yml.new` for you to compare.
 
-Note that `convoyctl backup` only handles the bundled database; with an external
+Note that `convoy backup` only handles the bundled database; with an external
 one, back it up with your provider's tooling.
 
 ## Backups
 
-`convoyctl backup` writes a gzipped `pg_dump` to `/opt/convoy/backups`. It is
+`convoy backup` writes a gzipped `pg_dump` to `/opt/convoy/backups`. It is
 run automatically before every upgrade. It is *not* run on a schedule — put it
 in cron if you want that:
 
 ```
-0 3 * * * /usr/local/bin/convoyctl backup >/dev/null
+0 3 * * * /usr/local/bin/convoy backup >/dev/null
 ```
 
 Volumes hold the database, Redis data, issued certificates and the contents of
@@ -137,16 +143,16 @@ them.
 ## Troubleshooting
 
 **The panel container will not start.** Its startup checks fail loudly and on
-purpose. `convoyctl logs web` will name the problem — a missing `APP_KEY`, an
+purpose. `convoy logs web` will name the problem — a missing `APP_KEY`, an
 `APP_URL` still pointing at localhost, or a storage volume the container cannot
 write to.
 
 **Everything looks fine but nothing happens when I act on a server.** The worker
-is down. `convoyctl horizon` tells you; `convoyctl logs worker` tells you why.
+is down. `convoy horizon` tells you; `convoy logs worker` tells you why.
 
-**Status indicators are stale.** The scheduler is down. `convoyctl logs
+**Status indicators are stale.** The scheduler is down. `convoy logs
 scheduler` should show `nodes:poll` and `anchors:poll` running each minute.
 
 **Certificate errors.** ACME needs port 80 reachable from the internet and a
-domain that resolves to this host. `convoyctl logs web` includes Caddy's output,
+domain that resolves to this host. `convoy logs web` includes Caddy's output,
 which says precisely which of those failed.

@@ -1,0 +1,400 @@
+#!/usr/bin/env bash
+#
+# convoy -- day-two operations for a Convoy install.
+#
+# Everything here is a thin wrapper over `docker compose` in the install
+# directory. That is deliberate: an operator who knows Docker can ignore this
+# script entirely, and one who does not never has to learn which of the five
+# containers to exec into.
+#
+# Same name, path and upgrade contract as 5.x's `convoy`, so `convoy upgrade`
+# on a 5.x install replaces that command with this one. A v4 install goes
+# through 5.x first, with 5.x's `convoy import-v4`.
+
+set -euo pipefail
+
+# Stamped by .github/workflows/release.yml and the Dockerfile.
+CONVOY_CLI_VERSION="canary"
+
+# Where an install lives unless CONVOY_DIR says otherwise.
+DEFAULT_DIR=/opt/convoy
+
+if [[ -t 2 ]]; then
+    RED=$'\033[0;31m' GREEN=$'\033[0;32m' YELLOW=$'\033[0;33m' RESET=$'\033[0m'
+else
+    RED='' GREEN='' YELLOW='' RESET=''
+fi
+
+# Messages for the person running the command go to stderr, so stdout carries
+# only what a command prints for a script (the backup's path).
+say()  { printf '%s\n' "$*" >&2; }
+err()  { say "${RED}error:${RESET} $*"; }
+info() { say "${GREEN}==>${RESET} $*"; }
+warn() { say "${YELLOW}warning:${RESET} $*"; }
+die()  { err "$@"; exit 1; }
+
+##########################################################################
+# .env files
+##########################################################################
+
+# Prints the value of KEY in a dotenv file, unquoted, or nothing. The last
+# definition wins, as it does for Compose.
+env_get() {
+    local file="$1" key="$2" line value="" found=1
+    [[ -r "$file" ]] || return 1
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        line="${line%$'\r'}"
+        [[ "$line" =~ ^[[:space:]]*(export[[:space:]]+)?${key}[[:space:]]*=(.*)$ ]] || continue
+        value="$(env_unquote "${BASH_REMATCH[2]}")"
+        found=0
+    done < "$file"
+    printf '%s' "$value"
+    return "$found"
+}
+
+env_unquote() {
+    local value="$1"
+    value="${value#"${value%%[![:space:]]*}"}"
+    if [[ "$value" =~ ^\"(.*)\"[[:space:]]*(#.*)?$ ]]; then
+        value="${BASH_REMATCH[1]}"
+    elif [[ "$value" =~ ^\'(.*)\'[[:space:]]*(#.*)?$ ]]; then
+        value="${BASH_REMATCH[1]}"
+    else
+        # An unquoted value ends at ` #`.
+        value="${value%%[[:space:]]#*}"
+        value="${value%"${value##*[![:space:]]}"}"
+    fi
+    printf '%s' "$value"
+}
+
+##########################################################################
+# Finding the install
+##########################################################################
+
+# Which kind of install DIR holds: "compose" (compose.yml with web and worker,
+# which 5.x and this release share), "v4" (docker-compose.yml with php and
+# database), or nothing. Read from the file rather than `docker compose config`,
+# which fails on an incomplete .env. Not postgres: an install on an external
+# database removes that service.
+layout_of() {
+    local dir="$1"
+    if [[ -f "$dir/compose.yml" ]] && grep -qE '^  web:' "$dir/compose.yml" && grep -qE '^  worker:' "$dir/compose.yml"; then
+        echo "compose"
+    elif [[ -f "$dir/docker-compose.yml" ]] && grep -qE '^  php:' "$dir/docker-compose.yml" && grep -qE '^  database:' "$dir/docker-compose.yml"; then
+        echo "v4"
+    fi
+}
+
+INSTALL_DIR=""
+
+# Sets INSTALL_DIR to the install in DIR, else CONVOY_DIR, else /opt/convoy,
+# and moves into it.
+use_install() {
+    local dir="${1:-${CONVOY_DIR:-$DEFAULT_DIR}}"
+    case "$(layout_of "$dir")" in
+        compose) ;;
+        v4)      die "$dir is a v4 install, which upgrades through 5.x. Install 5.x, move v4 onto it with 'convoy import-v4', then upgrade." ;;
+        *)       die "there's no Convoy install in $dir. If it's somewhere else, set CONVOY_DIR to its directory." ;;
+    esac
+    INSTALL_DIR="$(cd "$dir" && pwd)"
+    cd "$INSTALL_DIR"
+}
+
+require_install() { use_install ""; }
+
+compose() { docker compose "$@"; }
+
+# Exec flags for an interactive command: a TTY when there is one, so Artisan's
+# prompts (and hidden password input) work; none when piped.
+tty_flags() {
+    if [[ -t 0 && -t 1 ]]; then printf '%s\n' "-it"; else printf '%s\n' "-T"; fi
+}
+
+app_running() {
+    [[ -n "$(compose ps -q --status running web 2>/dev/null)" ]]
+}
+
+# Sets APP_CMD to the command that runs something in the app container, or in a
+# throwaway one from the same image while the stack is down. The throwaway skips
+# the image's entrypoint: on the web service it would run migrations first
+# (AUTORUN), and it prints a banner into the command's output.
+APP_CMD=()
+app_cmd() {
+    local flag="$1"
+    if app_running; then
+        APP_CMD=(docker compose exec "$flag" web)
+    else
+        APP_CMD=(docker compose run --rm --no-deps "$flag" --entrypoint /usr/bin/env web)
+    fi
+}
+
+in_app() {
+    app_cmd "$(tty_flags)"
+    "${APP_CMD[@]}" "$@"
+}
+
+run_artisan() { in_app php artisan "$@"; }
+
+wait_healthy() {
+    local service="$1" limit="$2" waited=0 id
+    until [[ "$(docker inspect -f '{{.State.Health.Status}}' "$(compose ps -q "$service")" 2>/dev/null)" == "healthy" ]]; do
+        if (( waited >= limit )); then
+            return 1
+        fi
+        sleep 5
+        waited=$(( waited + 5 ))
+        id="$(compose ps -q "$service" 2>/dev/null || true)"
+        if [[ -n "$id" && "$(docker inspect -f '{{.State.Status}}' "$id" 2>/dev/null)" == "exited" ]]; then
+            return 1
+        fi
+    done
+}
+
+##########################################################################
+# Day-two commands
+##########################################################################
+
+load_db_settings() {
+    DB_USERNAME="$(env_get .env DB_USERNAME || true)"
+    DB_DATABASE="$(env_get .env DB_DATABASE || true)"
+    DB_USERNAME="${DB_USERNAME:-convoy}"
+    DB_DATABASE="${DB_DATABASE:-convoy}"
+}
+
+# True when the bundled Postgres container is part of this project rather than
+# an external database being used.
+bundled_postgres() {
+    compose config --services 2>/dev/null | grep -qx postgres
+}
+
+cmd_backup() {
+    bundled_postgres || die "this install uses an external database. Back it up with your provider's tooling."
+    load_db_settings
+
+    local backup_dir="$INSTALL_DIR/backups" stamp file
+    mkdir -p "$backup_dir"
+    chmod 700 "$backup_dir"
+    stamp="$(date -u +%Y%m%dT%H%M%SZ)"
+    file="$backup_dir/convoy-$stamp.sql.gz"
+
+    info "Backing up the database to $file"
+    # --clean --if-exists so the dump can be replayed over an existing database.
+    # A failed dump leaves no file: a truncated one would pass for a backup.
+    if ! ( umask 077; compose exec -T postgres pg_dump \
+        --username "$DB_USERNAME" \
+        --dbname "$DB_DATABASE" \
+        --clean --if-exists \
+        | gzip > "$file" ); then
+        rm -f "$file"
+        die "the database backup failed. Check 'convoy logs postgres'."
+    fi
+
+    info "Backup complete ($(du -h "$file" | cut -f1))"
+    printf '%s\n' "$file"
+}
+
+##########################################################################
+# Upgrading
+##########################################################################
+
+# Where a release's image keeps the files the host takes from it: compose.yml
+# and this command (docker/convoy).
+IMAGE_APP_DIR=/var/www/html
+
+# How long the worker gets to finish the jobs it is running before an upgrade
+# replaces it. Jobs that wait on Proxmox re-queue themselves every few seconds,
+# so this only bounds the odd slow API call or disk resize.
+UPGRADE_DRAIN_TIMEOUT="${CONVOY_UPGRADE_DRAIN_TIMEOUT:-600}"
+
+# Prints FILE (relative to IMAGE_APP_DIR) from the image the web service is
+# configured to run, which after a pull is the new release. Fails when that
+# image doesn't carry the file.
+new_release_file() {
+    compose run --rm --no-deps -T --entrypoint cat web "$IMAGE_APP_DIR/$1" 2>/dev/null
+}
+
+# The ID of the image the web container was created from, or nothing when there
+# is no web container. Until the stack is recreated, that is the release the
+# install is on.
+running_image() {
+    local id
+    id="$(compose ps -a -q web 2>/dev/null | head -n1)"
+    [[ -n "$id" ]] || return 1
+    docker inspect -f '{{.Image}}' "$id" 2>/dev/null
+}
+
+# Replaces this command with the copy in the new release's image. Succeeds only
+# when it replaced it; an image without a copy, an identical copy, or a copy
+# that doesn't parse leaves this one in place.
+update_self() {
+    local self new version
+    self="$(readlink -f "${BASH_SOURCE[0]}")"
+    new="$(mktemp)"
+    if ! new_release_file docker/convoy > "$new" || [[ ! -s "$new" ]] || cmp -s "$new" "$self"; then
+        rm -f "$new"
+        return 1
+    fi
+    if ! bash -n "$new" 2>/dev/null; then
+        rm -f "$new"
+        warn "the convoy command in the new release doesn't parse, so the upgrade kept this one."
+        return 1
+    fi
+    if [[ ! -w "$(dirname "$self")" ]]; then
+        rm -f "$new"
+        warn "can't replace $self. To update the convoy command too, run 'sudo convoy upgrade' again."
+        return 1
+    fi
+    version="$(sed -n 's/^CONVOY_CLI_VERSION="\([^"]*\)"$/\1/p' "$new")"
+    # A rename, not a write: bash reads a script as it runs, and this one is
+    # still running.
+    install -m 755 "$new" "$self.new"
+    mv -f "$self.new" "$self"
+    rm -f "$new"
+    info "Updated the convoy command: $CONVOY_CLI_VERSION -> ${version:-unknown}"
+}
+
+# Brings compose.yml up to the new release's, unless it has been edited: then
+# the new one is written next to it as compose.yml.new. "Edited" means it
+# differs from the compose.yml in the image the install runs now; with no
+# container to tell, any difference counts as an edit.
+update_compose_file() {
+    local old_image="$1" new shipped
+    new="$(mktemp)"
+    if ! new_release_file compose.yml > "$new" || [[ ! -s "$new" ]] || cmp -s "$new" compose.yml; then
+        rm -f "$new"
+        return 0
+    fi
+    shipped="$(mktemp)"
+    if [[ -n "$old_image" ]] \
+        && docker run --rm --network none --entrypoint cat "$old_image" "$IMAGE_APP_DIR/compose.yml" > "$shipped" 2>/dev/null \
+        && [[ -s "$shipped" ]] && cmp -s "$shipped" compose.yml; then
+        install -m 644 "$new" compose.yml
+        info "Updated compose.yml to this release's"
+    else
+        install -m 644 "$new" compose.yml.new
+        warn "compose.yml has local changes, so the upgrade left it alone and saved the new one as compose.yml.new."
+        warn "compare them with 'diff $INSTALL_DIR/compose.yml $INSTALL_DIR/compose.yml.new' and bring over what you need."
+    fi
+    rm -f "$new" "$shipped"
+}
+
+# Set while the worker and scheduler are stopped and nothing has been replaced
+# yet, so a failure in that window can put them back as they were.
+UPGRADE_DRAINED=0
+
+resume_after_failed_upgrade() {
+    if (( UPGRADE_DRAINED )); then
+        warn "the upgrade stopped before anything was replaced. Starting the worker and scheduler again."
+        compose start worker scheduler >/dev/null 2>&1 || true
+    fi
+}
+
+# The order matters more than any single step. The command updates itself
+# first, so a release's own upgrade steps apply to the upgrade that installs it.
+# The worker finishes what it is running and the scheduler stops before the
+# backup, so nothing changes under it. The web container starts alone and
+# migrates the database before any worker runs the new code.
+#
+# 5.x's `convoy upgrade` runs the first block itself, then hands over to this
+# command with CONVOY_UPGRADE_UPDATED_SELF set, so everything after it is what
+# upgrading a 5.x install runs.
+cmd_upgrade() {
+    local old_image
+
+    # Once per upgrade: the updated command carries on from here, with the
+    # images already pulled, and must not update itself again.
+    if [[ -z "${CONVOY_UPGRADE_UPDATED_SELF:-}" ]]; then
+        info "Downloading images"
+        compose pull
+        if update_self; then
+            CONVOY_UPGRADE_UPDATED_SELF=1 exec "$(readlink -f "${BASH_SOURCE[0]}")" upgrade
+        fi
+    fi
+
+    old_image="$(running_image || true)"
+    update_compose_file "$old_image"
+    # A new compose.yml can name new images.
+    compose pull --quiet
+
+    trap resume_after_failed_upgrade EXIT
+
+    info "Stopping the scheduler"
+    compose stop scheduler >/dev/null
+    UPGRADE_DRAINED=1
+    info "Waiting for the worker to finish its current jobs (up to $(( UPGRADE_DRAIN_TIMEOUT / 60 )) minutes)"
+    compose stop --timeout "$UPGRADE_DRAIN_TIMEOUT" worker >/dev/null
+
+    if bundled_postgres; then
+        cmd_backup >/dev/null
+    else
+        warn "this install uses an external database, which the upgrade doesn't back up."
+    fi
+
+    # Migrations run when the web container starts (AUTORUN).
+    info "Starting the new release"
+    UPGRADE_DRAINED=0
+    compose up -d web
+    info "Waiting for the panel to report healthy"
+    wait_healthy web 300 || die "the panel didn't become healthy within 5 minutes, so the worker and scheduler are still stopped. Check 'convoy logs web', then run 'convoy up'."
+
+    info "Starting the worker and scheduler"
+    compose up -d --remove-orphans
+    wait_healthy worker 120 || warn "the worker isn't healthy yet, so queued jobs won't run until it is. Check 'convoy logs worker'."
+
+    trap - EXIT
+    info "Upgrade complete: $(run_artisan --version 2>/dev/null | tail -1)"
+}
+
+##########################################################################
+# Entry point
+##########################################################################
+
+usage() {
+    cat <<'EOF'
+convoy -- manage a Convoy installation
+
+  convoy up                    Start the stack
+  convoy down                  Stop the stack (data volumes are kept)
+  convoy restart [service]     Restart everything, or one service
+  convoy ps                    Show container status
+  convoy logs [service]        Follow logs
+  convoy upgrade               Back up the database and upgrade Convoy
+  convoy backup                Back up the bundled database to <install>/backups
+  convoy artisan <args>        Run an Artisan command
+  convoy shell [service]       Open a shell (default: web)
+  convoy horizon               Show queue worker status
+  convoy version               Show this command's version
+
+The install is in /opt/convoy unless CONVOY_DIR names another directory.
+
+Examples:
+  convoy logs web
+  convoy artisan users:create
+  convoy upgrade
+
+EOF
+}
+
+main() {
+    local cmd="${1:-help}"
+    [[ $# -gt 0 ]] && shift
+
+    case "$cmd" in
+        version|--version) printf 'convoy %s\n' "$CONVOY_CLI_VERSION" ;;
+        help|-h|--help)   usage ;;
+        up)               require_install; compose up -d --remove-orphans ;;
+        down)             require_install; compose down ;;
+        restart)          require_install; compose restart "$@" ;;
+        ps)               require_install; compose ps ;;
+        logs)             require_install; compose logs -f --tail=200 "$@" ;;
+        upgrade)          require_install; cmd_upgrade ;;
+        backup)           require_install; cmd_backup ;;
+        artisan)          require_install; run_artisan "$@" ;;
+        horizon)          require_install; run_artisan horizon:status ;;
+        # The images are Alpine-based and ship no bash.
+        shell)            require_install; compose exec "${1:-web}" sh ;;
+        *)                usage; die "unknown command: $cmd" ;;
+    esac
+}
+
+main "$@"
