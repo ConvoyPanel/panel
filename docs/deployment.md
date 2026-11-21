@@ -16,7 +16,8 @@ curl -fsSL https://install.convoypanel.com | sudo bash
 The installer asks for the hostname customers will reach the panel on and an
 email address for the first administrator, installs Docker if it is missing,
 writes `/opt/convoy`, starts the stack, and prints a URL and a temporary
-password.
+password. It installs the newest 6.x release. Pass `--version` for another one
+(see [Versions](#versions)).
 
 Non-interactively:
 
@@ -79,12 +80,33 @@ the worker finish its current jobs and takes a database backup. Then it starts
 the web container, which runs the migrations, waits for the panel to report
 healthy, and starts the worker and scheduler again.
 
-A 5.x install upgrades the same way: 5.x's `convoy upgrade` swaps itself for
-this release's command and hands over to it.
+### Versions
 
-To control exactly which version you run, pin `CONVOY_VERSION` in
-`/opt/convoy/.env` to a release tag instead of `latest`, and change it when you
-want to move.
+`CONVOY_VERSION` in `/opt/convoy/.env` sets which releases `convoy upgrade`
+moves to:
+
+| `CONVOY_VERSION` | `convoy upgrade` moves to |
+| --- | --- |
+| `6` (what the installer writes) | the newest 6.x release, never 7.0 |
+| `6.1` | the newest 6.1.x release |
+| `6.0.1` | nothing: that release only |
+
+A new major is never a routine upgrade. To move to one, read its upgrade notes,
+set `CONVOY_VERSION` to its number and run `convoy upgrade`. The installer takes
+the same values with `--version`.
+
+### From 5.x
+
+5.x stays on 5.x releases until you change its `CONVOY_VERSION`. Read the
+Upgrading section of the [changelog](../CHANGELOG.md) first: templates, ISOs and
+Coterm don't carry over. Then, on the 5.x host:
+
+1. Set `CONVOY_VERSION=6` in `/opt/convoy/.env`.
+2. Run `convoy upgrade`.
+
+5.x's `convoy upgrade` replaces itself with this release's command, which carries
+out the rest of the upgrade as above. A v4 install moves to 5.x first, with
+5.x's `convoy import-v4`.
 
 ## What is actually running
 
