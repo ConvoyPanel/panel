@@ -127,7 +127,7 @@ stored in the panel's settings table and is not derived from `APP_KEY`,
 | Field | Meaning |
 | --- | --- |
 | `total` | Accounts. |
-| `admins` | Accounts with `root_admin`. |
+| `admins` | Accounts with an admin role, any role. |
 | `active.day` / `.week` / `.month` | Distinct accounts with a signed-in browser request in the last 1, 7 and 30 days. |
 | `active_admins.*` | The same, for admins. |
 

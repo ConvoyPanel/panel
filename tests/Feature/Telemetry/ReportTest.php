@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\Audit\AuditEvent;
+use App\Models\AdminRole;
 use App\Models\AuditLog;
 use App\Models\Location;
 use App\Models\Node;
@@ -117,7 +118,11 @@ it('counts accounts and the distinct accounts active in each window', function (
     User::factory()->create(['last_active_at' => now()->subDays(45)]);
     User::factory()->create(['last_active_at' => null]);
     User::factory()->create(['root_admin' => true, 'last_active_at' => now()->subMinutes(5)]);
-    User::factory()->create(['root_admin' => true, 'last_active_at' => now()->subDays(10)]);
+    // Any admin role counts, not only Superadmin.
+    User::factory()->create([
+        'admin_role_id' => AdminRole::query()->where('name', 'Support')->value('id'),
+        'last_active_at' => now()->subDays(10),
+    ]);
 
     expect($build()['users'])->toBe([
         'total' => 7,

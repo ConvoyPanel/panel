@@ -146,7 +146,7 @@ class TelemetryReportBuilder
 
         $active = fn (bool $admins) => array_map(
             fn (CarbonImmutable $since) => User::query()
-                ->when($admins, fn ($query) => $query->where('root_admin', true))
+                ->when($admins, fn ($query) => $query->whereNotNull('admin_role_id'))
                 ->where('last_active_at', '>', $since)
                 ->count(),
             $windows,
@@ -154,7 +154,7 @@ class TelemetryReportBuilder
 
         return [
             'total' => self::count(User::query()->count()),
-            'admins' => self::count(User::query()->where('root_admin', true)->count()),
+            'admins' => self::count(User::query()->whereNotNull('admin_role_id')->count()),
             'active' => array_map(self::count(...), $active(false)),
             'active_admins' => array_map(self::count(...), $active(true)),
         ];

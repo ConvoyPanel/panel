@@ -36,7 +36,7 @@ class SendTelemetryReportJob implements ShouldQueue
     {
         // A second copy (two schedulers, a manual run) is dropped rather than released: the first
         // one is already sending today's report.
-        return [(new ExpiringWithoutOverlapping('telemetry-report'))->dontRelease()];
+        return [(new ExpiringWithoutOverlapping('telemetry-report', $this->timeout))->dontRelease()];
     }
 
     public function handle(

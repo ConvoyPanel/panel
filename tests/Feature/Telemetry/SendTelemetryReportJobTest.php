@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\Audit\AuditEvent;
+use App\Jobs\Middleware\ExpiringWithoutOverlapping;
 use App\Jobs\Telemetry\EraseTelemetryJob;
 use App\Jobs\Telemetry\SendTelemetryReportJob;
 use App\Models\AuditLog;
@@ -40,6 +41,15 @@ $send = fn () => app()->call([new SendTelemetryReportJob, 'handle']);
 $logins = fn (int $count, CarbonImmutable $at) => collect(range(1, $count))->each(
     fn () => AuditLog::query()->create(['event' => AuditEvent::AUTH_LOGIN_SUCCEEDED, 'properties' => [], 'created_at' => $at]),
 );
+
+it('holds a lock that drops a second copy and expires just after the job times out', function () {
+    $job = new SendTelemetryReportJob;
+    [$lock] = $job->middleware();
+
+    expect($lock)->toBeInstanceOf(ExpiringWithoutOverlapping::class)
+        ->and($lock->releaseAfter)->toBeNull()
+        ->and($lock->expiresAfter)->toBe($job->timeout + ExpiringWithoutOverlapping::EXPIRY_MARGIN);
+});
 
 it('sends the report and moves the window on once the console accepts it', function () use ($settings, $send) {
     Http::fake([TELEMETRY_URL => Http::response(null, 204)]);
