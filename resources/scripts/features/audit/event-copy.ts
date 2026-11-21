@@ -82,6 +82,14 @@ export const AUDIT_EVENT_COPY: Record<AuditEvent, AuditEventCopy> = {
     },
     'auth.logout': { verb: 'signed out', detail: () => null },
     'auth.invite.accepted': { verb: 'accepted their invitation' },
+    'auth.password-reset.requested': {
+        verb: 'asked for a password reset link',
+        detail: p => pick(p, 'ip'),
+    },
+    'auth.password-reset.completed': {
+        verb: 'reset their password',
+        detail: p => pick(p, 'ip'),
+    },
 
     // Account and credentials
     'account.profile.updated': {

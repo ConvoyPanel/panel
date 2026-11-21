@@ -9,13 +9,15 @@ class UpdateAccountSettingsRequest extends BaseApiRequest
     public function rules(): array
     {
         return [
-            // All four required rather than `sometimes`: the screen is one form
+            // All required rather than `sometimes`: the screen is one form
             // over the whole policy, so a partial body is a bug in the caller
             // rather than a request to leave a switch alone.
             'allow_name_change' => 'required|boolean',
             'allow_email_change' => 'required|boolean',
             'allow_password_change' => 'required|boolean',
             'allow_avatar_change' => 'required|boolean',
+            'allow_password_reset' => 'required|boolean',
+            'send_server_ready_email' => 'required|boolean',
         ];
     }
 }

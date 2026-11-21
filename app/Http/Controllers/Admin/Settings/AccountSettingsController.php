@@ -11,9 +11,9 @@ use App\Settings\AccountSettings;
 
 class AccountSettingsController
 {
-    public function show(AccountPolicyResolver $resolver): AccountSettingsData
+    public function show(AccountSettings $settings, AccountPolicyResolver $resolver): AccountSettingsData
     {
-        return $this->present($resolver);
+        return $this->present($settings, $resolver);
     }
 
     public function update(
@@ -25,6 +25,8 @@ class AccountSettingsController
         $settings->allow_email_change = $request->boolean('allow_email_change');
         $settings->allow_password_change = $request->boolean('allow_password_change');
         $settings->allow_avatar_change = $request->boolean('allow_avatar_change');
+        $settings->allow_password_reset = $request->boolean('allow_password_reset');
+        $settings->send_server_ready_email = $request->boolean('send_server_ready_email');
 
         $settings->save();
 
@@ -36,17 +38,20 @@ class AccountSettingsController
                 'allow_email_change' => $settings->allow_email_change,
                 'allow_password_change' => $settings->allow_password_change,
                 'allow_avatar_change' => $settings->allow_avatar_change,
+                'allow_password_reset' => $settings->allow_password_reset,
+                'send_server_ready_email' => $settings->send_server_ready_email,
             ],
         );
 
-        return $this->present($resolver);
+        return $this->present($settings, $resolver);
     }
 
     /**
      * Read back through the resolver so this screen and the enforcement path
-     * can never disagree about what the stored policy means.
+     * can never disagree about what the stored policy means. The two email
+     * switches have no per-user resolution, so they are read as stored.
      */
-    private function present(AccountPolicyResolver $resolver): AccountSettingsData
+    private function present(AccountSettings $settings, AccountPolicyResolver $resolver): AccountSettingsData
     {
         $policy = $resolver->global();
 
@@ -55,6 +60,8 @@ class AccountSettingsController
             allowEmailChange: $policy->canChangeEmail,
             allowPasswordChange: $policy->canChangePassword,
             allowAvatarChange: $policy->canChangeAvatar,
+            allowPasswordReset: $settings->allow_password_reset,
+            sendServerReadyEmail: $settings->send_server_ready_email,
         );
     }
 }

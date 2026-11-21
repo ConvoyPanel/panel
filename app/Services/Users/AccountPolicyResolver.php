@@ -38,6 +38,18 @@ class AccountPolicyResolver
     }
 
     /**
+     * Whether this account may reset a forgotten password by email.
+     *
+     * The panel-wide switch first, then the same bar as changing a password while signed in:
+     * a reset is a password change, so an account the policy stops from changing its password
+     * must not be able to do it by email instead.
+     */
+    public function canResetPassword(User $user): bool
+    {
+        return $this->settings->allow_password_reset && $this->for($user)->canChangePassword;
+    }
+
+    /**
      * The panel-wide policy, before the admin exemption. This is the tier the
      * admin Settings screen edits.
      */

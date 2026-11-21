@@ -1,9 +1,18 @@
-import { acceptInvite, inviteQuery } from '@/features/auth/invites.ts'
-import { handleFormErrors } from '@/utils/http.ts'
+import RecoveryCodesRevealDialog from '@/features/account/components/RecoveryCodesRevealDialog.tsx'
+import {
+    acceptInvite,
+    acceptInviteWithPasskey,
+    inviteQuery,
+} from '@/features/auth/invites.ts'
+import { isPasskeyDismissal } from '@/features/auth/passkeys.ts'
+import { getApiErrorMessage, handleFormErrors } from '@/utils/http.ts'
 import { PASSWORD_MAX_BYTES, PASSWORD_MIN_LENGTH } from '@/utils/password.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useQuery } from '@tanstack/react-query'
+import { browserSupportsWebAuthn } from '@simplewebauthn/browser'
+import { IconKey } from '@tabler/icons-react'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { createLazyFileRoute, useNavigate } from '@tanstack/react-router'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 
@@ -50,6 +59,38 @@ const AcceptInvite = () => {
     })
 
     const password = form.watch('password')
+
+    const [recoveryCodes, setRecoveryCodes] = useState<string[] | null>(null)
+
+    // Registering needs a secure context and WebAuthn. Where either is
+    // missing, the button would only ever fail, so it isn't offered.
+    const canUsePasskey = window.isSecureContext && browserSupportsWebAuthn()
+
+    const { mutate: registerPasskey, isPending: isRegistering } = useMutation({
+        mutationFn: () => acceptInviteWithPasskey(token),
+        onSuccess: async codes => {
+            // The codes are shown once, before leaving. Without any, there is
+            // nothing to show and they go straight in.
+            if (codes) {
+                setRecoveryCodes(codes)
+
+                return
+            }
+
+            await navigate({ to: '/' })
+        },
+        onError: e => {
+            if (isPasskeyDismissal(e)) return
+
+            toast.add({
+                title:
+                    e instanceof Error && e.name === 'InvalidStateError'
+                        ? 'This authenticator is already registered'
+                        : getApiErrorMessage(e, "Couldn't add the passkey"),
+                type: 'error',
+            })
+        },
+    })
 
     const submit = async (data: z.infer<typeof schema>) => {
         try {
@@ -100,7 +141,9 @@ const AcceptInvite = () => {
             <CardHeader>
                 <CardTitle>Welcome, {invite.name}</CardTitle>
                 <CardDescription>
-                    Choose a password for {invite.email}.
+                    {canUsePasskey
+                        ? `Choose how to sign in as ${invite.email}.`
+                        : `Choose a password for ${invite.email}.`}
                 </CardDescription>
             </CardHeader>
             <Form {...form}>
@@ -124,11 +167,30 @@ const AcceptInvite = () => {
                             )}
                         </FieldGroup>
                     </CardContent>
-                    <CardFooter className={'justify-end'}>
-                        <FormButton>Set password and sign in</FormButton>
+                    {/* The sign-in page's action band: the main action full
+                        width, the passkey route under it as the quieter one. */}
+                    <CardFooter className={'flex-col items-stretch gap-2'}>
+                        <FormButton className={'w-full'}>
+                            Set password and sign in
+                        </FormButton>
+                        {canUsePasskey && (
+                            <Button
+                                type={'button'}
+                                variant={'ghost'}
+                                onClick={() => registerPasskey()}
+                                loading={isRegistering}
+                                icon={<IconKey className='size-4' />}
+                            >
+                                Use a passkey instead
+                            </Button>
+                        )}
                     </CardFooter>
                 </form>
             </Form>
+            <RecoveryCodesRevealDialog
+                codes={recoveryCodes}
+                onClose={() => navigate({ to: '/' })}
+            />
         </>
     )
 }
