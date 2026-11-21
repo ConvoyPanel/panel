@@ -127,6 +127,20 @@ const ServerDetailOverview = ({ serverId }: Props) => {
                 />
             ),
         },
+        ...(server.externalId
+            ? [
+                  {
+                      title: 'External ID',
+                      value: (
+                          <CopyValue
+                              label={'external ID'}
+                              value={server.externalId}
+                              className={'text-xs'}
+                          />
+                      ),
+                  },
+              ]
+            : []),
         { title: 'Created', value: server.createdAt.toLocaleString() },
         { title: 'Description', value: server.description || '—' },
     ]

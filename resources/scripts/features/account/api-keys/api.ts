@@ -1,14 +1,20 @@
+import {
+    expiresAtPayload,
+    tokenExpirySchema,
+} from '@/features/tokens/expiry.ts'
+import ApiKeyController from '@/wayfinder/actions/App/Http/Controllers/Client/Account/ApiKeyController'
 import { queryOptions, useQuery } from '@tanstack/react-query'
 import { z } from 'zod'
 
-import { apiFetch, type DataResponse } from '@/lib/api'
-import ApiKeyController from '@/wayfinder/actions/App/Http/Controllers/Client/Account/ApiKeyController'
+import { type DataResponse, apiFetch } from '@/lib/api'
 
 export interface ApiKey {
     id: number
     name: string
     abilities: string[]
     lastUsedAt: Date | null
+    /** Null for a token that never expires. */
+    expiresAt: Date | null
 }
 
 /** The scope options an end-user can pick when minting a token, mapped to the backend vocabulary. */
@@ -34,7 +40,10 @@ export type ApiKeyScope = (typeof apiKeyScopes)[number]['value']
 
 export const apiKeyCreateSchema = z.object({
     name: z.string().min(1).max(191),
-    scope: z.enum(apiKeyScopes.map(s => s.value) as [ApiKeyScope, ...ApiKeyScope[]]),
+    scope: z.enum(
+        apiKeyScopes.map(s => s.value) as [ApiKeyScope, ...ApiKeyScope[]]
+    ),
+    expiresIn: tokenExpirySchema,
 })
 
 export type ApiKeyCreateInput = z.infer<typeof apiKeyCreateSchema>
@@ -44,6 +53,7 @@ const rawDataToApiKey = (data: App.Data.User.ApiKeyData): ApiKey => ({
     name: data.name,
     abilities: data.abilities,
     lastUsedAt: data.lastUsedAt ? new Date(data.lastUsedAt) : null,
+    expiresAt: data.expiresAt ? new Date(data.expiresAt) : null,
 })
 
 export const getApiKeys = async (): Promise<ApiKey[]> => {
@@ -58,10 +68,11 @@ export const getApiKeys = async (): Promise<ApiKey[]> => {
 export const createApiKey = async ({
     name,
     scope,
+    expiresIn,
 }: ApiKeyCreateInput): Promise<{ key: ApiKey; plainTextToken: string }> => {
     const { data } = await apiFetch<DataResponse<App.Data.User.ApiKeyData>>(
         ApiKeyController.store(),
-        { body: { name, abilities: [scope] } }
+        { body: { name, abilities: [scope], ...expiresAtPayload(expiresIn) } }
     )
 
     return {

@@ -63,6 +63,11 @@ export const serverBuildSchema = refineOveragePenalty(
     })
 )
 
+export const serverGeneralSchema = z.object({
+    /** Blank clears it. */
+    externalId: z.string().trim().max(191, 'Must be at most 191 characters'),
+})
+
 export const serverSchema = z
     .object({
         name: z.string().min(1, 'Name is required.').max(191),
@@ -145,6 +150,7 @@ export const serverSchema = z
 const indexRoute = ServerController.index['/api/admin/servers']
 const showRoute = ServerController.show['/api/admin/servers/{server}']
 const storeRoute = ServerController.store['/api/admin/servers']
+const updateRoute = ServerController.update['/api/admin/servers/{server}']
 const updateBuildRoute =
     ServerController.updateBuild['/api/admin/servers/{server}/settings/build']
 
@@ -282,6 +288,24 @@ export const createServer = async ({
                     start_on_completion: startOnCompletion,
                 },
             })
+        ).data
+    )
+
+/** The general-info PATCH. Only `external_id` is sent; the fields it leaves out stay as they are. */
+export const updateServerGeneral = async (
+    serverId: number,
+    { externalId }: z.infer<typeof serverGeneralSchema>
+): Promise<Server> =>
+    rawDataToServer(
+        (
+            await apiFetch<DataResponse<unknown>>(
+                updateRoute(String(serverId)),
+                {
+                    body: {
+                        external_id: externalId === '' ? null : externalId,
+                    },
+                }
+            )
         ).data
     )
 

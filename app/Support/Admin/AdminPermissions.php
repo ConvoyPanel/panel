@@ -51,6 +51,8 @@ final class AdminPermissions
         'anchors' => 'anchors',
         'relays' => 'anchors',
         'settings' => 'settings',
+        // A webhook hears every audit entry it subscribes to, so it is panel configuration.
+        'webhooks' => 'settings',
         // No `tokens.read`: listing panel-wide API tokens is part of managing them, and the
         // fallback below picks `tokens.manage` for the GET as well.
         'tokens' => 'tokens',

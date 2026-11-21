@@ -3,14 +3,18 @@
 namespace App\Providers;
 
 use App\Auth\Socialite\OidcProvider;
+use App\Enums\Api\ApiKeyType;
 use App\Models\Passkey;
 use App\Models\PersonalAccessToken;
 use App\Models\Server;
 use App\Models\SessionRecord;
 use App\Services\Mail\MailConfigurator;
 use Illuminate\Auth\Events\Logout;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Mail\MailManager;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Sanctum\Sanctum;
@@ -56,6 +60,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         $this->bootRoute();
+        $this->bootRateLimits();
         $this->bootOidc();
         $this->bootMail();
     }
@@ -110,6 +115,38 @@ class AppServiceProvider extends ServiceProvider
             )));
 
             return $provider->setScopes($scopes);
+        });
+    }
+
+    /**
+     * One budget per API token, across both token APIs.
+     *
+     * Keyed on the token rather than the address: an integration behind a NAT shares an
+     * address with everything else on that network, and a leaked token used from many
+     * addresses is still one budget. The panel's own browser session is not limited here;
+     * the SPA polls, and its own sign-in endpoints carry the limits that protect it.
+     *
+     * An application token locked to an IP allowlist is not limited either. The limit is there
+     * for a token that leaks, and one that only works from the integration's own hosts has
+     * nowhere to leak to, while the integration it belongs to is exactly the caller a limit
+     * gets in the way of. The allowlist is checked before this runs, so a request from
+     * anywhere else is refused before it gets here.
+     */
+    public function bootRateLimits(): void
+    {
+        RateLimiter::for('api-tokens', function (Request $request) {
+            $token = $request->user()?->currentAccessToken();
+            $perMinute = (int) config('convoy.api.rate_limit', 240);
+
+            if (! $token instanceof PersonalAccessToken || $perMinute <= 0) {
+                return Limit::none();
+            }
+
+            if ($token->type === ApiKeyType::APPLICATION && ! empty($token->allowed_networks)) {
+                return Limit::none();
+            }
+
+            return Limit::perMinute($perMinute)->by('token:'.$token->getKey());
         });
     }
 

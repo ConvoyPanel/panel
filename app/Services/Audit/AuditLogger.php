@@ -6,6 +6,7 @@ use App\Enums\Audit\AuditEvent;
 use App\Facades\Audit;
 use App\Models\AuditLog;
 use App\Providers\AuditServiceProvider;
+use App\Services\Webhooks\WebhookDispatcher;
 use Closure;
 use Illuminate\Contracts\Auth\Factory as AuthFactory;
 use Illuminate\Contracts\Foundation\Application;
@@ -123,6 +124,9 @@ class AuditLogger
         }
 
         $log->save();
+
+        // Everything the audit log hears, a webhook can.
+        $this->app->make(WebhookDispatcher::class)->auditRecorded($log);
 
         return $log;
     }

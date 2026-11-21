@@ -8,6 +8,7 @@ export const rawDataToServer = (data: any): Server => ({
     permissions: data.permissions ?? [],
     uuid: data.uuid,
     uuidShort: data.uuidShort,
+    externalId: data.externalId ?? null,
     nodeId: data.nodeId,
     networkInterfaceId: data.networkInterfaceId,
     node: data.node ? rawDataToNode(data.node.data ?? data.node) : undefined,

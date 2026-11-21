@@ -1,4 +1,8 @@
 import {
+    expiresAtPayload,
+    tokenExpirySchema,
+} from '@/features/tokens/expiry.ts'
+import {
     type ApiKey,
     type PaginatedApiKeys,
     TOKEN_RESOURCES,
@@ -65,6 +69,7 @@ export const tokenSchema = z
         fullAccess: z.boolean(),
         scopes: z.record(z.enum(TOKEN_RESOURCES), tokenScopeSchema),
         allowedNetworks: allowedNetworksSchema,
+        expiresIn: tokenExpirySchema,
     })
     .refine(
         data =>
@@ -93,6 +98,7 @@ export const createToken = async (input: TokenInput): Promise<ApiKey> =>
                 name: input.name.trim(),
                 abilities: buildAbilities(input.fullAccess, input.scopes),
                 allowed_networks: parseAllowedNetworks(input.allowedNetworks),
+                ...expiresAtPayload(input.expiresIn),
             },
         })
     ).data

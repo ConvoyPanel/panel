@@ -28,6 +28,8 @@ const baseUserSchema = z.object({
     type: z.enum(['standard', 'guest']),
     /** The admin role, as a string so the select can use `''` for "no admin access". */
     adminRoleId: z.string(),
+    /** Blank clears it. */
+    externalId: z.string().trim().max(191, 'Must be at most 191 characters'),
 })
 
 /**

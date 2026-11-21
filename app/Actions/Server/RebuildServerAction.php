@@ -23,12 +23,17 @@ class RebuildServerAction
 
     /**
      * @param  array<string, string|null>  $provisionerFields  by field key
+     * @param  ?string  $sshKeys  Newline-separated public keys.
      *
      * @throws RequestException
      * @throws ConnectionException
      */
-    public function execute(Deployment $deployment, ?string $accountPassword, array $provisionerFields = []): void
-    {
+    public function execute(
+        Deployment $deployment,
+        ?string $accountPassword,
+        array $provisionerFields = [],
+        ?string $sshKeys = null,
+    ): void {
         // The guest the old scripts were written for is about to be destroyed,
         // so they will never report. Their snippet comes off the node now
         // rather than when the timeout gives up on them.
@@ -37,7 +42,7 @@ class RebuildServerAction
         $jobs = Arr::flatten([
             $this->onStart($deployment),
             $this->deleteServerAction->getJobs($deployment),
-            $this->buildServerAction->getJobs($deployment, $accountPassword, $provisionerFields),
+            $this->buildServerAction->getJobs($deployment, $accountPassword, $provisionerFields, $sshKeys),
             $this->onComplete($deployment),
         ]);
 

@@ -73,6 +73,7 @@ class ServerCreationService
             $server = Server::forceCreate([
                 'uuid' => $uuid,
                 'uuid_short' => substr($uuid, 0, 8),
+                'external_id' => Arr::get($data, 'external_id'),
                 'user_id' => $data['user_id'],
                 'node_id' => $node->id,
                 'network_interface_id' => Arr::get($data, 'limits.network_interface_id'),
@@ -142,10 +143,13 @@ class ServerCreationService
                     'requested_at' => now(),
                 ]);
 
+                $sshKeys = implode("\n", Arr::get($data, 'ssh_keys') ?? []);
+
                 $this->buildServerAction->execute(
                     $deployment,
                     Arr::get($data, 'account_password'),
                     Arr::get($data, 'provisioner_fields') ?? [],
+                    $sshKeys === '' ? null : $sshKeys,
                 );
             }
 

@@ -33,7 +33,7 @@ class EnforceTokenAbilities
         if ($token instanceof PersonalAccessToken) {
             $required = $vocabulary::requiredFor($request);
 
-            if (! $vocabulary::grants($token->abilities ?? [], $required)) {
+            if ($required !== null && ! $vocabulary::grants($token->abilities ?? [], $required)) {
                 throw new AccessDeniedHttpException("This token is missing the required ability: {$required}.");
             }
         }

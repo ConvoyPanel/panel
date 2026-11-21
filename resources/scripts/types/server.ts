@@ -33,6 +33,8 @@ export interface Server {
     permissions: App.Enums.Server.ServerPermission[]
     uuid: string
     uuidShort: string
+    /** The id an integration knows this server by. Null for non-admin viewers, not just unset. */
+    externalId: string | null
     userId: number
     nodeId: number
     networkInterfaceId: number | null
