@@ -1,5 +1,6 @@
 /// <reference types="vite/client" />
 import '@/app.css'
+import trackPageViews from '@/features/telemetry/page-views.ts'
 import { ThemeProvider } from '@/providers/theme-provider.tsx'
 import '@fontsource/geist-sans/400.css'
 import '@fontsource/geist-sans/500.css'
@@ -28,6 +29,8 @@ const router = createRouter({
     defaultNotFoundComponent: NotFoundComponent,
     defaultErrorComponent: ErrorComponent,
 })
+
+trackPageViews(router)
 
 declare module '@tanstack/react-router' {
     interface Register {

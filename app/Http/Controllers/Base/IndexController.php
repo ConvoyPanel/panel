@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Base;
 
 use App\Services\Auth\OAuthAuthenticationService;
+use App\Services\Telemetry\TelemetryService;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Factory as ViewFactory;
 
@@ -14,6 +15,7 @@ class IndexController
     public function __construct(
         protected ViewFactory $view,
         protected OAuthAuthenticationService $oauth,
+        protected TelemetryService $telemetry,
     ) {}
 
     /**
@@ -24,6 +26,9 @@ class IndexController
         return $this->view->make('app', [
             'siteConfiguration' => [
                 'version' => config('app.version'),
+                // Whether the browser should count page views for the telemetry report. When it is
+                // off nothing is counted, so the browser sends nothing either.
+                'telemetry' => $this->telemetry->enabled(),
                 // Surfaced so the login screen can render "Continue with <provider>" buttons and
                 // the account page its connect actions. Only enabled+configured providers appear.
                 'oauthProviders' => collect($this->oauth->enabledProviders())
