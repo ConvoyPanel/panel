@@ -9,9 +9,10 @@ use Illuminate\Support\Facades\Schema;
  * Every size column held whole mebibytes, rounded down, and StorageSizeCast
  * turned them into bytes on the way out. They now hold bytes, in bigints.
  *
- * Runs last on every path into this schema -- a fresh install, the v4 cutover
- * and an upgrade from 5.x -- so whatever came before it left these columns in
- * mebibytes. Zero, null and the -1 "unlimited" sentinel stay as they are.
+ * Runs last on both paths into this schema, a fresh install and an upgrade
+ * from 5.x, so whatever came before it left these columns in mebibytes. 5.x
+ * already stores ISO sizes in bytes, but 2026_09_07_000002 deletes those rows
+ * first. Zero, null and the -1 "unlimited" sentinel stay as they are.
  */
 return new class extends Migration
 {
