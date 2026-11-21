@@ -14,6 +14,7 @@ import {
     IconSettings,
     IconShieldLock,
     IconStack2,
+    IconTerminal2,
     IconTransform,
     IconUsers,
 } from '@tabler/icons-react'
@@ -113,6 +114,12 @@ const sections: GatedGroup[] = [
                 icon: IconBoxMargin,
                 label: 'Images',
                 path: '/admin/images',
+                permission: 'image-groups.read',
+            },
+            {
+                icon: IconTerminal2,
+                label: 'Provisioners',
+                path: '/admin/provisioners',
                 permission: 'image-groups.read',
             },
             {

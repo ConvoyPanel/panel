@@ -8,6 +8,7 @@ use App\Facades\Audit;
 use App\Http\Requests\Admin\Images\ImageDefinitionRequest;
 use App\Models\ImageDefinition;
 use App\Models\ImageGroup;
+use App\Models\Provisioner;
 use Illuminate\Http\Response;
 use Spatie\LaravelData\DataCollection;
 use Spatie\QueryBuilder\AllowedFilter;
@@ -21,7 +22,7 @@ class ImageDefinitionController
             ->allowedFilters(['name', AllowedFilter::exact('is_admin_only')])
             ->allowedIncludes(['versions'])
             ->defaultSort('name')
-            ->with('versions')
+            ->with(['versions', 'provisioners'])
             ->get();
 
         return ImageDefinitionData::collect($definitions, DataCollection::class);
@@ -29,7 +30,9 @@ class ImageDefinitionController
 
     public function store(ImageDefinitionRequest $request, ImageGroup $imageGroup)
     {
-        $definition = $imageGroup->definitions()->create($request->validated());
+        $definition = $imageGroup->definitions()->create($request->attributesForDefinition());
+
+        $this->syncProvisioners($definition, $request->provisionerUuids());
 
         Audit::record(
             AuditEvent::ADMIN_IMAGE_CREATED,
@@ -37,12 +40,12 @@ class ImageDefinitionController
             properties: ['name' => $definition->name, 'group' => $imageGroup->name],
         );
 
-        return ImageDefinitionData::from($definition);
+        return ImageDefinitionData::from($definition->load('provisioners'));
     }
 
     public function show(ImageGroup $imageGroup, ImageDefinition $imageDefinition)
     {
-        return ImageDefinitionData::from($imageDefinition->load('versions'))->include('versions');
+        return ImageDefinitionData::from($imageDefinition->load(['versions', 'provisioners']))->include('versions');
     }
 
     public function update(
@@ -50,18 +53,49 @@ class ImageDefinitionController
         ImageGroup $imageGroup,
         ImageDefinition $imageDefinition,
     ) {
-        $imageDefinition->update($request->validated());
+        $imageDefinition->update($request->attributesForDefinition());
+
+        $provisionersChanged = $this->syncProvisioners($imageDefinition, $request->provisionerUuids());
 
         Audit::record(
             AuditEvent::ADMIN_IMAGE_UPDATED,
             subject: $imageDefinition,
             properties: [
                 'name' => $imageDefinition->name,
-                'changed' => array_keys($imageDefinition->getChanges()),
+                'changed' => [
+                    ...array_keys($imageDefinition->getChanges()),
+                    ...($provisionersChanged ? ['provisioners'] : []),
+                ],
             ],
         );
 
-        return ImageDefinitionData::from($imageDefinition);
+        return ImageDefinitionData::from($imageDefinition->load('provisioners'));
+    }
+
+    /**
+     * Attach exactly these provisioners, in this order.
+     *
+     * @param  ?list<string>  $uuids  null leaves the current list alone
+     * @return bool whether anything changed
+     */
+    private function syncProvisioners(ImageDefinition $definition, ?array $uuids): bool
+    {
+        if ($uuids === null) {
+            return false;
+        }
+
+        $before = $definition->provisioners()->pluck('provisioners.uuid')->all();
+
+        $ids = Provisioner::whereIn('uuid', $uuids)->pluck('id', 'uuid');
+
+        $definition->provisioners()->sync(
+            collect($uuids)
+                ->values()
+                ->mapWithKeys(fn (string $uuid, int $position) => [$ids[$uuid] => ['position' => $position]])
+                ->all(),
+        );
+
+        return $before !== $uuids;
     }
 
     public function destroy(ImageGroup $imageGroup, ImageDefinition $imageDefinition): Response

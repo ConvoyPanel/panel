@@ -84,6 +84,15 @@ which leaves less to do here.
 - **Multiple disks.** Add extra disks at creation (`limits.disks[]`) or later from the admin Disks tab, then grow or
   remove them. Capacity is checked per storage across all of a server's disks.
 - **Build presets.** Save a server's build as a preset and apply it in one pick when creating the next.
+- **Provisioner scripts.** Scripts that run once inside a server on its first boot, for one-click installs or a
+  monitoring agent on every server ([#188](https://github.com/ConvoyPanel/panel/issues/188)).
+  - Admins write them under Provisioners and attach them to images, in order. Linux images only.
+  - A provisioner can ask for fields, such as a domain. The admin create form, the reinstall form and the API
+    (`provisioner_fields`) ask for them.
+  - Scripts get the server's details and each field as `CONVOY_*` environment variables, never pasted into the script.
+  - Anchor writes the scripts to the node as cloud-init vendor data and deletes them once they report back, or after
+    `PROVISIONER_TIMEOUT_MINUTES`. The node needs an Anchor that reports `provisioning.snippets` and a storage with
+    the Snippets content type.
 - **Resource usage graphs.** CPU, memory, disk and network on one time axis, with live CPU and memory trends on the
   overview.
 - **Firewall tab.**

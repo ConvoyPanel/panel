@@ -1,3 +1,5 @@
+import { provisionerFieldErrorMapping } from '@/features/provisioners/api.ts'
+import ProvisionerFieldInputs from '@/features/provisioners/components/ProvisionerFieldInputs.tsx'
 import ImageField from '@/features/servers/components/client/Rebuild/ImageField'
 import ImageGroupField from '@/features/servers/components/client/Rebuild/ImageGroupField'
 import {
@@ -36,6 +38,7 @@ const defaultValues: ReinstallServerInput = {
     accountPassword: '',
     accountPasswordConfirmation: '',
     startOnCompletion: true,
+    provisionerFields: {},
 }
 
 /**
@@ -57,6 +60,7 @@ const OSSelectionForm = ({ server }: OSSelectionFormProps) => {
     })
 
     const imageGroupUuid = form.watch('imageGroupUuid')
+    const imageUuid = form.watch('imageUuid')
 
     const selectedGroup = useMemo(
         () => imageGroups?.find(group => group.uuid === imageGroupUuid),
@@ -67,12 +71,22 @@ const OSSelectionForm = ({ server }: OSSelectionFormProps) => {
         form.setValue('imageUuid', '')
     }, [imageGroupUuid, form])
 
+    // A key one image asks for must not be sent with another.
+    useEffect(() => {
+        form.setValue('provisionerFields', {})
+    }, [imageUuid, form])
+
+    const provisionerFields =
+        selectedGroup?.definitions?.find(image => image.uuid === imageUuid)
+            ?.provisionerFields ?? []
+
     const { mutateAsync: trigger } = useMutation({
         mutationFn: (data: ReinstallServerInput) =>
             reinstallServer(server.uuid, {
                 imageUuid: data.imageUuid,
                 accountPassword: data.accountPassword,
                 startOnCompletion: data.startOnCompletion,
+                provisionerFields: data.provisionerFields,
             }),
         onSuccess: () => {
             toast.add({
@@ -99,7 +113,8 @@ const OSSelectionForm = ({ server }: OSSelectionFormProps) => {
             })
         },
         onError: e => {
-            if (handleFormErrors(e, form.setError)) return
+            const mapping = provisionerFieldErrorMapping(e)
+            if (handleFormErrors(e, form.setError, mapping)) return
 
             toast.add({ title: 'Failed to start installation.', type: 'error' })
         },
@@ -125,6 +140,15 @@ const OSSelectionForm = ({ server }: OSSelectionFormProps) => {
                         <FieldTitle>Version</FieldTitle>
                         <ImageField group={selectedGroup} />
                     </Field>
+
+                    {provisionerFields.length > 0 && (
+                        <Field>
+                            <FieldTitle>Setup</FieldTitle>
+                            <ProvisionerFieldInputs
+                                fields={provisionerFields}
+                            />
+                        </Field>
+                    )}
 
                     <InputForm
                         name={'accountPassword'}

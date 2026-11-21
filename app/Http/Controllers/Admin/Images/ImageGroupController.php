@@ -40,7 +40,7 @@ class ImageGroupController
 
     public function show(ImageGroup $imageGroup)
     {
-        return ImageGroupData::from($imageGroup->load('definitions.versions'))->include('definitions');
+        return ImageGroupData::from($imageGroup->load(['definitions.versions', 'definitions.provisioners']))->include('definitions');
     }
 
     public function update(ImageGroupRequest $request, ImageGroup $imageGroup)

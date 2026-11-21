@@ -40,6 +40,8 @@ export interface ReinstallServerRequest {
     imageUuid: string
     accountPassword?: string
     startOnCompletion?: boolean
+    /** By field key, for the image's provisioners. */
+    provisionerFields?: Record<string, string | undefined>
 }
 
 /**
@@ -63,6 +65,7 @@ export const reinstallServerSchema = z
             .string()
             .min(1, 'Please confirm the password'),
         startOnCompletion: z.boolean(),
+        provisionerFields: z.record(z.string(), z.string().optional()),
     })
     .refine(data => data.accountPassword === data.accountPasswordConfirmation, {
         message: "Passwords don't match",
@@ -344,6 +347,7 @@ export const reinstallServer = async (
             image_uuid: data.imageUuid,
             account_password: data.accountPassword,
             start_on_completion: data.startOnCompletion,
+            provisioner_fields: data.provisionerFields,
         },
     })
 }

@@ -30,6 +30,7 @@ use App\Models\Node;
 use App\Models\Server;
 use App\Models\ServerMigrationTransfer;
 use App\Models\Storage;
+use App\Services\Provisioners\ProvisioningService;
 use App\Services\Proxmox\Node\ProxmoxAllocationClient;
 use App\Services\Servers\AnchorMigrationRollbackService;
 use App\Services\Servers\ServerCreationService;
@@ -73,6 +74,7 @@ class MigrateServerAction
         private ConnectionInterface $connection,
         private ProxmoxAllocationClient $allocation,
         private ServerCreationService $creation,
+        private ProvisioningService $provisioning,
     ) {}
 
     /**
@@ -111,6 +113,19 @@ class MigrateServerAction
             if ($refusal !== null) {
                 throw new MigrationRefusedException($refusal);
             }
+        }
+
+        // A guest still waiting on its provisioner scripts names a snippet in
+        // `cicustom` that exists only on this node. Carried to another one, it
+        // would leave a guest that cannot start, so the scripts are given up
+        // on first. Synchronously, because the move copies the config as it
+        // stands.
+        try {
+            $this->provisioning->releaseNow($server);
+        } catch (Throwable $e) {
+            throw new MigrationRefusedException(
+                'This server is still waiting on its provisioner scripts, and their snippet could not be removed: '.$e->getMessage(),
+            );
         }
 
         // Allocated before the transaction: it is a Proxmox round trip, and

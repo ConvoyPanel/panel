@@ -199,7 +199,7 @@ enum AuditEvent: string
     case ADMIN_SETTINGS_PERMISSIONS_UPDATED = 'admin.settings.permissions-updated';
 
     // -----------------------------------------------------------------------------------------
-    // Presets and templates. Subject is the preset, group, or template.
+    // Presets, templates and provisioners. Subject is the preset, group, template or provisioner.
     // -----------------------------------------------------------------------------------------
     case ADMIN_SERVER_PRESET_CREATED = 'admin.server-preset.created';
     case ADMIN_SERVER_PRESET_UPDATED = 'admin.server-preset.updated';
@@ -215,6 +215,9 @@ enum AuditEvent: string
     case ADMIN_IMAGE_VERSION_DELETED = 'admin.image-version.deleted';
     case ADMIN_IMAGE_UPLOADED = 'admin.image.uploaded';
     case ADMIN_IMAGE_IMPORTED = 'admin.image.imported';
+    case ADMIN_PROVISIONER_CREATED = 'admin.provisioner.created';
+    case ADMIN_PROVISIONER_UPDATED = 'admin.provisioner.updated';
+    case ADMIN_PROVISIONER_DELETED = 'admin.provisioner.deleted';
 
     /**
      * How long entries for this event survive. Defaults to the configured prune window; the listed
