@@ -490,6 +490,12 @@ export const AUDIT_EVENT_COPY: Record<AuditEvent, AuditEventCopy> = {
         verb: 'imported an image from the catalogue',
         detail: p => pick(p, 'slug'),
     },
+    'admin.provisioner.created': { verb: 'created a provisioner' },
+    'admin.provisioner.updated': {
+        verb: 'updated a provisioner',
+        detail: changedFields,
+    },
+    'admin.provisioner.deleted': { verb: 'deleted a provisioner' },
 }
 
 /**

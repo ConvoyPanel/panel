@@ -1,7 +1,9 @@
 import { useIdentityConfirmed } from '@/features/auth/identity/api.ts'
-import RebuildConfirmDialog from '@/features/servers/components/client/Rebuild/RebuildConfirmDialog'
+import { provisionerFieldErrorMapping } from '@/features/provisioners/api.ts'
+import ProvisionerFieldInputs from '@/features/provisioners/components/ProvisionerFieldInputs.tsx'
 import ImageField from '@/features/servers/components/client/Rebuild/ImageField'
 import ImageGroupField from '@/features/servers/components/client/Rebuild/ImageGroupField'
+import RebuildConfirmDialog from '@/features/servers/components/client/Rebuild/RebuildConfirmDialog'
 import {
     type ReinstallServerInput,
     reinstallServer,
@@ -42,6 +44,7 @@ const defaultValues: ReinstallServerInput = {
     accountPassword: '',
     accountPasswordConfirmation: '',
     startOnCompletion: true,
+    provisionerFields: {},
 }
 
 const RebuildForm = ({ server }: Props) => {
@@ -72,12 +75,20 @@ const RebuildForm = ({ server }: Props) => {
         form.setValue('imageUuid', '')
     }, [imageGroupUuid, form])
 
+    // A key one image asks for must not be sent with another.
+    useEffect(() => {
+        form.setValue('provisionerFields', {})
+    }, [imageUuid, form])
+
+    const provisionerFields = selectedImageDefinition?.provisionerFields ?? []
+
     const { mutateAsync: trigger, isPending } = useMutation({
         mutationFn: (data: ReinstallServerInput) =>
             reinstallServer(server.uuid, {
                 imageUuid: data.imageUuid,
                 accountPassword: data.accountPassword,
                 startOnCompletion: data.startOnCompletion,
+                provisionerFields: data.provisionerFields,
             }),
         onSuccess: () => {
             setConfirming(false)
@@ -111,7 +122,8 @@ const RebuildForm = ({ server }: Props) => {
         onError: e => {
             setConfirming(false)
 
-            if (handleFormErrors(e, form.setError)) return
+            const mapping = provisionerFieldErrorMapping(e)
+            if (handleFormErrors(e, form.setError, mapping)) return
 
             toast.add({ title: 'Failed to start installation.', type: 'error' })
         },
@@ -179,6 +191,22 @@ const RebuildForm = ({ server }: Props) => {
                         <ImageField group={selectedGroup} />
                     </CardContent>
                 </Card>
+
+                {provisionerFields.length > 0 && (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Setup</CardTitle>
+                            <CardDescription>
+                                Values this image's setup scripts need.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <ProvisionerFieldInputs
+                                fields={provisionerFields}
+                            />
+                        </CardContent>
+                    </Card>
+                )}
 
                 <Card>
                     <CardHeader>
