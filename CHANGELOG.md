@@ -24,6 +24,9 @@ which leaves less to do here.
   except the console until their host is enrolled.
 - **Update your billing module and other API clients** for the changes in the table below.
 - **Check mail after upgrading.** SMTP `MAIL_*` values are imported into the panel once and not read again.
+- **Then upgrade with `convoy upgrade`.** On the 5.x host, set `CONVOY_VERSION=6` in `/opt/convoy/.env` and run
+  `convoy upgrade`. 5.x stays on 5.x releases until you do. See
+  [`docs/deployment.md`](docs/deployment.md#from-5x).
 
 #### Breaking API changes
 
@@ -49,9 +52,13 @@ which leaves less to do here.
   - `worker`: Horizon. Every Proxmox action is a queued job.
   - `scheduler`: runs the node and Anchor polls.
   - PostgreSQL 17 and Redis 8 are bundled, and either can be swapped for your own.
-  - `latest` moves only on a release. Set `CONVOY_VERSION` to pin one.
-- **`convoyctl`.** `convoyctl upgrade` backs up the database, pulls new images, restarts and waits for the panel to
-  report healthy. It also has `backup`, `logs`, `ps`, `artisan`, `shell` and `horizon`.
+  - Installs run the `6` tag, so `convoy upgrade` takes 6.x releases but never 7.0 on its own. Set `CONVOY_VERSION`
+    to `6.1` or an exact release such as `6.0.1` to pin one.
+- **`convoy`.** The same command as 5.x's. `convoy upgrade` updates the command and `compose.yml` from the new
+  release, lets the worker finish its jobs, backs up the database, then starts the new release and waits for it to report
+  healthy. It also has `backup`, `logs`, `ps`, `artisan`, `shell`, `horizon` and `version`. `convoy support` sends a
+  bundle of logs and diagnostics to the Convoy team, with secrets removed on the host first. See
+  [`docs/support-bundle.md`](docs/support-bundle.md).
 - **Configuration reference.** Every setting and its default is in `.env.reference` and explained in
   [`docs/configuration.md`](docs/configuration.md). `.env.example` keeps only what an install must set.
 - **Update notices.** An hourly check of GitHub releases shows a newer version in Settings, on the dashboard and as a

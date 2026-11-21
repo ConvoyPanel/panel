@@ -40,6 +40,14 @@ jobs:
           npm run tc
           git diff --exit-code -- . ':(exclude)config/app.php'
 
+      # `convoy version` and `convoy upgrade` report this.
+      - name: Stamp the convoy command
+        env:
+          VERSION: ${{ github.ref_name }}
+        run: |
+          sed -i "s/^CONVOY_CLI_VERSION=\"[^\"]*\"/CONVOY_CLI_VERSION=\"${VERSION#v}\"/" docker/convoy
+          grep -q "^CONVOY_CLI_VERSION=\"${VERSION#v}\"" docker/convoy
+
       - name: Create Release Archive
         run: |
           files_to_remove=(
@@ -65,6 +73,10 @@ jobs:
           )
 
           tar --exclude=panel.tar.gz -czf panel.tar.gz * "${files_to_include[@]}"
+
+          # Attached on its own: install.sh installs this stamped copy as
+          # /usr/local/bin/convoy.
+          install -m 755 docker/convoy convoy
 
       - name: Extract Changelog
         id: extract_changelog
@@ -101,3 +113,4 @@ jobs:
           files: |
             panel.tar.gz
             checksum.txt
+            convoy

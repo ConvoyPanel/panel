@@ -12,8 +12,9 @@
 set -euo pipefail
 
 CONVOY_DIR="${CONVOY_DIR:-/opt/convoy}"
-CONVOY_VERSION="${CONVOY_VERSION:-latest}"
-CONVOY_REPO="${CONVOY_REPO:-https://raw.githubusercontent.com/ConvoyPanel/panel}"
+CONVOY_VERSION="${CONVOY_VERSION:-6}"
+CONVOY_GITHUB_REPO="${CONVOY_GITHUB_REPO:-ConvoyPanel/panel}"
+CONVOY_REPO="${CONVOY_REPO:-https://raw.githubusercontent.com/$CONVOY_GITHUB_REPO}"
 DOMAIN=""
 ADMIN_EMAIL=""
 ASSUME_YES=0
@@ -30,7 +31,9 @@ Convoy installer
 
   --domain <host>     Hostname or IP the panel will be reached on
   --email <address>   Email address for the first administrator
-  --version <tag>     Image tag to install (default: latest)
+  --version <version> 6 for the newest 6.x release (the default), 6.1 for the
+                      newest 6.1.x, an exact release such as 6.0.1, or main
+                      for unreleased builds of the main branch
   --dir <path>        Install directory (default: /opt/convoy)
   --yes               Do not prompt; fail instead of asking
   --help              Show this message
@@ -55,7 +58,7 @@ done
 ##########################################################################
 [[ "$(id -u)" -eq 0 ]] || die "run this as root (prefix the command with sudo)."
 
-[[ -e "$CONVOY_DIR/.env" ]] && die "a Convoy install already exists at $CONVOY_DIR. Use 'convoyctl upgrade' to update it, or pass --dir to install elsewhere."
+[[ -e "$CONVOY_DIR/.env" ]] && die "a Convoy install already exists at $CONVOY_DIR. Use 'convoy upgrade' to update it, or pass --dir to install elsewhere."
 
 command -v curl >/dev/null 2>&1 || die "curl is required but not installed."
 
@@ -105,18 +108,49 @@ systemctl enable --now docker >/dev/null 2>&1 || true
 info "writing $CONVOY_DIR"
 mkdir -p "$CONVOY_DIR"
 
-# The compose file and the image have to come from the same release. `latest` is
-# a published image tag, not a git ref, so resolve it to the tag it points at
-# rather than pulling compose.yml off main and running a released image with it.
-ref="$CONVOY_VERSION"
-if [[ "$ref" == "latest" ]]; then
-    ref="$(curl -fsSL "https://api.github.com/repos/ConvoyPanel/panel/releases/latest" 2>/dev/null \
-           | sed -n 's/.*"tag_name": *"\([^"]*\)".*/\1/p' | head -1)"
-    [[ -n "$ref" ]] || die "could not determine the latest Convoy release. Pass --version with an explicit tag (for example --version v5.0.0)."
-fi
+# The newest published release whose tag starts with PREFIX (v6. or v6.1.),
+# skipping drafts and prereleases.
+newest_release() {
+    local prefix="$1"
+    curl -fsSL -H 'Accept: application/vnd.github+json' \
+        "https://api.github.com/repos/$CONVOY_GITHUB_REPO/releases?per_page=100" 2>/dev/null \
+        | grep -oE '"(tag_name|draft|prerelease)": *("[^"]*"|true|false)' \
+        | awk -v prefix="$prefix" '
+            /"tag_name"/   { tag = $0; sub(/^"tag_name": *"/, "", tag); sub(/"$/, "", tag); seen = 0; skip = 0; next }
+            /"draft"/      { seen++; if ($0 ~ /true/) skip = 1 }
+            /"prerelease"/ { seen++; if ($0 ~ /true/) skip = 1 }
+            seen == 2 && tag != "" { if (!skip && index(tag, prefix) == 1) print tag; tag = "" }
+        ' \
+        | sort -V | tail -1
+}
+
+# The compose file and the image have to come from the same release, so the
+# version is resolved to a git tag for the files and an image tag for .env.
+# `6` follows the newest 6.x release, so `convoy upgrade` picks up fixes but
+# never turns into a major upgrade on its own. `latest` means the same here:
+# it's never written to .env.
+version="${CONVOY_VERSION#v}"
+case "$version" in
+    latest|6)
+        ref="$(newest_release v6.)"
+        image_tag=6 ;;
+    main)
+        # The main branch as it stands: unreleased, rebuilt on every push.
+        ref=main
+        image_tag=main ;;
+    6.[0-9]*.[0-9]*)
+        ref="v$version"
+        image_tag="$version" ;;
+    6.[0-9]*)
+        ref="$(newest_release "v$version.")"
+        image_tag="$version" ;;
+    *)
+        die "$CONVOY_VERSION isn't a Convoy 6 version. Use --version 6 for the newest release, or an exact one such as --version 6.0.1." ;;
+esac
+[[ -n "$ref" ]] || die "couldn't find a published Convoy $version release. Pass --version with an exact release (for example --version 6.0.1)."
 
 curl -fsSL "$CONVOY_REPO/$ref/compose.yml" -o "$CONVOY_DIR/compose.yml" \
-    || die "could not download compose.yml for version $CONVOY_VERSION."
+    || die "could not download compose.yml for $ref."
 curl -fsSL "$CONVOY_REPO/$ref/.env.docker.example" -o "$CONVOY_DIR/.env" \
     || die "could not download the environment template."
 
@@ -150,15 +184,23 @@ set_env APP_KEY "$app_key"
 set_env APP_DOMAIN "$DOMAIN"
 set_env APP_URL "$scheme://$DOMAIN"
 set_env CONVOY_AUTO_HTTPS "$AUTO_HTTPS"
-set_env CONVOY_VERSION "$CONVOY_VERSION"
+set_env CONVOY_VERSION "$image_tag"
 set_env DB_PASSWORD "$db_password"
 set_env MAIL_FROM_ADDRESS "convoy@$DOMAIN"
 
 chmod 600 "$CONVOY_DIR/.env"
 
-info "installing convoyctl"
-curl -fsSL "$CONVOY_REPO/$ref/docker/convoyctl" -o /usr/local/bin/convoyctl \
-    && chmod 755 /usr/local/bin/convoyctl
+# A released command comes from the release assets, where it carries its
+# version; a branch build from the tree.
+info "installing the convoy command"
+cli_tmp="$(mktemp)"
+if [[ "$ref" =~ ^v[0-9] ]] && curl -fsSL "https://github.com/$CONVOY_GITHUB_REPO/releases/download/$ref/convoy" -o "$cli_tmp" 2>/dev/null; then
+    :
+else
+    curl -fsSL "$CONVOY_REPO/$ref/docker/convoy" -o "$cli_tmp" || die "could not download the convoy command for $ref."
+fi
+install -m 755 "$cli_tmp" /usr/local/bin/convoy
+rm -f "$cli_tmp"
 
 ##########################################################################
 # Start
@@ -190,7 +232,7 @@ docker compose exec -T web php artisan users:create \
     --email "$ADMIN_EMAIL" \
     --name "Administrator" \
     --password "$admin_password" \
-    --admin true >/dev/null || die "could not create the administrator. The panel is running; create one with: convoyctl artisan users:create"
+    --admin true >/dev/null || die "could not create the administrator. The panel is running; create one with: convoy artisan users:create"
 
 cat <<EOF
 
@@ -202,12 +244,12 @@ ${GREEN}${BOLD}Convoy is installed.${RESET}
 
   ${DIM}Change this password after signing in. It is not stored anywhere else.${RESET}
 
-Manage the install with ${BOLD}convoyctl${RESET}:
+Manage the install with ${BOLD}convoy${RESET}:
 
-  convoyctl ps                status of every container
-  convoyctl logs web          follow the panel's logs
-  convoyctl upgrade           back up, pull, restart
-  convoyctl artisan <cmd>     run an Artisan command
+  convoy ps                   status of every container
+  convoy logs web             follow the panel's logs
+  convoy upgrade              back up, pull, restart
+  convoy artisan <cmd>        run an Artisan command
 
 Configuration lives in ${BOLD}$CONVOY_DIR/.env${RESET}.
 EOF

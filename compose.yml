@@ -18,7 +18,7 @@ name: convoy
 
 services:
   web:
-    image: ${CONVOY_IMAGE:-ghcr.io/convoypanel/panel}:${CONVOY_VERSION:-latest}
+    image: ${CONVOY_IMAGE:-ghcr.io/convoypanel/panel}:${CONVOY_VERSION:-6}
     restart: unless-stopped
     env_file:
       - .env
@@ -62,7 +62,7 @@ services:
         max-file: "3"
 
   worker:
-    image: ${CONVOY_IMAGE:-ghcr.io/convoypanel/panel}:${CONVOY_VERSION:-latest}
+    image: ${CONVOY_IMAGE:-ghcr.io/convoypanel/panel}:${CONVOY_VERSION:-6}
     restart: unless-stopped
     command: ["php", "artisan", "horizon"]
     env_file:
@@ -92,7 +92,7 @@ services:
         max-file: "3"
 
   scheduler:
-    image: ${CONVOY_IMAGE:-ghcr.io/convoypanel/panel}:${CONVOY_VERSION:-latest}
+    image: ${CONVOY_IMAGE:-ghcr.io/convoypanel/panel}:${CONVOY_VERSION:-6}
     restart: unless-stopped
     command: ["php", "artisan", "schedule:work"]
     env_file:
