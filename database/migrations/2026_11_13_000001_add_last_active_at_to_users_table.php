@@ -4,6 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+// The same migration, under the same name, as v4.7.0's and 5.x's, so a database
+// upgraded from 5.x has already run it.
 return new class extends Migration
 {
     public function up(): void
@@ -18,6 +20,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
+            $table->dropIndex(['last_active_at']);
             $table->dropColumn('last_active_at');
         });
     }
