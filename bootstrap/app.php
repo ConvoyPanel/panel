@@ -83,11 +83,11 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         // The client API is served under the web group but also accepts Sanctum bearer tokens;
         // our CSRF middleware exempts genuine token requests (which browsers can't forge) while
-        // keeping full CSRF protection for the session-cookie SPA.
-        $middleware->replace(
-            Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class,
-            ValidateCsrfToken::class,
-        );
+        // keeping full CSRF protection for the session-cookie SPA. CSRF verification lives in the
+        // web group, not the global stack, so `$middleware->replace()` would never reach it.
+        $middleware->web(replace: [
+            Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class => ValidateCsrfToken::class,
+        ]);
 
         // Track active web sessions (for the account "active sessions" list). Appended to the web
         // group so it runs after the session + auth are resolved; it self-skips token/anon requests.

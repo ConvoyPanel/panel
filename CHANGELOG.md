@@ -255,6 +255,8 @@ which leaves less to do here.
   Convoy now waits for the Proxmox task and retries one that timed out.
 - **A killed worker could leave a server's jobs stuck forever.** Job locks now expire, and a job that finds one held
   waits and retries.
+- **Personal access tokens could only read.** Every other client API request made with one failed with 419 "CSRF token
+  mismatch". The panel's CSRF check, which lets a valid token through, was never applied to those routes.
 
 ### Security
 
