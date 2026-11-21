@@ -120,6 +120,7 @@ if the scheduler is running.
 | `BACKUP_PRUNE_AGE` | `360` | Days before a backup is eligible for pruning. |
 | `DEPLOYMENT_RETENTION_PERIOD` | `90` | Days of deployment records to keep. |
 | `DEPLOYMENT_STUCK_AGE` | `1440` | Minutes after which an in-progress deployment is treated as stuck. |
+| `PROVISIONER_TIMEOUT_MINUTES` | `60` | Minutes a server's provisioner scripts have to report back once it is started. After that the panel removes their snippet from the node. A later report is still recorded. |
 
 ## Rate limits
 

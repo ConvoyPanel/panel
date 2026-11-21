@@ -35,6 +35,9 @@ return [
     'App\\Jobs\\Node\\SyncServerUsagesJob' => [
         ['name' => 'nodeId', 'type' => 'int', 'optional' => false, 'promoted' => true, 'variadic' => false],
     ],
+    'App\\Jobs\\Provisioner\\CleanUpProvisioningRunJob' => [
+        ['name' => 'runId', 'type' => 'int', 'optional' => false, 'promoted' => true, 'variadic' => false],
+    ],
     'App\\Jobs\\Server\\BatchSyncNetworkSettingsJob' => [
         ['name' => 'addressBlock', 'type' => 'App\\Models\\AddressBlock', 'optional' => false, 'promoted' => true, 'variadic' => false],
     ],
@@ -91,6 +94,10 @@ return [
     'App\\Jobs\\Server\\MonitorBackupRestorationJob' => [
         ['name' => 'server', 'type' => 'App\\Models\\Server', 'optional' => false, 'promoted' => true, 'variadic' => false],
         ['name' => 'upid', 'type' => 'string', 'optional' => false, 'promoted' => true, 'variadic' => false],
+    ],
+    'App\\Jobs\\Server\\PrepareProvisionersJob' => [
+        ['name' => 'step', 'type' => 'App\\Models\\DeploymentStep', 'optional' => false, 'promoted' => true, 'variadic' => false],
+        ['name' => 'fields', 'type' => 'array', 'optional' => true, 'promoted' => true, 'variadic' => false],
     ],
     'App\\Jobs\\Server\\PurgeBackupsJob' => [
         ['name' => 'server', 'type' => 'App\\Models\\Server', 'optional' => false, 'promoted' => true, 'variadic' => false],

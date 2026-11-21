@@ -5,6 +5,7 @@ namespace App\Services\Servers;
 use App\Enums\Server\PowerCommand;
 use App\Exceptions\Http\Server\PowerActionInProgressException;
 use App\Exceptions\Proxmox\RequestException;
+use App\Models\ProvisioningRun;
 use App\Models\Server;
 use App\Services\Proxmox\Server\ProxmoxPowerClient;
 use App\Services\Servers\Power\ServerPowerLockService;
@@ -50,5 +51,11 @@ class SendServerPowerCommand
         // Record the task the command spawned so the lock clears when Proxmox
         // reports it finished, rather than only when the TTL fires.
         $this->lock->attachTask($server, is_string($upid) ? $upid : null);
+
+        // A server built without being started has not run its provisioner
+        // scripts yet, so their timeout starts here rather than at the build.
+        if (in_array($command, [PowerCommand::START, PowerCommand::RESTART, PowerCommand::RESET], true)) {
+            ProvisioningRun::startClockFor($server);
+        }
     }
 }

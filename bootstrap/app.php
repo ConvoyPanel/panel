@@ -77,6 +77,10 @@ return Application::configure(basePath: dirname(__DIR__))
                 Route::prefix('/api/anchor')
                     ->as('anchor.')
                     ->group(base_path('routes/api-anchor.php'));
+
+                Route::prefix('/api/provisioning')
+                    ->as('provisioning.')
+                    ->group(base_path('routes/api-provisioning.php'));
             });
         }
     )

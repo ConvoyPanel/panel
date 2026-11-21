@@ -6,6 +6,7 @@ use App\Enums\Activity\TaskStatus;
 use App\Enums\Server\ServerLifecycle;
 use App\Jobs\Middleware\ExpiringWithoutOverlapping;
 use App\Models\Server;
+use App\Services\Provisioners\ProvisioningService;
 use App\Services\Proxmox\Server\ProxmoxActivityClient;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -14,6 +15,7 @@ use Illuminate\Queue\Attributes\WithoutRelations;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Carbon;
+use Throwable;
 
 class MonitorBackupRestorationJob implements ShouldQueue
 {
@@ -37,7 +39,7 @@ class MonitorBackupRestorationJob implements ShouldQueue
         return [new ExpiringWithoutOverlapping((string) $this->server->id, $this->timeout)];
     }
 
-    public function handle(ProxmoxActivityClient $client): void
+    public function handle(ProxmoxActivityClient $client, ProvisioningService $provisioning): void
     {
         $task = $client->setServer($this->server)->getStatus($this->upid);
 
@@ -45,6 +47,14 @@ class MonitorBackupRestorationJob implements ShouldQueue
             $this->release(3);
 
             return;
+        }
+
+        // Reported rather than thrown: a restore that finished is not undone
+        // by this, and failing here would leave the server stuck restoring.
+        try {
+            $provisioning->dropStaleCicustom($this->server);
+        } catch (Throwable $e) {
+            report($e);
         }
 
         $this->server->update([

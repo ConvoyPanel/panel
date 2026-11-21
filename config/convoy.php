@@ -86,4 +86,14 @@ return [
     'updates' => [
         'repository' => env('UPDATE_CHECK_REPOSITORY', 'ConvoyPanel/panel'),
     ],
+
+    /*
+    | How long a server's provisioner scripts have to report back once it has
+    | been started, in minutes. After that the panel stops waiting: it removes
+    | `cicustom` from the guest and has Anchor delete the snippet. A report that
+    | arrives later is still recorded.
+    */
+    'provisioners' => [
+        'timeout_minutes' => env('PROVISIONER_TIMEOUT_MINUTES', 60),
+    ],
 ];

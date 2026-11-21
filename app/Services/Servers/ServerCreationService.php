@@ -142,7 +142,11 @@ class ServerCreationService
                     'requested_at' => now(),
                 ]);
 
-                $this->buildServerAction->execute($deployment, Arr::get($data, 'account_password'));
+                $this->buildServerAction->execute(
+                    $deployment,
+                    Arr::get($data, 'account_password'),
+                    Arr::get($data, 'provisioner_fields') ?? [],
+                );
             }
 
             return $server;

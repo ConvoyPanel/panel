@@ -9,6 +9,7 @@ use App\Console\Commands\Maintenance\PruneOrphanedBackupsCommand;
 use App\Console\Commands\Maintenance\PruneUsersCommand;
 use App\Console\Commands\Node\PollNodeStatusesCommand;
 use App\Console\Commands\Server\ResetUsagesCommand;
+use App\Console\Commands\Server\SweepProvisioningRunsCommand;
 use App\Console\Commands\Server\UpdateRateLimitsCommand;
 use App\Console\Commands\Server\UpdateUsagesCommand;
 use App\Models\SessionRecord;
@@ -65,6 +66,10 @@ Schedule::command(PollAnchorLivenessCommand::class)->everyMinute()->withoutOverl
 // waits on GitHub. Hourly is far below the API's rate limit and well inside how
 // quickly anyone needs to hear about a release.
 Schedule::command(CheckForUpdatesCommand::class)->hourly()->withoutOverlapping(5);
+
+// Provisioner snippets hold customer field values on a node, so one the guest
+// never reported back on comes off within a minute of its deadline.
+Schedule::command(SweepProvisioningRunsCommand::class)->everyMinute()->withoutOverlapping(5);
 
 // Bandwidth quota + rate limiting (see docs/bandwidth-rate-limiting-plan.md).
 // Usage must accumulate for quotas to ever trip, so all three run together:

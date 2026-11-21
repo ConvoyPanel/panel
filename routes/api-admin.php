@@ -382,6 +382,20 @@ Route::prefix('/image-groups')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
+| Provisioner Routes
+|--------------------------------------------------------------------------
+|
+| Endpoint: /api/admin/provisioners
+|
+| Scripts that run inside a server on its first boot. They are attached to
+| images, through the image definition's `provisioner_uuids`.
+|
+*/
+Route::resource('provisioners', Admin\ProvisionerController::class)
+    ->only(['index', 'show', 'store', 'update', 'destroy']);
+
+/*
+|--------------------------------------------------------------------------
 | Admin Role Routes
 |--------------------------------------------------------------------------
 |
