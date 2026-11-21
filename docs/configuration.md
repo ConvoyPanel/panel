@@ -144,6 +144,13 @@ Applied to calls out to Proxmox and Anchor.
 | --- | --- | --- |
 | `UPDATE_CHECK_REPOSITORY` | `ConvoyPanel/panel` | The repository the admin dashboard checks for newer releases. |
 
+## Telemetry
+
+| Variable | Default | Notes |
+| --- | --- | --- |
+| `CONVOY_TELEMETRY_ENABLED` | `true` | `false` stops the anonymous daily usage report. The admin Settings switch then shows it as off and cannot turn it on. |
+| `CONVOY_TELEMETRY_URL` | `https://convoypanel.com/api/v1/telemetry` | Where the report is sent. Leave it empty on an install that cannot reach the internet. [telemetry.md](telemetry.md) lists every field. |
+
 ## Metrics (optional)
 
 | Variable | Default | Notes |

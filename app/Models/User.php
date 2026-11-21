@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Sanctum\HasApiTokens;
@@ -33,6 +34,7 @@ use Spatie\LaravelPasskeys\Models\Concerns\HasPasskeys;
  * @property ?int $admin_role_id
  * @property ?AdminRole $adminRole
  * @property bool $root_admin
+ * @property Carbon|null $last_active_at
  *
  * @mixin Eloquent
  */
@@ -109,6 +111,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'type' => UserType::class,
+            'last_active_at' => 'datetime',
         ];
     }
 

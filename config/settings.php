@@ -5,6 +5,7 @@ use App\Settings\AnchorSettings;
 use App\Settings\AuditSettings;
 use App\Settings\BandwidthSettings;
 use App\Settings\MailSettings;
+use App\Settings\TelemetrySettings;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelSettings\SettingsCasts\DataCast;
 use Spatie\LaravelSettings\SettingsCasts\DateTimeInterfaceCast;
@@ -24,6 +25,7 @@ return [
         AuditSettings::class,
         BandwidthSettings::class,
         MailSettings::class,
+        TelemetrySettings::class,
     ],
 
     /*

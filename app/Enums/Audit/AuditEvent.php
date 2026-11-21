@@ -197,6 +197,7 @@ enum AuditEvent: string
     case ADMIN_SETTINGS_MAIL_UPDATED = 'admin.settings.mail-updated';
     case ADMIN_SETTINGS_MAIL_TESTED = 'admin.settings.mail-tested';
     case ADMIN_SETTINGS_PERMISSIONS_UPDATED = 'admin.settings.permissions-updated';
+    case ADMIN_SETTINGS_TELEMETRY_UPDATED = 'admin.settings.telemetry-updated';
 
     // -----------------------------------------------------------------------------------------
     // Presets, templates and provisioners. Subject is the preset, group, template or provisioner.

@@ -11,6 +11,8 @@ interface OAuthProvider {
 interface SiteConfiguration {
     version: string
     oauthProviders: OAuthProvider[]
+    /** Whether to count page views for the telemetry report. */
+    telemetry: boolean
 }
 
 interface Window {
