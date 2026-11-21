@@ -13,11 +13,10 @@ It comes after 5.x, the transitional release of the 4.x panel.
 ### Upgrading
 
 Upgrading is a one-time cutover with a maintenance window, not an in-place update. Customers' virtual machines keep
-running throughout. Only the panel is offline. 5.x moves an install onto PostgreSQL and this container setup first,
-which leaves less to do here.
+running throughout. Only the panel is offline.
 
-- **Be on PostgreSQL 17.** MySQL is no longer supported. 5.x makes the move. Coming straight from 4.x,
-  [`database/cutover/RUNBOOK.md`](database/cutover/RUNBOOK.md) copies the data across and runs the renaming migrations.
+- **Upgrade from 5.x.** 5.x moves an install onto PostgreSQL 17 and this container setup. A 4.x install goes through
+  5.x first with `convoy import-v4`. Upgrading a 4.x database straight to this release stops before changing anything.
 - **Add an image for every OS you offer.** Templates are gone and are not migrated. A template row is only a VMID,
   while an image needs the disks and their hardware profile.
 - **Snapshots are gone.** Proxmox keeps existing snapshots, but the panel no longer takes or rolls them back. A server
@@ -259,8 +258,6 @@ which leaves less to do here.
   waits and retries.
 - **Personal access tokens could only read.** Every other client API request made with one failed with 419 "CSRF token
   mismatch". The panel's CSRF check, which lets a valid token through, was never applied to those routes.
-- **Progress bars drew the square of their value.** A 50% meter filled a quarter of its track, so storage, memory,
-  bandwidth and capacity meters all read low. The bar was sized to the value and then shifted left by the remainder.
 
 ### Security
 

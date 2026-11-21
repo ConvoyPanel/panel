@@ -325,6 +325,8 @@ follow-ups** below — all doable in-sandbox, no prod data.
   v5 Postgres; the maintainer has no prod data, so there is **no maintainer-side dry-run pending**. Fresh
   v5 installs start on Postgres and skip it. `verify.sh` caveat: pgloader is amd64-only and segfaults under
   arm64-Linux qemu (works on x86_64 or macOS Docker/Rosetta); takes a `PGLOADER_IMAGE` override.
+  **Since removed:** a v4 install goes through 5.x's `convoy import-v4` first, and 6.x refuses a database
+  that skipped it (`2022_12_14_083706_require_convoy_5`).
 - **Phase 4 (frontend data layer)** — DONE. Old `api/` directory gone; zero raw `axios` calls; every
   domain on a `features/<domain>/api.ts` module (`queryOptions` + `apiFetch` + Wayfinder routes). SWR shim
   removed. Reference impls: `features/servers/api.ts`, `features/overview/api.ts`.
