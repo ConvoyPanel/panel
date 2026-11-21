@@ -19,12 +19,17 @@ const LinearProgressBar = forwardRef<HTMLDivElement, LinearProgressBarProps>(
             )}
             {...props}
         >
+            {/* Base UI sizes the indicator itself (an inline width of
+                value%). The translateX(-(100 - value)%) shadcn used with
+                Radix, whose indicator was always full width, shifted that
+                already-sized bar left by the remainder, so every meter drew
+                value² -- 50% as 25%. With no value Base UI sets no width, so
+                data-indeterminate keeps the track empty as before. */}
             <Progress.Indicator
                 className={cn(
-                    'bg-primary h-full w-full flex-1 transition-all',
+                    'bg-primary h-full transition-all data-indeterminate:w-0',
                     indicatorClassName
                 )}
-                style={{ transform: `translateX(-${100 - (value ?? 0)}%)` }}
             />
         </Progress.Root>
     )

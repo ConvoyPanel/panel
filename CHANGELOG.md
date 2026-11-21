@@ -257,6 +257,8 @@ which leaves less to do here.
   waits and retries.
 - **Personal access tokens could only read.** Every other client API request made with one failed with 419 "CSRF token
   mismatch". The panel's CSRF check, which lets a valid token through, was never applied to those routes.
+- **Progress bars drew the square of their value.** A 50% meter filled a quarter of its track, so storage, memory,
+  bandwidth and capacity meters all read low. The bar was sized to the value and then shifted left by the remainder.
 
 ### Security
 
