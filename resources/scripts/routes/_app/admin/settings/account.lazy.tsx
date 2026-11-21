@@ -4,6 +4,7 @@ import {
     updateAccountSettings,
     useAccountSettings,
 } from '@/features/settings/api.ts'
+import MailNotConfiguredAlert from '@/features/settings/components/MailNotConfiguredAlert.tsx'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
 import { handleFormErrors } from '@/utils/http.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -32,6 +33,8 @@ const AccountSettingsPage = () => {
             allowEmailChange: true,
             allowPasswordChange: true,
             allowAvatarChange: true,
+            allowPasswordReset: false,
+            sendServerReadyEmail: true,
         },
     })
 
@@ -43,6 +46,8 @@ const AccountSettingsPage = () => {
             allowEmailChange: settings.allowEmailChange,
             allowPasswordChange: settings.allowPasswordChange,
             allowAvatarChange: settings.allowAvatarChange,
+            allowPasswordReset: settings.allowPasswordReset,
+            sendServerReadyEmail: settings.sendServerReadyEmail,
         })
     }, [form, settings])
 
@@ -125,12 +130,47 @@ const AccountSettingsPage = () => {
                                 name={'allowPasswordChange'}
                                 label={'Password'}
                                 description={
-                                    'There is no password reset flow, so turning this off makes their current password permanent.'
+                                    'Turning this off also stops them resetting a forgotten password.'
                                 }
                                 formItemProps={{
                                     className: 'py-3.5 first:pt-0 last:pb-0',
                                 }}
                             />
+                        </CardContent>
+                    </Card>
+
+                    <Card className={'mt-4'}>
+                        <CardHeader>
+                            <CardTitle>Emails</CardTitle>
+                        </CardHeader>
+                        <CardContent className={'space-y-3.5'}>
+                            <MailNotConfiguredAlert>
+                                These emails can't be sent until it is.
+                            </MailNotConfiguredAlert>
+                            <div className={'divide-y'}>
+                                <SwitchForm
+                                    name={'allowPasswordReset'}
+                                    label={'Password reset'}
+                                    description={
+                                        'Adds “Forgot password?” to the sign-in page. Anyone who can read the account’s email can then set a new password.'
+                                    }
+                                    formItemProps={{
+                                        className:
+                                            'py-3.5 first:pt-0 last:pb-0',
+                                    }}
+                                />
+                                <SwitchForm
+                                    name={'sendServerReadyEmail'}
+                                    label={'Server ready'}
+                                    description={
+                                        'Emails the owner when a new server finishes installing, whether it was created here or through the API.'
+                                    }
+                                    formItemProps={{
+                                        className:
+                                            'py-3.5 first:pt-0 last:pb-0',
+                                    }}
+                                />
+                            </div>
                         </CardContent>
                     </Card>
 

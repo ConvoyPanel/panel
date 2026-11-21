@@ -11,6 +11,7 @@ interface OAuthProvider {
 interface SiteConfiguration {
     version: string
     oauthProviders: OAuthProvider[]
+    passwordResets: boolean
 }
 
 interface Window {

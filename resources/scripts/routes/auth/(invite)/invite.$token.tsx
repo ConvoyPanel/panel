@@ -16,6 +16,6 @@ export const Route = createFileRoute('/auth/(invite)/invite/$token')({
             .ensureQueryData(inviteQuery(params.token))
             .catch(() => null),
     staticData: {
-        title: 'Set your password',
+        title: 'Set up your account',
     },
 })

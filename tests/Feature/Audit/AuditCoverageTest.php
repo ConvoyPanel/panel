@@ -39,6 +39,9 @@ const AUDIT_EXEMPT = [
     'ConfirmedTwoFactorAuthenticationController@store' => 'Audited via Fortify\'s two-factor events.',
     'ConfirmableIdentityController@store' => 'Re-authentication step; the action it gates is audited.',
     'RecoveryCodeController@store' => 'Audited in App\\Http\\Controllers\\Client\\RecoveryCodeController.',
+    // Only a link that was actually sent is worth an entry, and only the service knows which.
+    'PasswordResetController@store' => 'Audited in App\\Services\\Users\\PasswordResetService.',
+    'PasswordResetController@update' => 'Audited in App\\Services\\Users\\PasswordResetService.',
 ];
 
 /** The prefixes this guard governs. Horizon and the SPA shell are not ours to audit. */

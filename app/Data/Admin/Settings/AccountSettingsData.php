@@ -20,5 +20,7 @@ class AccountSettingsData extends Data
         public bool $allowEmailChange,
         public bool $allowPasswordChange,
         public bool $allowAvatarChange,
+        public bool $allowPasswordReset,
+        public bool $sendServerReadyEmail,
     ) {}
 }

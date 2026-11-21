@@ -71,6 +71,23 @@ class UserInviteService
         return $user;
     }
 
+    /**
+     * Burn the invite for an account whose first credential is a passkey rather than a password.
+     *
+     * The placeholder password is left alone: 64 random characters nobody has seen, so signing in
+     * with a password stays impossible until the account sets one (by a reset, if the operator
+     * allows them). The passkey itself is stored by the caller, which has the request the
+     * attestation arrived in.
+     */
+    public function acceptWithPasskey(UserInvite $invite): User
+    {
+        $user = $invite->user;
+
+        $invite->delete();
+
+        return $user;
+    }
+
     public function revoke(User $user): void
     {
         UserInvite::query()->where('user_id', '=', $user->id)->delete();

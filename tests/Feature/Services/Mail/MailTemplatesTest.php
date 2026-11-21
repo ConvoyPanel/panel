@@ -1,8 +1,11 @@
 <?php
 
 use App\Enums\Mail\MailEncryption;
+use App\Models\Address;
 use App\Models\User;
 use App\Notifications\PasswordChanged;
+use App\Notifications\PasswordResetRequested;
+use App\Notifications\ServerReady;
 use App\Notifications\UserInvited;
 use App\Services\Mail\TestMailMessage;
 
@@ -94,4 +97,47 @@ it('leaves no unrendered Blade in any mail view', function (string $view) {
         // remove; either one reaching a view means the build regressed.
         ->not->toContain('oklch(')
         ->not->toContain('var(--');
-})->with(['test', 'user-invited', 'password-changed']);
+})->with(['test', 'user-invited', 'password-changed', 'password-reset', 'server-ready']);
+
+it('renders the reset link with the address it belongs to', function () {
+    $user = User::factory()->create(['name' => 'Ada', 'email' => 'ada@example.com']);
+
+    $html = (new PasswordResetRequested('deadbeef'))->toMail($user)->render();
+
+    // Escaped in the href and the fallback text alike, since both go through Blade's {{ }}.
+    expect($html)
+        ->toContain('Hello Ada,')
+        ->toContain('/auth/reset-password/deadbeef?email=ada%40example.com')
+        ->toContain('60 minutes');
+});
+
+it('renders the server notice with where to reach it', function () {
+    [$owner, , , $server] = createServerModel();
+    $address = Address::factory()->create(['server_id' => $server->id, 'ip' => '203.0.113.10']);
+    $server->update([
+        'name' => 'web-01',
+        'hostname' => 'web-01.example.com',
+        'primary_ipv4_address_id' => $address->id,
+    ]);
+
+    $html = (new ServerReady($server->fresh()))->toMail($owner)->render();
+
+    expect($html)
+        ->toContain('web-01 has finished installing')
+        ->toContain('IPv4 address')
+        ->toContain('203.0.113.10')
+        ->not->toContain('IPv6 address')
+        ->toContain('web-01.example.com')
+        ->toContain(config('app.url').'/servers/'.$server->uuid_short);
+});
+
+it('leaves out the address rows a server does not have', function () {
+    [$owner, , , $server] = createServerModel();
+
+    $html = (new ServerReady($server->fresh()))->toMail($owner)->render();
+
+    expect($html)
+        ->not->toContain('IPv4 address')
+        ->not->toContain('IPv6 address')
+        ->toContain('Hostname');
+});

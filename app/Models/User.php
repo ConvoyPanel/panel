@@ -5,10 +5,13 @@ namespace App\Models;
 use App\Enums\Admin\AdminPermission;
 use App\Enums\Api\ApiKeyType;
 use App\Enums\User\UserType;
+use App\Notifications\PasswordResetRequested;
 use Eloquent;
 use Illuminate\Auth\Authenticatable;
+use Illuminate\Auth\Passwords\CanResetPassword;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
+use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -36,9 +39,9 @@ use Spatie\LaravelPasskeys\Models\Concerns\HasPasskeys;
  *
  * @mixin Eloquent
  */
-class User extends Model implements AuthenticatableContract, AuthorizableContract, HasPasskeys
+class User extends Model implements AuthenticatableContract, AuthorizableContract, CanResetPasswordContract, HasPasskeys
 {
-    use Authenticatable, Authorizable, HasApiTokens, HasFactory, Notifiable, TwoFactorAuthenticatable;
+    use Authenticatable, Authorizable, CanResetPassword, HasApiTokens, HasFactory, Notifiable, TwoFactorAuthenticatable;
 
     /**
      * The attributes that are mass assignable.
@@ -309,6 +312,15 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     public function getPassKeyDisplayName(): string
     {
         return $this->name;
+    }
+
+    /**
+     * The panel's own reset email instead of the framework's. Laravel's version renders through
+     * its markdown theme and links to a `password.reset` route this panel does not have.
+     */
+    public function sendPasswordResetNotification(#[\SensitiveParameter] $token): void
+    {
+        $this->notify(new PasswordResetRequested($token));
     }
 
     /**
