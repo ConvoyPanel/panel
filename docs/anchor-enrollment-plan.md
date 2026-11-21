@@ -250,7 +250,8 @@ is already a no-op on every row.
 
 ### What the v4 operator actually experiences
 
-The cutover in `database/cutover/RUNBOOK.md` is unchanged — pgloader for the
+The cutover in `database/cutover/RUNBOOK.md` (since removed: v4 now moves to
+Postgres through 5.x's `convoy import-v4`) is unchanged — pgloader for the
 engine, `artisan migrate` for the renames. Nodes arrive with `anchor_id = NULL`
 and **keep working**: they poll, they place servers, they run backups. What
 they lack is console and template installs, which is exactly what they lacked

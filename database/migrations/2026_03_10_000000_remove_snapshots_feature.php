@@ -2,12 +2,18 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
     public function up(): void
     {
+        // A server caught mid-restore, or left there by a restore that failed, would keep a
+        // status the lifecycle no longer has, and loading it would throw. The restore can't
+        // finish now, so the server goes back to ready.
+        DB::table('servers')->where('status', 'restoring_snapshot')->update(['status' => 'ready']);
+
         Schema::dropIfExists('snapshots');
 
         Schema::table('servers', function (Blueprint $table) {

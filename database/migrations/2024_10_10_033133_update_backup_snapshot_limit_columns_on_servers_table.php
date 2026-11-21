@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -22,14 +23,21 @@ return new class extends Migration
         Schema::table('servers', function (Blueprint $table) {
             $table->renameColumn('snapshot_limit', 'snapshot_count_limit');
             $table->renameColumn('backup_limit', 'backup_count_limit');
-            $table->integer('snapshot_size_limit')->after('snapshot_count_limit');
-            $table->integer('backup_size_limit')->after('backup_count_limit');
+            // Nullable until they're filled: Postgres won't add a NOT NULL column without a
+            // default to a table that has rows, so on an upgrade from 5.x this failed on the
+            // first server. Servers had no size limits before, so they get -1, unlimited.
+            $table->integer('snapshot_size_limit')->nullable()->after('snapshot_count_limit');
+            $table->integer('backup_size_limit')->nullable()->after('backup_count_limit');
         });
+
+        DB::table('servers')->update(['snapshot_size_limit' => -1, 'backup_size_limit' => -1]);
 
         Schema::table('servers', function (Blueprint $table) {
             $table->integer('snapshot_count_limit')->nullable(false)->change();
             $table->integer('backup_count_limit')->nullable(false)->change();
             $table->integer('bandwidth_limit')->nullable(false)->change();
+            $table->integer('snapshot_size_limit')->nullable(false)->change();
+            $table->integer('backup_size_limit')->nullable(false)->change();
         });
     }
 
