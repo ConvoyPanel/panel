@@ -2,7 +2,10 @@
 
 use App\Enums\Api\ApiKeyType;
 use App\Models\User;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Spatie\LaravelSettings\Migrations\SettingsMigrator;
 
 // Each test puts rows back the way 5.x left them and runs one migration over them.
 
@@ -47,4 +50,60 @@ it('lets a 5.x database and a fresh install through', function () {
     DB::table('migrations')->where('migration', '>', '2022_12_14_083706')->delete();
 
     expect(fn () => $guard->up())->not->toThrow(Throwable::class);
+});
+
+it("moves 5.x's announcement dismissals onto each user and drops the table", function () {
+    [$alice, $bob, $carol] = User::factory()->count(3)->create();
+
+    Schema::table('users', fn (Blueprint $table) => $table->dropColumn('dismissed_announcements'));
+    Schema::create('announcement_dismissals', function (Blueprint $table) {
+        $table->id();
+        $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+        $table->string('announcement_id', 120);
+        $table->timestamps();
+        $table->unique(['user_id', 'announcement_id']);
+    });
+    DB::table('announcement_dismissals')->insert([
+        ['user_id' => $alice->id, 'announcement_id' => '2026-10-21-php2shell'],
+        ['user_id' => $bob->id, 'announcement_id' => '2026-10-21-php2shell'],
+        ['user_id' => $alice->id, 'announcement_id' => '2026-11-13-convoy-6'],
+    ]);
+
+    upgradeMigration('migrations/2026_11_21_000001_store_announcement_dismissals_on_users.php')->up();
+
+    $dismissed = fn (User $user) => json_decode(DB::table('users')->find($user->id)->dismissed_announcements);
+
+    expect($dismissed($alice))->toBe(['2026-10-21-php2shell', '2026-11-13-convoy-6'])
+        ->and($dismissed($bob))->toBe(['2026-10-21-php2shell'])
+        ->and($dismissed($carol))->toBeNull()
+        ->and(Schema::hasTable('announcement_dismissals'))->toBeFalse();
+});
+
+it("moves 5.x's emailed announcements into settings and drops the table", function () {
+    $migrator = app(SettingsMigrator::class);
+    $migrator->delete('announcements.notified');
+
+    Schema::create('announcement_notifications', function (Blueprint $table) {
+        $table->id();
+        $table->string('announcement_id', 120)->unique();
+        $table->unsignedInteger('recipients')->default(0);
+        $table->timestamps();
+    });
+    DB::table('announcement_notifications')->insert([
+        ['announcement_id' => '2026-10-21-php2shell', 'recipients' => 2],
+        ['announcement_id' => '2026-11-13-convoy-6', 'recipients' => 3],
+    ]);
+
+    upgradeMigration('settings/2026_11_21_000002_create_announcement_settings.php')->up();
+
+    $payload = DB::table('settings')->where('group', 'announcements')->where('name', 'notified')->value('payload');
+
+    expect(json_decode($payload))->toBe(['2026-10-21-php2shell', '2026-11-13-convoy-6'])
+        ->and(Schema::hasTable('announcement_notifications'))->toBeFalse();
+});
+
+it('starts a fresh install with nothing emailed', function () {
+    $payload = DB::table('settings')->where('group', 'announcements')->where('name', 'notified')->value('payload');
+
+    expect(json_decode($payload))->toBe([]);
 });
