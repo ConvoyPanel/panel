@@ -95,6 +95,15 @@ A new major is never a routine upgrade. To move to one, read its upgrade notes,
 set `CONVOY_VERSION` to its number and run `convoy upgrade`. The installer takes
 the same values with `--version`.
 
+A new major can't run the jobs an older one queued. When `convoy upgrade` moves
+to a new major, it lets the worker finish every queued job before it replaces
+anything, then takes the panel offline so nothing new is queued, and checks
+again. A running backup or server build keeps its job queued until it's done,
+so upgrade when none is in progress. If the queue doesn't empty within 10
+minutes, the upgrade stops with the panel still on the old release. Run
+`convoy upgrade` again once those jobs have finished. `CONVOY_UPGRADE_QUEUE_TIMEOUT`
+sets the wait in seconds.
+
 ### From 5.x
 
 5.x stays on 5.x releases until you change its `CONVOY_VERSION`. Read the
@@ -105,8 +114,9 @@ Coterm don't carry over. Then, on the 5.x host:
 2. Run `convoy upgrade`.
 
 5.x's `convoy upgrade` replaces itself with this release's command, which carries
-out the rest of the upgrade as above. A v4 install moves to 5.x first, with
-5.x's `convoy import-v4`.
+out the rest of the upgrade as above. Like any move to a new major, it first
+waits for the jobs 5.x has queued (see [Versions](#versions)). A v4 install
+moves to 5.x first, with 5.x's `convoy import-v4`.
 
 ## What is actually running
 

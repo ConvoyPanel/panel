@@ -124,9 +124,11 @@ tty_flags() {
     if [[ -t 0 && -t 1 ]]; then printf '%s\n' "-it"; else printf '%s\n' "-T"; fi
 }
 
-app_running() {
-    [[ -n "$(compose ps -q --status running web 2>/dev/null)" ]]
+service_running() {
+    [[ -n "$(compose ps -q --status running "$1" 2>/dev/null)" ]]
 }
+
+app_running() { service_running web; }
 
 # Sets APP_CMD to the command that runs something in the app container, or in a
 # throwaway one from the same image while the stack is down. The throwaway skips
@@ -220,6 +222,10 @@ IMAGE_APP_DIR=/var/www/html
 # so this only bounds the odd slow API call or disk resize.
 UPGRADE_DRAIN_TIMEOUT="${CONVOY_UPGRADE_DRAIN_TIMEOUT:-600}"
 
+# How long an upgrade to a new major waits for the running release's queue to
+# empty. A running backup or server build keeps its job queued until it's done.
+UPGRADE_QUEUE_TIMEOUT="${CONVOY_UPGRADE_QUEUE_TIMEOUT:-600}"
+
 # Prints FILE (relative to IMAGE_APP_DIR) from the image the web service is
 # configured to run, which after a pull is the new release. Fails when that
 # image doesn't carry the file.
@@ -292,21 +298,140 @@ update_compose_file() {
     rm -f "$new" "$shipped"
 }
 
-# Set while the worker and scheduler are stopped and nothing has been replaced
-# yet, so a failure in that window can put them back as they were.
-UPGRADE_DRAINED=0
+# The services the upgrade has stopped while nothing has been replaced yet, so
+# a failure in that window can start them again.
+UPGRADE_STOPPED=()
+
+stop_for_upgrade() {
+    local service="$1"
+    shift
+    UPGRADE_STOPPED+=("$service")
+    compose stop "$@" "$service" >/dev/null
+}
+
+# "a", "a and b", "a, b and c".
+join_and() {
+    local out="${1:-}"
+    shift || true
+    while (( $# > 1 )); do
+        out+=", $1"
+        shift
+    done
+    if (( $# )); then
+        out+=" and $1"
+    fi
+    printf '%s\n' "$out"
+}
 
 resume_after_failed_upgrade() {
-    if (( UPGRADE_DRAINED )); then
-        warn "the upgrade stopped before anything was replaced. Starting the worker and scheduler again."
-        compose start worker scheduler >/dev/null 2>&1 || true
+    (( ${#UPGRADE_STOPPED[@]} )) || return 0
+    local service names=()
+    for service in "${UPGRADE_STOPPED[@]}"; do
+        case "$service" in
+            web) names+=("the panel") ;;
+            *)   names+=("the $service") ;;
+        esac
+    done
+    warn "the upgrade stopped before anything was replaced. Starting $(join_and "${names[@]}") again."
+    compose start "${UPGRADE_STOPPED[@]}" >/dev/null 2>&1 || true
+}
+
+# The major of a version like 6.0.1 or 6.1.0-beta.2. Nothing for main or canary.
+major_of() {
+    if [[ "$1" =~ ^v?([0-9]+)\. ]]; then
+        printf '%s\n' "${BASH_REMATCH[1]}"
     fi
+}
+
+# Counts every queue a Horizon supervisor works, the way the release that
+# queued the jobs configured them.
+queue_size_php() {
+    cat <<'PHP'
+$queues = collect([config('horizon.defaults', []), ...array_values(config('horizon.environments', []))])
+    ->flatMap(fn ($supervisors) => collect($supervisors)->flatMap(fn ($supervisor) => (array) ($supervisor['queue'] ?? [])))
+    ->unique()
+    ->whenEmpty(fn ($queues) => $queues->push('default'));
+echo $queues->sum(fn ($queue) => Illuminate\Support\Facades\Queue::size($queue)), PHP_EOL;
+PHP
+}
+
+# Jobs queued in the release SERVICE runs, delayed and reserved ones included,
+# or nothing when they can't be counted.
+queue_size() {
+    compose exec -T "$1" env HOME=/tmp php artisan tinker --execute "$(queue_size_php)" < /dev/null 2>/dev/null \
+        | tr -d '\r' | grep -E '^[0-9]+$' | tail -1 || true
+}
+
+# Waits for the queue to empty while the worker runs what's in it, leaving the
+# last count in QUEUE_LEFT. Returns 1 when it doesn't empty in time and 2 when
+# it can't be counted.
+QUEUE_LEFT=""
+wait_for_empty_queue() {
+    local deadline=$(( SECONDS + UPGRADE_QUEUE_TIMEOUT )) unreadable=0
+    while :; do
+        QUEUE_LEFT="$(queue_size worker)"
+        if [[ "$QUEUE_LEFT" == 0 ]]; then
+            return 0
+        elif [[ -z "$QUEUE_LEFT" ]]; then
+            (( ++unreadable < 3 )) || return 2
+        else
+            unreadable=0
+        fi
+        (( SECONDS < deadline )) || return 1
+        sleep 5
+    done
+}
+
+queue_empty_or_die() {
+    local old_name="$1" new_name="$2" status=0 jobs=jobs
+    wait_for_empty_queue || status=$?
+    case "$status" in
+        0) return 0 ;;
+        2) die "couldn't count the jobs $old_name has queued, which $new_name can't run, so the upgrade stopped with the panel still on $old_name. Check 'convoy logs worker', then run 'convoy upgrade' again." ;;
+    esac
+    [[ "$QUEUE_LEFT" == 1 ]] && jobs=job
+    die "$old_name still has $QUEUE_LEFT queued $jobs after $(( UPGRADE_QUEUE_TIMEOUT / 60 )) minutes, which $new_name can't run, so the upgrade stopped with the panel still on $old_name. A running backup or server build keeps its job queued until it's done. Run 'convoy upgrade' again once they've finished."
+}
+
+# A new major can't run the jobs an older one queued: the classes they name are
+# gone. So an upgrade across majors lets the running worker finish the whole
+# queue, not just its current jobs, then stops the panel so nothing new is
+# queued, and checks once more. A build without a version number, like main,
+# counts as another major, which only costs the wait.
+empty_queue_before_new_major() {
+    local old_image="$1" old new old_name new_name
+    old="$(docker run --rm --network none --entrypoint cat "$old_image" "$IMAGE_APP_DIR/config/app.php" 2>/dev/null | panel_version_from_tree /dev/stdin || true)"
+    new="$(new_release_file config/app.php | panel_version_from_tree /dev/stdin || true)"
+    if [[ -n "$(major_of "$old")" && "$(major_of "$old")" == "$(major_of "$new")" ]]; then
+        return 0
+    fi
+    old_name="${old:+Convoy $old}"
+    old_name="${old_name:-the running release}"
+    new_name="${new:+Convoy $new}"
+    new_name="${new_name:-the new release}"
+
+    if ! service_running worker; then
+        if ! app_running; then
+            warn "the panel isn't running, so the upgrade couldn't check for jobs $old_name still has queued, which $new_name can't run."
+            return 0
+        fi
+        QUEUE_LEFT="$(queue_size web)"
+        [[ "$QUEUE_LEFT" == 0 ]] && return 0
+        die "the worker isn't running, so jobs $old_name has queued can't finish, and $new_name can't run them. Start the worker with 'convoy restart worker', then run 'convoy upgrade' again."
+    fi
+
+    info "Waiting for $old_name's queued jobs to finish (up to $(( UPGRADE_QUEUE_TIMEOUT / 60 )) minutes)"
+    queue_empty_or_die "$old_name" "$new_name"
+    info "Stopping the panel, so nothing new is queued"
+    stop_for_upgrade web
+    queue_empty_or_die "$old_name" "$new_name"
 }
 
 # The order matters more than any single step. The command updates itself
 # first, so a release's own upgrade steps apply to the upgrade that installs it.
-# The worker finishes what it is running and the scheduler stops before the
-# backup, so nothing changes under it. The web container starts alone and
+# The scheduler stops and the worker finishes what it is running before the
+# backup, so nothing changes under it. Across majors the worker first empties
+# the queue, before anything is replaced. The web container starts alone and
 # migrates the database before any worker runs the new code.
 #
 # 5.x's `convoy upgrade` runs the first block itself, then hands over to this
@@ -326,17 +451,20 @@ cmd_upgrade() {
     fi
 
     old_image="$(running_image || true)"
+    trap resume_after_failed_upgrade EXIT
+
+    info "Stopping the scheduler"
+    stop_for_upgrade scheduler
+    if [[ -n "$old_image" ]]; then
+        empty_queue_before_new_major "$old_image"
+    fi
+
     update_compose_file "$old_image"
     # A new compose.yml can name new images.
     compose pull --quiet
 
-    trap resume_after_failed_upgrade EXIT
-
-    info "Stopping the scheduler"
-    compose stop scheduler >/dev/null
-    UPGRADE_DRAINED=1
     info "Waiting for the worker to finish its current jobs (up to $(( UPGRADE_DRAIN_TIMEOUT / 60 )) minutes)"
-    compose stop --timeout "$UPGRADE_DRAIN_TIMEOUT" worker >/dev/null
+    stop_for_upgrade worker --timeout "$UPGRADE_DRAIN_TIMEOUT"
 
     if bundled_postgres; then
         cmd_backup >/dev/null
@@ -346,7 +474,7 @@ cmd_upgrade() {
 
     # Migrations run when the web container starts (AUTORUN).
     info "Starting the new release"
-    UPGRADE_DRAINED=0
+    UPGRADE_STOPPED=()
     compose up -d web
     info "Waiting for the panel to report healthy"
     wait_healthy web 300 || die "the panel didn't become healthy within 5 minutes, so the worker and scheduler are still stopped. Check 'convoy logs web', then run 'convoy up'."
