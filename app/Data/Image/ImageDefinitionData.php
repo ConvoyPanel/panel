@@ -2,7 +2,9 @@
 
 namespace App\Data\Image;
 
+use App\Data\Provisioner\ProvisionerFieldData;
 use App\Models\ImageDefinition;
+use App\Models\Provisioner;
 use Spatie\LaravelData\Attributes\LoadRelation;
 use Spatie\LaravelData\Attributes\MapInputName;
 use Spatie\LaravelData\Data;
@@ -32,6 +34,18 @@ class ImageDefinitionData extends Data
         public array $effectiveHardware,
         public ?int $minimumCores,
         public ?int $minimumMemory,
+        /**
+         * The provisioners a server built from this image runs, in order.
+         *
+         * @var list<string>
+         */
+        public array $provisionerUuids,
+        /**
+         * What deploying this image asks for: every provisioner's fields, one per key.
+         *
+         * @var DataCollection<int, ProvisionerFieldData>
+         */
+        public DataCollection $provisionerFields,
         /** The newest active version, or null when none has been added yet. */
         public ?ImageVersionData $latestVersion,
         #[LoadRelation]
@@ -59,6 +73,10 @@ class ImageDefinitionData extends Data
             effectiveHardware: $definition->effectiveHardware(),
             minimumCores: $definition->minimum_cores,
             minimumMemory: $definition->minimum_memory,
+            provisionerUuids: $definition->provisioners->map(fn (Provisioner $provisioner) => $provisioner->uuid)->values()->all(),
+            // Unwrapped: see StorageConsumersData.
+            provisionerFields: ProvisionerFieldData::collect($definition->provisionerFields(), DataCollection::class)
+                ->withoutWrapping(),
             latestVersion: $latest ? ImageVersionData::fromModel($latest) : null,
             versions: Lazy::whenLoaded(
                 'versions',

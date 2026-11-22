@@ -9,6 +9,8 @@ use App\Models\ImageDefinition;
 use App\Models\Server;
 use App\Rules\ImageFitsStorage;
 use App\Rules\ImageIsAvailable;
+use App\Rules\ProvisionersCanRunOn;
+use App\Support\Provisioners\ProvisionerFieldRules;
 use Illuminate\Validation\Validator;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
@@ -57,10 +59,37 @@ class ReinstallServerRequest extends BaseApiRequest
                 'exists:image_definitions,uuid',
                 new ImageIsAvailable,
                 new ImageFitsStorage,
+                new ProvisionersCanRunOn,
             ],
             'account_password' => ['required', 'string', 'min:8', 'max:191'],
             'start_on_completion' => 'present|boolean',
+            ...ProvisionerFieldRules::for($this->image()),
         ];
+    }
+
+    public function attributes(): array
+    {
+        return ProvisionerFieldRules::attributes($this->image());
+    }
+
+    public function messages(): array
+    {
+        return [
+            'provisioner_fields.*.regex' => 'The :attribute field cannot contain line breaks.',
+        ];
+    }
+
+    private ?ImageDefinition $image = null;
+
+    private function image(): ?ImageDefinition
+    {
+        $uuid = $this->input('image_uuid');
+
+        if (! is_string($uuid) || blank($uuid)) {
+            return null;
+        }
+
+        return $this->image ??= ImageDefinition::with('provisioners')->where('uuid', $uuid)->first();
     }
 
     /**

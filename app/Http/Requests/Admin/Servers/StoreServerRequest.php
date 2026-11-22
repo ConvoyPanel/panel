@@ -5,6 +5,7 @@ namespace App\Http\Requests\Admin\Servers;
 use App\Enums\Node\Storage\StorageContentType;
 use App\Http\Requests\BaseApiRequest;
 use App\Models\Address;
+use App\Models\ImageDefinition;
 use App\Models\Server;
 use App\Rules\HasSufficientAddresses;
 use App\Rules\HasSufficientCPU;
@@ -14,11 +15,13 @@ use App\Rules\ImageFitsStorage;
 use App\Rules\ImageIsAvailable;
 use App\Rules\NetworkInterfaceBelongsToNode;
 use App\Rules\OwnerIsNotAGuest;
+use App\Rules\ProvisionersCanRunOn;
 use App\Rules\StorageAllows;
 use App\Rules\VlanIsDeclaredOnInterface;
 use App\Rules\VMIDIsAvailable;
 use App\Services\Addresses\AddressAvailabilityService;
 use App\Services\Addresses\AddressReachabilityService;
+use App\Support\Provisioners\ProvisionerFieldRules;
 use Illuminate\Validation\Rule;
 
 class StoreServerRequest extends BaseApiRequest
@@ -124,9 +127,41 @@ class StoreServerRequest extends BaseApiRequest
                 'exists:image_definitions,uuid',
                 new ImageIsAvailable,
                 new ImageFitsStorage,
+                new ProvisionersCanRunOn,
             ],
+            ...ProvisionerFieldRules::for($this->image()),
             'start_on_completion' => 'required|boolean',
         ];
+    }
+
+    public function attributes(): array
+    {
+        return ProvisionerFieldRules::attributes($this->image());
+    }
+
+    public function messages(): array
+    {
+        return [
+            'provisioner_fields.*.regex' => 'The :attribute field cannot contain line breaks.',
+        ];
+    }
+
+    private ?ImageDefinition $image = null;
+
+    /**
+     * The image the server is built from, when the build installs one. An
+     * import keeps the disk it finds, so there is no first boot to run
+     * provisioner scripts on and no fields to ask for.
+     */
+    private function image(): ?ImageDefinition
+    {
+        $uuid = $this->input('image_uuid');
+
+        if (! $this->boolean('should_create_vm') || $this->boolean('deferred_os_selection') || ! is_string($uuid) || blank($uuid)) {
+            return null;
+        }
+
+        return $this->image ??= ImageDefinition::with('provisioners')->where('uuid', $uuid)->first();
     }
 
     protected function prepareForValidation(): void
@@ -144,6 +179,7 @@ class StoreServerRequest extends BaseApiRequest
             $toMerge['start_on_completion'] = false;
             $toMerge['account_password'] = null;
             $toMerge['image_uuid'] = null;
+            $toMerge['provisioner_fields'] = null;
         }
 
         if (! empty($toMerge)) {

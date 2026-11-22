@@ -11,6 +11,9 @@ interface OAuthProvider {
 interface SiteConfiguration {
     version: string
     oauthProviders: OAuthProvider[]
+    /** Whether to count page views for the telemetry report. */
+    telemetry: boolean
+    /** Whether the sign-in page links to "Forgot password?". */
     passwordResets: boolean
 }
 

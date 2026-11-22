@@ -43,6 +43,8 @@ final class AdminPermissions
         'address-block-groups' => 'address-block-groups',
         'images' => 'image-groups',
         'image-groups' => 'image-groups',
+        // A provisioner is part of an image: it runs on what the image builds.
+        'provisioners' => 'image-groups',
         'isos' => 'isos',
         'users' => 'users',
         'admin-roles' => 'users',

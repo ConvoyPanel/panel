@@ -120,6 +120,7 @@ if the scheduler is running.
 | `BACKUP_PRUNE_AGE` | `360` | Days before a backup is eligible for pruning. |
 | `DEPLOYMENT_RETENTION_PERIOD` | `90` | Days of deployment records to keep. |
 | `DEPLOYMENT_STUCK_AGE` | `1440` | Minutes after which an in-progress deployment is treated as stuck. |
+| `PROVISIONER_TIMEOUT_MINUTES` | `60` | Minutes a server's provisioner scripts have to report back once it is started. After that the panel removes their snippet from the node. A later report is still recorded. |
 
 ## Rate limits
 
@@ -142,6 +143,13 @@ Applied to calls out to Proxmox and Anchor.
 | Variable | Default | Notes |
 | --- | --- | --- |
 | `UPDATE_CHECK_REPOSITORY` | `ConvoyPanel/panel` | The repository the admin dashboard checks for newer releases. |
+
+## Telemetry
+
+| Variable | Default | Notes |
+| --- | --- | --- |
+| `CONVOY_TELEMETRY_ENABLED` | `true` | `false` stops the anonymous daily usage report. The admin Settings switch then shows it as off and cannot turn it on. |
+| `CONVOY_TELEMETRY_URL` | `https://convoypanel.com/api/v1/telemetry` | Where the report is sent. Leave it empty on an install that cannot reach the internet. [telemetry.md](telemetry.md) lists every field. |
 
 ## Metrics (optional)
 

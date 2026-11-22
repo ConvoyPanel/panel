@@ -31,6 +31,8 @@ export const imageDefinitionSchema = z.object({
     hardware: z.record(z.string(), z.unknown()).optional(),
     minimumCores: z.coerce.number().min(1).nullable(),
     minimumMemory: z.coerce.number().min(1).nullable(),
+    /** In the order they run. Left out, the image keeps the ones it has. */
+    provisionerUuids: z.array(z.string()).max(10).optional(),
 })
 
 const indexRoute =
@@ -54,12 +56,16 @@ const toBody = ({
     isAdminOnly,
     minimumCores,
     minimumMemory,
+    provisionerUuids,
     ...rest
 }: z.infer<typeof imageDefinitionSchema>) => ({
     ...rest,
     is_admin_only: isAdminOnly,
     minimum_cores: minimumCores,
     minimum_memory: minimumMemory,
+    ...(provisionerUuids !== undefined && {
+        provisioner_uuids: provisionerUuids,
+    }),
 })
 
 export const getImageDefinitions = async (

@@ -382,6 +382,20 @@ Route::prefix('/image-groups')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
+| Provisioner Routes
+|--------------------------------------------------------------------------
+|
+| Endpoint: /api/admin/provisioners
+|
+| Scripts that run inside a server on its first boot. They are attached to
+| images, through the image definition's `provisioner_uuids`.
+|
+*/
+Route::resource('provisioners', Admin\ProvisionerController::class)
+    ->only(['index', 'show', 'store', 'update', 'destroy']);
+
+/*
+|--------------------------------------------------------------------------
 | Admin Role Routes
 |--------------------------------------------------------------------------
 |
@@ -560,6 +574,20 @@ Route::prefix('/settings')->group(function () {
     Route::post(
         '/mail/test',
         [Admin\Settings\MailSettingsController::class, 'test'],
+    );
+
+    Route::get(
+        '/telemetry',
+        [Admin\Settings\TelemetrySettingsController::class, 'show'],
+    );
+    Route::put(
+        '/telemetry',
+        [Admin\Settings\TelemetrySettingsController::class, 'update'],
+    );
+    // The exact report the daily job would send now. Read-only: nothing is reset by viewing it.
+    Route::get(
+        '/telemetry/report',
+        [Admin\Settings\TelemetrySettingsController::class, 'report'],
     );
 });
 

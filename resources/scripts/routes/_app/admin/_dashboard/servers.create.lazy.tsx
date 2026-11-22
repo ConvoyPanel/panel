@@ -1,3 +1,4 @@
+import { provisionerFieldErrorMapping } from '@/features/provisioners/api.ts'
 import { createServer, serverSchema } from '@/features/servers/admin/api.ts'
 import GeneralSection from '@/features/servers/components/admin/Create/sections/GeneralSection.tsx'
 import NetworkSection from '@/features/servers/components/admin/Create/sections/NetworkSection.tsx'
@@ -48,6 +49,7 @@ const CreateServerPage = () => {
             shouldCreateVm: true,
             accountPassword: '',
             imageUuid: '',
+            provisionerFields: {},
             startOnCompletion: true,
         },
     })
@@ -118,6 +120,7 @@ const CreateServerPage = () => {
                 'limits.addresses_ipv6_count': 'addressesIpv6Count',
                 'limits.addresses': 'addresses',
                 ...diskFieldMapping,
+                ...provisionerFieldErrorMapping(e),
             })
             toast.add({ title: 'Failed to create server', type: 'error' })
             console.error(e)

@@ -1,3 +1,5 @@
+import type { ProvisionerField } from '@/features/provisioners/types.ts'
+
 /** One disk belonging to an image version. */
 export interface ImageDisk {
     /** The `qm` slot this disk becomes, e.g. `scsi0` or `efidisk0`. */
@@ -60,6 +62,10 @@ export interface ImageDefinition {
     effectiveHardware: Record<string, unknown>
     minimumCores: number | null
     minimumMemory: number | null
+    /** The provisioners a server built from it runs, in order. */
+    provisionerUuids: string[]
+    /** What deploying it asks for: every provisioner's fields, one per key. */
+    provisionerFields: ProvisionerField[]
     latestVersion: ImageVersion | null
     versions?: ImageVersion[]
 }

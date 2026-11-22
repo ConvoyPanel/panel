@@ -86,4 +86,25 @@ return [
     'updates' => [
         'repository' => env('UPDATE_CHECK_REPOSITORY', 'ConvoyPanel/panel'),
     ],
+
+    /*
+    | How long a server's provisioner scripts have to report back once it has
+    | been started, in minutes. After that the panel stops waiting: it removes
+    | `cicustom` from the guest and has Anchor delete the snippet. A report that
+    | arrives later is still recorded.
+    */
+    'provisioners' => [
+        'timeout_minutes' => env('PROVISIONER_TIMEOUT_MINUTES', 60),
+    ],
+
+    /*
+    | The anonymous daily usage report (docs/telemetry.md lists every field).
+    | An empty URL turns it off for an install that cannot reach the internet;
+    | `enabled` turns it off without one. Either way the admin Settings switch
+    | shows it as off and cannot turn it back on.
+    */
+    'telemetry' => [
+        'enabled' => (bool) env('CONVOY_TELEMETRY_ENABLED', true),
+        'url' => env('CONVOY_TELEMETRY_URL', 'https://convoypanel.com/api/v1/telemetry'),
+    ],
 ];

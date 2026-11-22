@@ -42,6 +42,10 @@ const AUDIT_EXEMPT = [
     // Only a link that was actually sent is worth an entry, and only the service knows which.
     'PasswordResetController@store' => 'Audited in App\\Services\\Users\\PasswordResetService.',
     'PasswordResetController@update' => 'Audited in App\\Services\\Users\\PasswordResetService.',
+
+    // Telemetry page-view counts, sent by the browser every minute. Auditing them would log every
+    // page anyone opens, which is the opposite of what anonymous counts are for.
+    'PageViewController@__invoke' => 'Anonymous page-view counts; changes no record.',
 ];
 
 /** The prefixes this guard governs. Horizon and the SPA shell are not ours to audit. */

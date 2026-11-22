@@ -29,6 +29,7 @@ const STEP_MAPPINGS: Record<string, { label: string; isBytes?: boolean }> = {
     // ran under it are still in the database and still have to render.
     'clone': { label: 'Cloning image', isBytes: true },
     'update-password': { label: 'Updating password' },
+    'prepare-provisioners': { label: 'Preparing setup scripts' },
     'delete-backups': { label: 'Deleting backups' },
     'stop-vm': { label: 'Stopping VM' },
     'delete-vm': { label: 'Deleting VM' },

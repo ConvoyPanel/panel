@@ -7,6 +7,7 @@ import {
 import HardwareForm from '@/features/images/hardware/HardwareForm'
 import { OSTYPE_ITEMS } from '@/features/images/ostypes'
 import ImageVersionsModal from '@/features/images/versions/ImageVersionsModal'
+import ProvisionerPicker from '@/features/provisioners/components/ProvisionerPicker.tsx'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
 import { ImageGroup } from '@/types/image.ts'
 import { ImageDefinition } from '@/types/image.ts'
@@ -69,15 +70,22 @@ const ImageCard = ({ imageGroup, image }: Props) => {
             minimumCores: image.minimumCores,
             minimumMemory: image.minimumMemory,
             isAdminOnly: image.isAdminOnly,
+            provisionerUuids: image.provisionerUuids,
         })
     }, [image])
 
     const save = async (data: z.input<typeof imageDefinitionSchema>) => {
         try {
+            const values = data as z.infer<typeof imageDefinitionSchema>
             const updatedImageDefinition = await updateImageDefinition(
                 imageGroup.uuid,
                 image.uuid,
-                data as z.infer<typeof imageDefinitionSchema>
+                // Provisioners cannot run on Windows, so switching an image
+                // to it takes them off rather than failing the save on a
+                // field the form no longer shows.
+                values.ostype.startsWith('win')
+                    ? { ...values, provisionerUuids: [] }
+                    : values
             )
 
             await mutate(data => {
@@ -141,6 +149,11 @@ const ImageCard = ({ imageGroup, image }: Props) => {
                             </p>
                             <HardwareForm ostype={ostype} />
                         </div>
+                        {/* The runner is a POSIX shell script that cloud-init
+                            starts, so the panel refuses them on Windows. */}
+                        {!ostype.startsWith('win') && (
+                            <ProvisionerPicker name={'provisionerUuids'} />
+                        )}
                         <CheckboxItemForm
                             name={'isAdminOnly'}
                             label={'Admin Only'}

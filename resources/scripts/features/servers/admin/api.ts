@@ -112,6 +112,10 @@ export const serverSchema = z
         shouldCreateVm: z.boolean(),
         accountPassword: optionalAccountPasswordSchema,
         imageUuid: z.string().optional(),
+        /** By field key, for the image's provisioners. */
+        provisionerFields: z
+            .record(z.string(), z.string().optional())
+            .optional(),
         startOnCompletion: z.boolean(),
     })
     .superRefine((data, ctx) => {
@@ -228,6 +232,7 @@ export const createServer = async ({
     shouldCreateVm,
     accountPassword,
     imageUuid,
+    provisionerFields,
     startOnCompletion,
 }: z.infer<typeof serverSchema>) =>
     rawDataToServer(
@@ -268,6 +273,12 @@ export const createServer = async ({
                     should_create_vm: shouldCreateVm,
                     account_password: accountPassword,
                     image_uuid: imageUuid,
+                    // Only a build from an image runs provisioners; anything
+                    // else would send fields the panel has nothing to match.
+                    provisioner_fields:
+                        shouldCreateVm && !deferredOsSelection
+                            ? provisionerFields
+                            : undefined,
                     start_on_completion: startOnCompletion,
                 },
             })

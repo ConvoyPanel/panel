@@ -32,6 +32,7 @@ final class TokenAbilities extends ScopedTokenAbilities
         'address-block-groups',
         'images',
         'image-groups',
+        'provisioners',
         'isos',
         'users',
         'admin-roles',

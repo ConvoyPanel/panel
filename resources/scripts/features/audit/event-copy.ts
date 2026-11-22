@@ -458,6 +458,10 @@ export const AUDIT_EVENT_COPY: Record<AuditEvent, AuditEventCopy> = {
         verb: 'updated the sharing settings',
         detail: () => null,
     },
+    'admin.settings.telemetry-updated': {
+        verb: 'changed the telemetry setting',
+        detail: p => (p.enabled === true ? 'on' : 'off'),
+    },
 
     // Presets and images
     'admin.server-preset.created': { verb: 'created a server preset' },
@@ -498,6 +502,12 @@ export const AUDIT_EVENT_COPY: Record<AuditEvent, AuditEventCopy> = {
         verb: 'imported an image from the catalogue',
         detail: p => pick(p, 'slug'),
     },
+    'admin.provisioner.created': { verb: 'created a provisioner' },
+    'admin.provisioner.updated': {
+        verb: 'updated a provisioner',
+        detail: changedFields,
+    },
+    'admin.provisioner.deleted': { verb: 'deleted a provisioner' },
 }
 
 /**

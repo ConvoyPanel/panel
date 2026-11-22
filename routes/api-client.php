@@ -12,6 +12,12 @@ use Laravel\Fortify\Http\Controllers\TwoFactorSecretKeyController;
 
 Route::get('/user', Client\SessionController::class);
 
+// Page views for the telemetry report, batched by the browser. A token caller is not someone
+// browsing the panel, so this is session-only. A tab sends every few minutes and when it is
+// hidden, so ten a minute leaves room for someone switching tabs and little for a script.
+Route::post('/telemetry/page-views', Client\PageViewController::class)
+    ->middleware([DenyApiTokenAccess::class, 'throttle:10,1']);
+
 // The whole account/security surface is session-only: an end-user API token must never be able to
 // change the account it belongs to (password, 2FA, passkeys) or mint/revoke further tokens.
 Route::prefix('/account')->middleware(DenyApiTokenAccess::class)->group(function () {
