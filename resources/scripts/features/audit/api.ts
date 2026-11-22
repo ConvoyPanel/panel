@@ -13,6 +13,7 @@ export interface AuditEntry {
     event: App.Enums.Audit.AuditEvent
     batch: string | null
     actor: App.Data.Audit.AuditActorData
+    token: App.Data.Audit.AuditTokenData | null
     subject: App.Data.Audit.AuditSubjectData | null
     properties: Record<string, unknown>
     ip: string | null
@@ -25,7 +26,9 @@ export interface PaginatedAuditEntries {
     pagination: PaginatedResponse<unknown>['pagination']
 }
 
-const rawDataToAuditEntry = (data: App.Data.Audit.AuditLogData): AuditEntry => ({
+const rawDataToAuditEntry = (
+    data: App.Data.Audit.AuditLogData
+): AuditEntry => ({
     ...data,
     createdAt: new Date(data.createdAt),
 })
@@ -35,7 +38,15 @@ const rawDataToAuditEntry = (data: App.Data.Audit.AuditLogData): AuditEntry => (
  * controllers whitelist, or a typo silently returns an unfiltered list.
  */
 export type AuditListParams = QueryBuilderParams<
-    'event' | 'batch' | 'area' | 'actor_id' | 'subject_id' | 'subject_type' | 'since' | 'until',
+    | 'event'
+    | 'batch'
+    | 'area'
+    | 'actor_id'
+    | 'api_token_id'
+    | 'subject_id'
+    | 'subject_type'
+    | 'since'
+    | 'until',
     'created_at'
 >
 

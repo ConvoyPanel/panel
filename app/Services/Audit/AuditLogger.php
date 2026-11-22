@@ -101,11 +101,15 @@ class AuditLogger
         array $properties,
         ?Model $actor,
     ): AuditLog {
+        $token = $this->apiToken();
+
         $log = new AuditLog([
             'event' => $event,
             'batch' => $this->batchUuid,
             'properties' => $properties,
-            'api_token_id' => $this->apiTokenId(),
+            'api_token_id' => $token?->getKey(),
+            // A copy, like actor_label: revoking the token deletes it and nulls the id above.
+            'api_token_name' => $token !== null ? mb_substr((string) $token->name, 0, 255) : null,
             'ip' => $this->request()?->ip(),
             // Truncated rather than rejected: a hostile or merely eccentric UA string must not be
             // able to fail somebody's power action.
@@ -152,7 +156,7 @@ class AuditLogger
      * SystemActor rather than a User (panel-wide application tokens); both use HasApiTokens, so
      * `currentAccessToken()` is available either way.
      */
-    private function apiTokenId(): ?int
+    private function apiToken(): ?PersonalAccessToken
     {
         $user = $this->auth->guard()->user();
 
@@ -167,8 +171,8 @@ class AuditLogger
         /** @var mixed $token */
         $token = $user->currentAccessToken();
 
-        // Only a real personal access token has an id worth recording.
-        return $token instanceof PersonalAccessToken ? (int) $token->getKey() : null;
+        // Only a real personal access token has an id and a name worth recording.
+        return $token instanceof PersonalAccessToken ? $token : null;
     }
 
     private function userAgent(): ?string

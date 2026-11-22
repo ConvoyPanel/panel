@@ -178,6 +178,9 @@ which leaves less to do here.
 - **Rate limits.** 240 requests a minute for each token (`API_RATE_LIMIT`). Application tokens restricted to an IP
   allowlist aren't limited.
 - **Token expiry** for application and personal tokens.
+- **Token names in the audit log.** Changes made over the API show the token's name next to the actor, so two
+  integrations that both act as System can be told apart. The name stays after the token is revoked, and the admin
+  audit log API can be filtered by `api_token_id`.
 - **`tokens:create`.** Creates an application token on the command line, so a new install can be set up without a
   browser.
 - **External IDs** on servers and users, unique, and usable as a list filter.

@@ -23,6 +23,9 @@ class AuditLogController
                 'event',
                 'batch',
                 AllowedFilter::exact('actor_id'),
+                // Everything one token did, while it still exists. After it is revoked its
+                // entries keep the name but lose the id, so they are found by actor and time.
+                AllowedFilter::exact('api_token_id'),
                 AllowedFilter::exact('subject_id'),
                 AllowedFilter::exact('subject_type'),
                 // Prefix match on the dotted event key, so "filter[area]=admin.node" pulls back

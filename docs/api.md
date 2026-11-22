@@ -83,6 +83,13 @@ command line). A request from anywhere else is refused with 403 and the code `to
 In the panel, rebuilding a server and setting a root password ask the user to confirm who they are first. Tokens skip
 this step, because creating one already required it.
 
+### Seeing what a token did
+
+The audit log names the token behind every change made over the API. Application tokens all act as `System`, so the
+token's name is what tells one integration's changes from another's. Entries carry it as `token: { id, name }`, and
+`GET /api/application/audit-logs?filter[api_token_id]=<id>` lists everything one token did. Revoking a token keeps its
+name on the entries but sets `id` to null.
+
 ## Rate limits
 
 Each token can make 240 requests a minute, counted per token across both APIs. Responses carry `X-RateLimit-Limit`
@@ -161,8 +168,9 @@ A subscription can also use a pattern ending in `*`: `server.*`, `admin.user.*`,
 }
 ```
 
-For an audit event, `data` is the audit entry, shaped as `GET /api/application/audit-logs` returns it. `id` is the
-delivery's ID. It stays the same when a delivery is retried or sent again, so use it to ignore duplicates.
+For an audit event, `data` is the audit entry, shaped as `GET /api/application/audit-logs` returns it, including the
+token that made the change. `id` is the delivery's ID. It stays the same when a delivery is retried or sent again, so
+use it to ignore duplicates.
 
 ### Verifying a delivery
 
