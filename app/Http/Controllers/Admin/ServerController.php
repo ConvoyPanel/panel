@@ -120,7 +120,7 @@ class ServerController
                 AuditEvent::ADMIN_SERVER_UPDATED,
                 subject: $server,
                 properties: array_filter([
-                    'changed' => array_keys($server->getChanges()),
+                    'changed' => $server->getChangedAttributeNames(),
                     'subusers_revoked' => $revoked ?: null,
                 ], fn ($value) => $value !== null),
             );
@@ -134,6 +134,10 @@ class ServerController
     public function updateBuild(UpdateBuildRequest $request, Server $server)
     {
         $server->update($request->safe()->except('address_ids'));
+
+        // Read now: the build below can save the server again (it stamps a missing
+        // smbios_uuid), and getChanges() only remembers the last save.
+        $changed = $server->getChangedAttributeNames();
 
         // Build/limit-only forms must not have to echo the server's addresses
         // back merely to preserve them. Only reconcile IP assignments when a
@@ -153,7 +157,7 @@ class ServerController
         Audit::record(
             AuditEvent::ADMIN_SERVER_BUILD_UPDATED,
             subject: $server,
-            properties: ['changed' => array_keys($server->getChanges())],
+            properties: ['changed' => $changed],
         );
 
         $server->load(['addresses', 'user', 'node']);

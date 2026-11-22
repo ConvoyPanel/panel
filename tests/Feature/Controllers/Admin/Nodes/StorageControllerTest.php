@@ -1,5 +1,7 @@
 <?php
 
+use App\Enums\Audit\AuditEvent;
+use App\Models\AuditLog;
 use App\Models\Cluster;
 use App\Models\Location;
 use App\Models\Node;
@@ -381,4 +383,24 @@ it('will not let an update rewrite the content types', function () {
     expect($this->storage->refresh())
         ->stores_kvm->toBeTrue()
         ->stores_backups->toBeFalse();
+});
+
+it('records only the fields a storage update changed', function () {
+    fakeLiveStorage($this->storage->name, total: 100, used: 20, avail: 80);
+    $this->storage->update(['description' => null]);
+
+    $this->travel(5)->seconds();
+
+    $this->actingAs($this->user)
+        ->putJson("/api/admin/nodes/{$this->node->id}/storages/{$this->storage->id}", [
+            'name' => $this->storage->name,
+            'display_name' => $this->storage->display_name,
+            'size' => $this->storage->size,
+            'reserved_bytes' => $this->storage->reserved_bytes,
+            'description' => 'Fast pool',
+        ])
+        ->assertOk();
+
+    expect(AuditLog::query()->forEvent(AuditEvent::ADMIN_NODE_STORAGE_UPDATED)->sole()->properties['changed'])
+        ->toBe(['description']);
 });

@@ -1,5 +1,7 @@
 <?php
 
+use App\Enums\Audit\AuditEvent;
+use App\Models\AuditLog;
 use App\Models\NetworkInterface;
 use App\Models\Node;
 // Storage is attached to nodes through a pivot, so a storage needs no node to
@@ -172,4 +174,19 @@ it('round-trips a preset that carries extra disks', function () {
         ->assertOk()
         ->assertJsonPath('data.0.settings.disks.data.0.size', 25)
         ->assertJsonPath('data.0.settings.disks.data.1.storageId', $storage->id);
+});
+
+it('records only the fields a preset update changed', function () {
+    $preset = ServerPreset::factory()->create(['name' => 'Before']);
+
+    $this->travel(5)->seconds();
+
+    $this->actingAs($this->admin)->putJson("/api/admin/server-presets/{$preset->uuid}", [
+        'name' => 'After',
+        'description' => $preset->description,
+        'settings' => $preset->settings,
+    ])->assertOk();
+
+    expect(AuditLog::query()->forEvent(AuditEvent::ADMIN_SERVER_PRESET_UPDATED)->sole()->properties['changed'])
+        ->toBe(['name']);
 });

@@ -98,7 +98,7 @@ class NetworkInterfaceController
             subject: $node,
             properties: [
                 'name' => $networkInterface->name,
-                'changed' => array_keys($networkInterface->getChanges()),
+                'changed' => $networkInterface->getChangedAttributeNames(),
             ],
         );
 

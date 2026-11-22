@@ -71,7 +71,7 @@ class LocationController
         Audit::record(
             AuditEvent::ADMIN_LOCATION_UPDATED,
             subject: $location,
-            properties: ['short_code' => $location->short_code, 'changed' => array_keys($location->getChanges())],
+            properties: ['short_code' => $location->short_code, 'changed' => $location->getChangedAttributeNames()],
         );
 
         $location->loadCount('nodes', 'servers');

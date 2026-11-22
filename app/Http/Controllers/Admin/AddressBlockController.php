@@ -100,7 +100,7 @@ class AddressBlockController
             subject: $addressBlock,
             properties: [
                 'base_ip' => $addressBlock->base_ip,
-                'changed' => array_keys($addressBlock->getChanges()),
+                'changed' => $addressBlock->getChangedAttributeNames(),
             ],
         );
 

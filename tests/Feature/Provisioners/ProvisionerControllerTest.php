@@ -69,6 +69,20 @@ it('lists, shows, updates and deletes provisioners', function () {
     expect(Provisioner::query()->exists())->toBeFalse();
 });
 
+it('records only the fields a provisioner update changed', function () {
+    $this->actingAs($this->admin)->postJson('/api/admin/provisioners', provisionerPayload())->assertCreated();
+    $provisioner = Provisioner::query()->sole();
+
+    $this->travel(5)->seconds();
+
+    $this->actingAs($this->admin)
+        ->putJson("/api/admin/provisioners/{$provisioner->uuid}", provisionerPayload(['name' => 'Monitoring']))
+        ->assertOk();
+
+    expect(AuditLog::query()->forEvent(AuditEvent::ADMIN_PROVISIONER_UPDATED)->sole()->properties['changed'])
+        ->toBe(['name']);
+});
+
 it('refuses field keys that cannot be an environment variable', function (string $key) {
     $this->actingAs($this->admin)
         ->postJson('/api/admin/provisioners', provisionerPayload([
@@ -197,4 +211,22 @@ it('counts the images that run a provisioner', function () {
     $this->actingAs($this->admin)
         ->getJson('/api/admin/provisioners')
         ->assertJsonPath('data.0.imageCount', 2);
+});
+
+it('records only the fields an image update changed', function () {
+    $image = imageDefinition();
+    $provisioner = Provisioner::factory()->create();
+
+    $this->travel(5)->seconds();
+
+    $this->actingAs($this->admin)
+        ->putJson("/api/admin/image-groups/{$image->group->uuid}/images/{$image->uuid}", [
+            'name' => 'Ubuntu 24.04 LTS',
+            'ostype' => 'l26',
+            'provisioner_uuids' => [$provisioner->uuid],
+        ])
+        ->assertOk();
+
+    expect(AuditLog::query()->forEvent(AuditEvent::ADMIN_IMAGE_UPDATED)->sole()->properties['changed'])
+        ->toBe(['name', 'provisioners']);
 });

@@ -184,6 +184,25 @@ abstract class Model extends IlluminateModel
     }
 
     /**
+     * The names of the attributes the last save changed, without the timestamp
+     * columns.
+     *
+     * Eloquent sets `updated_at` on every save that changes something, so
+     * getChanges() lists it whenever the save lands in a later second than the
+     * previous one. An audit entry built from it would then say the user
+     * changed "name and updated at".
+     *
+     * @return list<string>
+     */
+    public function getChangedAttributeNames(): array
+    {
+        return array_values(array_diff(
+            array_keys($this->getChanges()),
+            array_filter([$this->getCreatedAtColumn(), $this->getUpdatedAtColumn()]),
+        ));
+    }
+
+    /**
      * Return a timestamp as DateTime object.
      */
     protected function asDateTime(mixed $value): Carbon|CarbonImmutable

@@ -26,11 +26,30 @@ it('rejects an empty display name', function () {
 it('records what a profile update changed', function () {
     $user = User::factory()->create(['name' => 'Before']);
 
+    // A later second than the row's updated_at, as every real edit is, so the
+    // save moves updated_at too and the entry must still list only the name.
+    $this->travel(5)->seconds();
+
     $this->actingAs($user)->patchJson('/api/client/account/profile', ['name' => 'After']);
 
     $entry = AuditLog::query()->where('event', '=', AuditEvent::ACCOUNT_PROFILE_UPDATED)->sole();
 
     expect($entry->properties['changed'])->toBe(['name']);
+});
+
+it('records what an email change changed', function () {
+    $user = User::factory()->create(['email' => 'old@example.com']);
+
+    $this->travel(5)->seconds();
+
+    $this->actingAs($user)
+        ->withSession(confirmedSession())
+        ->patchJson('/api/client/account/email', ['email' => 'new@example.com'])
+        ->assertSuccessful();
+
+    $entry = AuditLog::query()->where('event', '=', AuditEvent::ACCOUNT_PROFILE_UPDATED)->sole();
+
+    expect($entry->properties['changed'])->toBe(['email']);
 });
 
 it('does not record an update that changed nothing', function () {

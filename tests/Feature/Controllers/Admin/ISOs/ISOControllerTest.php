@@ -1,5 +1,7 @@
 <?php
 
+use App\Enums\Audit\AuditEvent;
+use App\Models\AuditLog;
 use App\Models\ISO;
 use App\Models\Location;
 use App\Models\Node;
@@ -144,4 +146,17 @@ it('says so when no node can inspect a link', function () {
             'https://example.invalid/virtio-win.iso',
         ))
         ->assertStatus(409);
+});
+
+it('records only the fields an ISO update changed', function () {
+    $iso = ISO::factory()->create(['name' => 'Before']);
+
+    $this->travel(5)->seconds();
+
+    $this->actingAs($this->user)
+        ->putJson("/api/admin/isos/{$iso->uuid}", ['name' => 'After'])
+        ->assertOk();
+
+    expect(AuditLog::query()->forEvent(AuditEvent::ADMIN_ISO_UPDATED)->sole()->properties['changed'])
+        ->toBe(['name']);
 });

@@ -50,7 +50,7 @@ class ImageGroupController
         Audit::record(
             AuditEvent::ADMIN_IMAGE_GROUP_UPDATED,
             subject: $imageGroup,
-            properties: ['name' => $imageGroup->name, 'changed' => array_keys($imageGroup->getChanges())],
+            properties: ['name' => $imageGroup->name, 'changed' => $imageGroup->getChangedAttributeNames()],
         );
 
         return ImageGroupData::from($imageGroup);

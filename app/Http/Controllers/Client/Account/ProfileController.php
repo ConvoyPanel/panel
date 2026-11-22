@@ -33,7 +33,7 @@ class ProfileController
             Audit::record(
                 AuditEvent::ACCOUNT_PROFILE_UPDATED,
                 subject: $user,
-                properties: ['changed' => array_keys($user->getChanges())],
+                properties: ['changed' => $user->getChangedAttributeNames()],
             );
         }
 
@@ -50,7 +50,7 @@ class ProfileController
             Audit::record(
                 AuditEvent::ACCOUNT_PROFILE_UPDATED,
                 subject: $user,
-                properties: ['changed' => array_keys($user->getChanges())],
+                properties: ['changed' => $user->getChangedAttributeNames()],
             );
         }
 

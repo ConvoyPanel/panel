@@ -1,5 +1,7 @@
 <?php
 
+use App\Enums\Audit\AuditEvent;
+use App\Models\AuditLog;
 use App\Models\Location;
 use App\Models\User;
 
@@ -53,4 +55,18 @@ it('can delete a location', function () {
     $response = $this->actingAs($user)->deleteJson("/api/admin/locations/{$location->id}");
 
     $response->assertNoContent();
+});
+
+it('records only the fields a location update changed', function () {
+    $location = Location::factory()->create(['description' => 'Before']);
+
+    $this->travel(5)->seconds();
+
+    $this->actingAs(admin())->putJson("/api/admin/locations/{$location->id}", [
+        'short_code' => $location->short_code,
+        'description' => 'After',
+    ])->assertOk();
+
+    expect(AuditLog::query()->forEvent(AuditEvent::ADMIN_LOCATION_UPDATED)->sole()->properties['changed'])
+        ->toBe(['description']);
 });
