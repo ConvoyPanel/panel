@@ -50,7 +50,7 @@ php artisan tokens:create --name=terraform --plain
 ```
 
 `--plain` prints only the token, so it can be captured: `TOKEN=$(php artisan tokens:create --name=ci --plain)`. In the
-container install, run it as `convoyctl artisan tokens:create ...`.
+container install, run it as `convoy artisan tokens:create ...`.
 
 | Option | |
 | --- | --- |

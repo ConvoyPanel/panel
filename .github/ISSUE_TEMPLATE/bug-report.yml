@@ -110,7 +110,7 @@ body:
     attributes:
       label: Error Logs
       description: |
-        Run `convoyctl logs web` on the panel host (add `convoyctl logs worker` if the bug involves a
+        Run `convoy logs web` on the panel host (add `convoy logs worker` if the bug involves a
         server action that never finished). Paste the relevant output below, or link a
         [gist](https://gist.github.com) if it is long. Redact tokens, passwords and customer data.
       render: shell
