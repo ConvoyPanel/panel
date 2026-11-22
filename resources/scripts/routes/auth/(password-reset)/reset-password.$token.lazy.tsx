@@ -62,13 +62,13 @@ const ResetPassword = () => {
 
             toast.add({ title: 'Password reset', type: 'success' })
 
-            // Not signed in: the reset proves the mailbox, not a second
-            // factor, so they sign in the usual way.
+            // Don't sign them in here. The reset link only proves they can
+            // read the email, so two-factor still has to happen at sign-in.
             await navigate({ to: '/auth/login' })
         } catch (error) {
             if (!handleFormErrors(error, form.setError)) {
-                // Spent or expired while the form was open. Asking again
-                // swaps the form for the screen that explains it.
+                // The link was used or expired while the form was open.
+                // Refetching shows the expired screen instead.
                 await refetch()
             }
         }
@@ -80,7 +80,7 @@ const ResetPassword = () => {
                 <CardHeader>
                     <CardTitle as={'h1'}>This reset link has expired</CardTitle>
                     <CardDescription>
-                        It may have been used already. Request a new one.
+                        It may have been used already.
                     </CardDescription>
                 </CardHeader>
                 <CardFooter className={'justify-end'}>
@@ -105,8 +105,8 @@ const ResetPassword = () => {
             </CardHeader>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(submit)}>
-                    {/* The address rides along hidden so a password manager
-                        files the new password under the right account. */}
+                    {/* Hidden email field so password managers save the new
+                        password under the right account. */}
                     <input
                         type={'email'}
                         name={'email'}

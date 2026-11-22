@@ -60,7 +60,7 @@ const EMAILS = [
             link: 'https://convoy.example.com/auth/reset-password/3b1f0c9e2d7a48f6a5c4e1b2d3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2?email=eric%40example.com',
             expiry: '60 minutes',
         },
-        note: 'The invite’s layout with a shorter fuse. The footer says what ignoring it means, because the reader who did not ask for it is the one most likely to worry.',
+        note: 'Same layout as the invite. The link expires sooner. The footer tells someone who did not ask for it that nothing changes unless the link is used.',
     },
     {
         file: 'server-ready.blade.php',
@@ -76,7 +76,7 @@ const EMAILS = [
             ipv6: '2001:db8::10',
             link: 'https://convoy.example.com/servers/1a2b3c4d',
         },
-        note: 'Where to reach the server, and a way into the panel. No credentials: whoever set the root password already has it. Either address row drops out when the server has none, so the hostname is the fixed last row.',
+        note: 'The server’s addresses and a link to it in the panel. No credentials, since whoever set the root password already has it. An address row is left out when the server has no address of that type, so the hostname is always the last row.',
     },
     {
         file: 'password-changed.blade.php',

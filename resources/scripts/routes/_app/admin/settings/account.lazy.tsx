@@ -130,7 +130,7 @@ const AccountSettingsPage = () => {
                                 name={'allowPasswordChange'}
                                 label={'Password'}
                                 description={
-                                    'Turning this off also stops them resetting a forgotten password.'
+                                    "Users who can't change their password can't reset it either."
                                 }
                                 formItemProps={{
                                     className: 'py-3.5 first:pt-0 last:pb-0',
@@ -152,7 +152,7 @@ const AccountSettingsPage = () => {
                                     name={'allowPasswordReset'}
                                     label={'Password reset'}
                                     description={
-                                        'Adds “Forgot password?” to the sign-in page. Anyone who can read the account’s email can then set a new password.'
+                                        'Adds “Forgot password?” to the sign-in page, which emails the user a link to choose a new password.'
                                     }
                                     formItemProps={{
                                         className:
@@ -163,7 +163,7 @@ const AccountSettingsPage = () => {
                                     name={'sendServerReadyEmail'}
                                     label={'Server ready'}
                                     description={
-                                        'Emails the owner when a new server finishes installing, whether it was created here or through the API.'
+                                        'Emails the owner when a new server finishes installing.'
                                     }
                                     formItemProps={{
                                         className:

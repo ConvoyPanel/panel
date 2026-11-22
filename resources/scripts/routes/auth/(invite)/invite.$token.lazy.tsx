@@ -62,15 +62,15 @@ const AcceptInvite = () => {
 
     const [recoveryCodes, setRecoveryCodes] = useState<string[] | null>(null)
 
-    // Registering needs a secure context and WebAuthn. Where either is
-    // missing, the button would only ever fail, so it isn't offered.
+    // Passkeys need HTTPS and a browser with WebAuthn. Without either, the
+    // button would always fail, so it's hidden.
     const canUsePasskey = window.isSecureContext && browserSupportsWebAuthn()
 
     const { mutate: registerPasskey, isPending: isRegistering } = useMutation({
         mutationFn: () => acceptInviteWithPasskey(token),
         onSuccess: async codes => {
-            // The codes are shown once, before leaving. Without any, there is
-            // nothing to show and they go straight in.
+            // Show the recovery codes once before leaving. If there are none,
+            // go straight to the panel.
             if (codes) {
                 setRecoveryCodes(codes)
 
@@ -167,8 +167,8 @@ const AcceptInvite = () => {
                             )}
                         </FieldGroup>
                     </CardContent>
-                    {/* The sign-in page's action band: the main action full
-                        width, the passkey route under it as the quieter one. */}
+                    {/* Same layout as the sign-in page: the main button full
+                        width, with the passkey option under it. */}
                     <CardFooter className={'flex-col items-stretch gap-2'}>
                         <FormButton className={'w-full'}>
                             Set password and sign in

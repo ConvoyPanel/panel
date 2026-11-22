@@ -36,10 +36,6 @@ const server = {
       </div>
     </CardContent>
 
-    <CardFooter>
-      Manage it, open its console or reset its root password from the panel.
-    </CardFooter>
-
     <template #footer>
       You received this because a server was created for your Convoy account.
     </template>

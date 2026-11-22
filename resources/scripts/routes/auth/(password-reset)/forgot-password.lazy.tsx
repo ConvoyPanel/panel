@@ -55,17 +55,16 @@ const ForgotPassword = () => {
         </Button>
     )
 
-    /*
-     * The server answers the same for every address, so this can't say a link
-     * was sent, only that one was if the address has an account.
-     */
+    // The server gives the same answer for every address, so this screen
+    // can't say whether an email was actually sent.
     if (sentTo) {
         return (
             <>
                 <CardHeader>
                     <CardTitle as={'h1'}>Check your email</CardTitle>
                     <CardDescription>
-                        If {sentTo} has an account, a reset link is on its way.
+                        If {sentTo} has an account, you'll get an email with a
+                        reset link.
                     </CardDescription>
                 </CardHeader>
                 <CardFooter className={'justify-end'}>
