@@ -45,8 +45,8 @@ const PasswordStrengthIndicator = ({ password }: Props) => {
                 ))}
             </ul>
             <p className={'text-muted-foreground text-sm'}>
-                Length is what matters. Several unrelated words you can remember
-                make a stronger password than a short one with substitutions.
+                Numbers and symbols aren't required. Passwords that have
+                appeared in a data leak aren't allowed.
             </p>
         </div>
     )

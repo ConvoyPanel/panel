@@ -83,7 +83,7 @@ class SettingsController
             // An image with no published version cannot be installed, so
             // offering it would only produce a validation error later.
             $query->whereHas('versions', fn ($versions) => $versions->where('is_active', true))
-                ->with('versions');
+                ->with(['versions', 'provisioners']);
         }])->get();
 
         return ImageGroupData::collect($groups, DataCollection::class)
@@ -104,7 +104,14 @@ class SettingsController
                 'requested_at' => now(),
             ]);
 
-            $this->rebuildServerAction->execute($deployment, $request->account_password);
+            $sshKeys = implode("\n", $request->input('ssh_keys') ?? []);
+
+            $this->rebuildServerAction->execute(
+                $deployment,
+                $request->account_password,
+                $request->validated('provisioner_fields') ?? [],
+                $sshKeys === '' ? null : $sshKeys,
+            );
 
             // Inside the transaction: a reinstall that rolls back must not leave a record
             // claiming it happened. The account password is deliberately not recorded.
@@ -286,8 +293,12 @@ class SettingsController
             subject: $server,
             properties: array_filter([
                 'type' => $type->value,
+                // `ssh_keys` is one newline-separated string, not a list.
                 'ssh_key_count' => $type === AuthenticationType::KEY
-                    ? count($request->ssh_keys ?? [])
+                    ? count(array_filter(
+                        preg_split('/\R/', (string) $request->ssh_keys),
+                        fn (string $key) => trim($key) !== '',
+                    ))
                     : null,
             ], fn ($value) => $value !== null),
         );

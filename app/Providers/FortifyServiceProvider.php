@@ -61,6 +61,13 @@ class FortifyServiceProvider extends ServiceProvider
             return Limit::perMinute(20)->by($email.$request->ip());
         });
 
+        // Per client rather than per address: every request can send an email, so the cap is on
+        // how many one client can send, whichever addresses it names. The broker separately
+        // holds each account to one link a minute.
+        RateLimiter::for('password-reset', function (Request $request) {
+            return Limit::perMinute(5)->by($request->ip());
+        });
+
         RateLimiter::for('two-factor', function (Request $request) {
             return Limit::perMinute(20)->by($request->session()->get('login.id'));
         });

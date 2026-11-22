@@ -14,8 +14,10 @@ import {
     IconSettings,
     IconShieldLock,
     IconStack2,
+    IconTerminal2,
     IconTransform,
     IconUsers,
+    IconWebhook,
 } from '@tabler/icons-react'
 import { Outlet, createFileRoute } from '@tanstack/react-router'
 
@@ -116,6 +118,12 @@ const sections: GatedGroup[] = [
                 permission: 'image-groups.read',
             },
             {
+                icon: IconTerminal2,
+                label: 'Provisioners',
+                path: '/admin/provisioners',
+                permission: 'image-groups.read',
+            },
+            {
                 icon: IconDisc,
                 label: 'ISOs',
                 path: '/admin/isos',
@@ -151,6 +159,14 @@ const sections: GatedGroup[] = [
                 permission: 'tokens.manage',
             },
             {
+                icon: IconWebhook,
+                label: 'Webhooks',
+                path: '/admin/webhooks',
+                // Webhooks are panel configuration: the API gates them on the
+                // `settings` resource, reads on `.read` and changes on `.manage`.
+                permission: 'settings.read',
+            },
+            {
                 icon: IconHistory,
                 label: 'Audit Log',
                 path: '/admin/audit-log',
@@ -175,7 +191,9 @@ const grants = (held: Permission[], required: Permission): boolean => {
 
     const [resource, action] = required.split('.')
 
-    return action === 'read' && held.includes(`${resource}.manage` as Permission)
+    return (
+        action === 'read' && held.includes(`${resource}.manage` as Permission)
+    )
 }
 
 const navFor = (held: Permission[]): SidebarNav => ({

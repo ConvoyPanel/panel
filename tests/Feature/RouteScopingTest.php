@@ -54,13 +54,12 @@ it('scopes every nested client route to its parent', function () use ($deliberat
 });
 
 it('resolves a backup through its server', function () {
-    // Client routes only: the admin and application endpoints address a backup
-    // directly rather than through a server, so there is no parent to scope to.
+    // The client, admin and application APIs each nest restore and delete under the server.
+    // The admin API's other backup delete, `backups/{backup}`, has no parent to scope to.
     $routes = collect(Route::getRoutes()->getRoutes())
-        ->filter(fn ($route) => str_starts_with($route->uri(), 'api/client/'))
-        ->filter(fn ($route) => str_contains($route->uri(), 'backups/{backup}'));
+        ->filter(fn ($route) => str_contains($route->uri(), 'servers/{server}/backups/{backup}'));
 
-    expect($routes)->toHaveCount(2);
+    expect($routes)->toHaveCount(6);
 
     $unscoped = $routes
         ->reject(fn ($route) => $route->enforcesScopedBindings())

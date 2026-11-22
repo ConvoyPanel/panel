@@ -25,7 +25,7 @@ class UpdateAuthSettingsRequest extends BaseApiRequest
         // than trusting a live cookie alone. The gate is on the password branch only —
         // rewriting the authorized key set stays a plain permission check, as before.
         if ($this->input('type') === AuthenticationType::PASSWORD->value
-            && ! IdentityConfirmation::isConfirmed($this->session())) {
+            && ! IdentityConfirmation::satisfiedBy($this)) {
             throw new AccessDeniedHttpException('Your identity must be confirmed to set a root password.');
         }
 

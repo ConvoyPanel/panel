@@ -7,6 +7,7 @@ use App\Enums\Server\PowerState;
 use App\Enums\Server\ServerLifecycle;
 use App\Enums\Server\ServerPermission;
 use App\Models\Server;
+use App\Models\SystemActor;
 use App\Models\User;
 use App\Services\Nodes\GuestStateCache;
 use Carbon\CarbonImmutable;
@@ -24,6 +25,8 @@ class ServerData extends Data
         public int $id,
         public string $uuid,
         public string $uuidShort,
+        /** The id an integration knows this server by. Staff only, like the flag below. */
+        public ?string $externalId,
         public int $userId,
         public int $nodeId,
         public ?int $networkInterfaceId,
@@ -103,6 +106,7 @@ class ServerData extends Data
             id: $server->id,
             uuid: $server->uuid,
             uuidShort: $server->uuid_short,
+            externalId: self::viewerIsStaff() ? $server->external_id : null,
             userId: $server->user_id,
             nodeId: $server->node_id,
             networkInterfaceId: $server->network_interface_id,
@@ -137,15 +141,27 @@ class ServerData extends Data
         );
     }
 
+    /** Whether the caller is an application token, which acts as the panel itself. */
+    private static function viewerIsSystem(): bool
+    {
+        /** @var User|SystemActor|null $actor */
+        $actor = Auth::user();
+
+        return $actor instanceof SystemActor;
+    }
+
     private static function viewer(): ?User
     {
         return Auth::user() instanceof User ? Auth::user() : null;
     }
 
-    /** Fields the customer has no business seeing are gated on staff, not on ownership. */
+    /**
+     * Fields the customer has no business seeing are gated on staff, not on ownership. An
+     * application token is staff: it is the panel's own credential, minted by an administrator.
+     */
     private static function viewerIsStaff(): bool
     {
-        return self::viewer()?->isAdmin() === true;
+        return self::viewerIsSystem() || self::viewer()?->isAdmin() === true;
     }
 
     /**
@@ -153,6 +169,10 @@ class ServerData extends Data
      */
     private static function permissionsFor(Server $server, ?User $viewer): array
     {
+        if (self::viewerIsSystem()) {
+            return ServerPermission::cases();
+        }
+
         if ($viewer === null) {
             return [];
         }

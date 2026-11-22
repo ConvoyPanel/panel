@@ -3,6 +3,7 @@ import {
     createToken,
     tokenSchema,
 } from '@/features/tokens/api.ts'
+import { tokenExpiryOptions } from '@/features/tokens/expiry.ts'
 import {
     type PaginatedApiKeys,
     TOKEN_RESOURCES,
@@ -44,6 +45,7 @@ const defaultValues: TokenInput = {
     name: '',
     fullAccess: true,
     allowedNetworks: '',
+    expiresIn: 'never',
     scopes: Object.fromEntries(
         TOKEN_RESOURCES.map(resource => [resource, 'none'])
     ) as TokenInput['scopes'],
@@ -171,6 +173,11 @@ const CreateTokenModal = ({ mutate }: Props) => {
                                         name={'name'}
                                         label={'Name'}
                                         placeholder={'e.g. Deploy bot'}
+                                    />
+                                    <SelectForm
+                                        name={'expiresIn'}
+                                        label={'Expiration'}
+                                        items={[...tokenExpiryOptions]}
                                     />
                                     <CheckboxForm
                                         name={'fullAccess'}

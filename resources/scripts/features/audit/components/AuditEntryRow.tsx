@@ -1,6 +1,7 @@
 import type { AuditEntry } from '@/features/audit/api.ts'
 import { describeAuditEvent } from '@/features/audit/event-copy.ts'
 import {
+    IconKey,
     IconRobot,
     IconShieldLock,
     IconUser,
@@ -10,12 +11,7 @@ import { format, formatDistanceToNow } from 'date-fns'
 import { useMemo } from 'react'
 
 import { Badge } from '@/components/ui/Badge'
-import {
-    Item,
-    ItemContent,
-    ItemMedia,
-    ItemTitle,
-} from '@/components/ui/Item'
+import { Item, ItemContent, ItemMedia, ItemTitle } from '@/components/ui/Item'
 import {
     Tooltip,
     TooltipContent,
@@ -67,7 +63,7 @@ const AuditEntryRow = ({ entry, showSubject = false }: Props) => {
                 </ItemTitle>
                 <p
                     className={
-                        'flex flex-wrap items-center gap-x-1.5 text-xs text-muted-foreground'
+                        'text-muted-foreground flex flex-wrap items-center gap-x-1.5 text-xs'
                     }
                 >
                     {/* Exact timestamp on hover: "3 days ago" is the readable form, but an
@@ -91,6 +87,32 @@ const AuditEntryRow = ({ entry, showSubject = false }: Props) => {
                                 {entry.subject.label ??
                                     `${entry.subject.type} #${entry.subject.id}`}
                             </span>
+                        </>
+                    )}
+                    {/* Every application token acts as System, so the token is what tells
+                        one integration's changes from another's. */}
+                    {entry.token && (
+                        <>
+                            <span aria-hidden>·</span>
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <span
+                                            className={
+                                                'inline-flex cursor-default items-center gap-0.5'
+                                            }
+                                        >
+                                            <IconKey className={'size-3'} />
+                                            {entry.token.name}
+                                        </span>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        {entry.token.id === null
+                                            ? 'Revoked API token'
+                                            : 'API token'}
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
                         </>
                     )}
                     {entry.ip && (

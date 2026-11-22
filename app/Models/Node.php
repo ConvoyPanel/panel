@@ -9,6 +9,7 @@ use App\Enums\Node\ConnectionErrorCode;
 use App\Enums\Node\NodeStatus;
 use App\Enums\Node\Storage\StorageContentType;
 use App\Models\Concerns\AnchorInstallation;
+use App\Support\Anchor\AnchorSnippetProtocol;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -355,6 +356,26 @@ class Node extends Model
     public function importStorage(): ?Storage
     {
         return $this->storages()->stores(StorageContentType::IMPORT)->first();
+    }
+
+    /**
+     * Where this node's provisioner snippets go: a storage with the `snippets`
+     * content type, `local` first because every node has one and it is not
+     * shared with anything.
+     */
+    public function snippetStorage(): ?Storage
+    {
+        return $this->storages()
+            ->stores(StorageContentType::SNIPPETS)
+            ->orderByRaw("case when storages.name = 'local' then 0 else 1 end")
+            ->orderBy('storages.id')
+            ->first();
+    }
+
+    /** Whether this node's Anchor reports that it can write provisioner snippets. */
+    public function canWriteSnippets(): bool
+    {
+        return in_array(AnchorSnippetProtocol::CAPABILITY, $this->agent_capabilities ?? [], true);
     }
 
     /**

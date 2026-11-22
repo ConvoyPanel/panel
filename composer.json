@@ -16,6 +16,7 @@
     "php": "^8.2",
     "ext-gmp": "*",
     "ext-pcntl": "*",
+    "dedoc/scramble": "^0.13.55",
     "laravel/fortify": "^1.20",
     "laravel/framework": "^12.0",
     "laravel/helpers": "^1.7",

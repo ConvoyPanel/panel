@@ -27,6 +27,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property string $name
  * @property ?string $description
  * @property ServerLifecycle $lifecycle
+ * @property ?string $external_id
  * @property ?CarbonImmutable $suspended_at
  * @property ?CarbonImmutable $flagged_at
  * @property ?string $flag_reason
@@ -65,6 +66,7 @@ class Server extends Model
 
     public static array $validationRules = [
         'name' => 'required|string|min:1|max:40',
+        'external_id' => 'sometimes|nullable|string|max:191|unique:servers,external_id',
         'node_id' => 'required|integer|exists:nodes,id',
         'storage_id' => 'required|integer|exists:storages,id',
         'network_interface_id' => 'nullable|integer|exists:network_interfaces,id',

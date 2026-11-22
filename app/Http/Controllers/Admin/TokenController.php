@@ -41,6 +41,7 @@ class TokenController
             $request->name,
             $request->abilities(),
             $request->allowedNetworks(),
+            $request->expiresAt(),
         );
 
         if (! $newToken->accessToken instanceof PersonalAccessToken) {
@@ -58,6 +59,7 @@ class TokenController
                 'name' => $newToken->accessToken->name,
                 'abilities' => $newToken->accessToken->abilities,
                 'allowed_networks' => $newToken->accessToken->allowed_networks,
+                'expires_at' => $newToken->accessToken->expires_at?->toIso8601String(),
             ],
         );
 

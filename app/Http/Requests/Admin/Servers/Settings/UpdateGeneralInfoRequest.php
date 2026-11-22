@@ -15,6 +15,7 @@ class UpdateGeneralInfoRequest extends BaseApiRequest
 
         return $this->requiredToOptional([
             'name' => $rules['name'],
+            'external_id' => $rules['external_id'],
             'hostname' => [...$rules['hostname'], ...[new Hostname]],
             'user_id' => [...$rules['user_id'], new OwnerIsNotAGuest],
             'vmid' => $rules['vmid'],

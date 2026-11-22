@@ -26,6 +26,7 @@ const AUDIT_EXEMPT = [
     // Read-only probes despite being POST: they take a payload but change nothing.
     'NodeConnectionTestController@__invoke' => 'Connection probe; reads only.',
     'VersionController@check' => 'Checks for panel updates; changes nothing.',
+    'WebhookDeliveryController@redeliver' => 'Resends a delivery the panel already sent; changes nothing.',
 
     // Authentication is audited from Laravel's events, not from Fortify's controllers.
     // See App\Listeners\AuditAuthenticationSubscriber.
@@ -39,6 +40,13 @@ const AUDIT_EXEMPT = [
     'ConfirmedTwoFactorAuthenticationController@store' => 'Audited via Fortify\'s two-factor events.',
     'ConfirmableIdentityController@store' => 'Re-authentication step; the action it gates is audited.',
     'RecoveryCodeController@store' => 'Audited in App\\Http\\Controllers\\Client\\RecoveryCodeController.',
+    // Only a link that was actually sent is worth an entry, and only the service knows which.
+    'PasswordResetController@store' => 'Audited in App\\Services\\Users\\PasswordResetService.',
+    'PasswordResetController@update' => 'Audited in App\\Services\\Users\\PasswordResetService.',
+
+    // Telemetry page-view counts, sent by the browser every minute. Auditing them would log every
+    // page anyone opens, which is the opposite of what anonymous counts are for.
+    'PageViewController@__invoke' => 'Anonymous page-view counts; changes no record.',
 ];
 
 /** The prefixes this guard governs. Horizon and the SPA shell are not ours to audit. */
@@ -86,7 +94,9 @@ it('audits every mutating api route, or exempts it on purpose', function () {
             continue;
         }
 
-        $file = (new ReflectionClass($route['class']))->getFileName();
+        // The class that declares the method, not the one routed to: the admin server
+        // operations are thin subclasses of the client controllers that hold the audit calls.
+        $file = (new ReflectionMethod($route['class'], $route['method']))->getDeclaringClass()->getFileName();
 
         // A vendor controller cannot be given a call site; it must be exempted with a reason.
         if ($file === false || Str::contains($file, '/vendor/')) {

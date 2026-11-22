@@ -9,9 +9,14 @@ use App\Console\Commands\Maintenance\PruneOrphanedBackupsCommand;
 use App\Console\Commands\Maintenance\PruneUsersCommand;
 use App\Console\Commands\Node\PollNodeStatusesCommand;
 use App\Console\Commands\Server\ResetUsagesCommand;
+use App\Console\Commands\Server\SweepProvisioningRunsCommand;
 use App\Console\Commands\Server\UpdateRateLimitsCommand;
 use App\Console\Commands\Server\UpdateUsagesCommand;
+use App\Jobs\Telemetry\SendTelemetryReportJob;
 use App\Models\SessionRecord;
+use App\Models\WebhookDelivery;
+use App\Services\Telemetry\TelemetryService;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Console\PruneCommand;
 use Illuminate\Support\Facades\Schedule;
 
@@ -27,6 +32,12 @@ if (config('metrics.victoriametrics.url')) {
 // Garbage-collect session metadata rows whose underlying session has aged out (see
 // SessionRecord::prunable) so the table stays bounded even for sessions never listed.
 Schedule::command(PruneCommand::class, ['--model' => [SessionRecord::class]])->daily();
+
+// An expired token can never authenticate again; drop it a day after it lapses.
+Schedule::command('sanctum:prune-expired', ['--hours' => 24])->daily();
+
+// Webhook deliveries are kept for WebhookDelivery::RETENTION_DAYS, then dropped.
+Schedule::command(PruneCommand::class, ['--model' => [WebhookDelivery::class]])->daily();
 
 if (config('deployments.stuck_age') || config('deployments.retention_period')) {
     Schedule::command(PruneDeploymentsCommand::class)->hourly();
@@ -65,6 +76,20 @@ Schedule::command(PollAnchorLivenessCommand::class)->everyMinute()->withoutOverl
 // waits on GitHub. Hourly is far below the API's rate limit and well inside how
 // quickly anyone needs to hear about a release.
 Schedule::command(CheckForUpdatesCommand::class)->hourly()->withoutOverlapping(5);
+
+// Provisioner snippets hold customer field values on a node, so one the guest
+// never reported back on comes off within a minute of its deadline.
+Schedule::command(SweepProvisioningRunsCommand::class)->everyMinute()->withoutOverlapping(5);
+
+// The anonymous daily report (docs/telemetry.md). Checked every minute, but due in only one of
+// them: each install takes its own minute of the UTC day from its random id, which spreads the
+// console's load over 24 hours. Not registered at all when the environment turns telemetry off.
+if (config('convoy.telemetry.enabled') && config('convoy.telemetry.url')) {
+    Schedule::job(new SendTelemetryReportJob)
+        ->everyMinute()
+        ->name('telemetry:report')
+        ->when(fn (TelemetryService $telemetry) => $telemetry->isDue(CarbonImmutable::now()));
+}
 
 // Bandwidth quota + rate limiting (see docs/bandwidth-rate-limiting-plan.md).
 // Usage must accumulate for quotas to ever trip, so all three run together:

@@ -5,6 +5,7 @@ namespace App\Traits\Actions;
 use App\Enums\Server\DeploymentStatus;
 use App\Enums\Server\ServerLifecycle;
 use App\Models\Deployment;
+use App\Services\Servers\ServerReadyNotifier;
 use Illuminate\Support\Facades\DB;
 
 use function now;
@@ -32,6 +33,11 @@ trait ManagesDeploymentLifecycle
                 ]);
                 $deployment->server->update(['lifecycle' => ServerLifecycle::READY]);
             });
+
+            // After the commit, so the email never announces a server the UI still shows as
+            // installing. Resolved here rather than injected: this closure runs on a queue
+            // worker, long after the action that built it.
+            app(ServerReadyNotifier::class)->deploymentCompleted($deployment);
         };
     }
 

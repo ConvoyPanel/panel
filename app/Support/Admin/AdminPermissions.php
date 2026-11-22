@@ -43,12 +43,16 @@ final class AdminPermissions
         'address-block-groups' => 'address-block-groups',
         'images' => 'image-groups',
         'image-groups' => 'image-groups',
+        // A provisioner is part of an image: it runs on what the image builds.
+        'provisioners' => 'image-groups',
         'isos' => 'isos',
         'users' => 'users',
         'admin-roles' => 'users',
         'anchors' => 'anchors',
         'relays' => 'anchors',
         'settings' => 'settings',
+        // A webhook hears every audit entry it subscribes to, so it is panel configuration.
+        'webhooks' => 'settings',
         // No `tokens.read`: listing panel-wide API tokens is part of managing them, and the
         // fallback below picks `tokens.manage` for the GET as well.
         'tokens' => 'tokens',

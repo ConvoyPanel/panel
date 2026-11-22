@@ -82,6 +82,14 @@ export const AUDIT_EVENT_COPY: Record<AuditEvent, AuditEventCopy> = {
     },
     'auth.logout': { verb: 'signed out', detail: () => null },
     'auth.invite.accepted': { verb: 'accepted their invitation' },
+    'auth.password-reset.requested': {
+        verb: 'asked for a password reset link',
+        detail: p => pick(p, 'ip'),
+    },
+    'auth.password-reset.completed': {
+        verb: 'reset their password',
+        detail: p => pick(p, 'ip'),
+    },
 
     // Account and credentials
     'account.profile.updated': {
@@ -426,6 +434,10 @@ export const AUDIT_EVENT_COPY: Record<AuditEvent, AuditEventCopy> = {
     'admin.token.created': { verb: 'created an application token' },
     'admin.token.updated': { verb: 'updated an application token' },
     'admin.token.deleted': { verb: 'revoked an application token' },
+    'admin.webhook.created': { verb: 'created a webhook' },
+    'admin.webhook.updated': { verb: 'updated a webhook' },
+    'admin.webhook.deleted': { verb: 'deleted a webhook' },
+    'admin.webhook.tested': { verb: 'sent a test event to a webhook' },
     'admin.settings.account-updated': {
         verb: 'changed the account settings',
         detail: () => null,
@@ -449,6 +461,10 @@ export const AUDIT_EVENT_COPY: Record<AuditEvent, AuditEventCopy> = {
     'admin.settings.permissions-updated': {
         verb: 'updated the sharing settings',
         detail: () => null,
+    },
+    'admin.settings.telemetry-updated': {
+        verb: 'changed the telemetry setting',
+        detail: p => (p.enabled === true ? 'on' : 'off'),
     },
 
     // Presets and images
@@ -490,6 +506,12 @@ export const AUDIT_EVENT_COPY: Record<AuditEvent, AuditEventCopy> = {
         verb: 'imported an image from the catalogue',
         detail: p => pick(p, 'slug'),
     },
+    'admin.provisioner.created': { verb: 'created a provisioner' },
+    'admin.provisioner.updated': {
+        verb: 'updated a provisioner',
+        detail: changedFields,
+    },
+    'admin.provisioner.deleted': { verb: 'deleted a provisioner' },
 }
 
 /**

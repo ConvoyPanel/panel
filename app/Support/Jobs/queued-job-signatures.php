@@ -35,6 +35,9 @@ return [
     'App\\Jobs\\Node\\SyncServerUsagesJob' => [
         ['name' => 'nodeId', 'type' => 'int', 'optional' => false, 'promoted' => true, 'variadic' => false],
     ],
+    'App\\Jobs\\Provisioner\\CleanUpProvisioningRunJob' => [
+        ['name' => 'runId', 'type' => 'int', 'optional' => false, 'promoted' => true, 'variadic' => false],
+    ],
     'App\\Jobs\\Server\\BatchSyncNetworkSettingsJob' => [
         ['name' => 'addressBlock', 'type' => 'App\\Models\\AddressBlock', 'optional' => false, 'promoted' => true, 'variadic' => false],
     ],
@@ -92,6 +95,10 @@ return [
         ['name' => 'server', 'type' => 'App\\Models\\Server', 'optional' => false, 'promoted' => true, 'variadic' => false],
         ['name' => 'upid', 'type' => 'string', 'optional' => false, 'promoted' => true, 'variadic' => false],
     ],
+    'App\\Jobs\\Server\\PrepareProvisionersJob' => [
+        ['name' => 'step', 'type' => 'App\\Models\\DeploymentStep', 'optional' => false, 'promoted' => true, 'variadic' => false],
+        ['name' => 'fields', 'type' => 'array', 'optional' => true, 'promoted' => true, 'variadic' => false],
+    ],
     'App\\Jobs\\Server\\PurgeBackupsJob' => [
         ['name' => 'server', 'type' => 'App\\Models\\Server', 'optional' => false, 'promoted' => true, 'variadic' => false],
     ],
@@ -112,8 +119,20 @@ return [
         ['name' => 'step', 'type' => 'App\\Models\\DeploymentStep', 'optional' => false, 'promoted' => true, 'variadic' => false],
         ['name' => 'password', 'type' => 'string', 'optional' => false, 'promoted' => true, 'variadic' => false],
     ],
+    'App\\Jobs\\Server\\UpdateSshKeysJob' => [
+        ['name' => 'step', 'type' => 'App\\Models\\DeploymentStep', 'optional' => false, 'promoted' => true, 'variadic' => false],
+        ['name' => 'keys', 'type' => 'string', 'optional' => false, 'promoted' => true, 'variadic' => false],
+    ],
     'App\\Jobs\\Server\\VerifyMigratedGuestJob' => [
         ['name' => 'step', 'type' => 'App\\Models\\DeploymentStep', 'optional' => false, 'promoted' => true, 'variadic' => false],
         ['name' => 'transferId', 'type' => 'int', 'optional' => false, 'promoted' => true, 'variadic' => false],
+    ],
+    'App\\Jobs\\Telemetry\\EraseTelemetryJob' => [
+        ['name' => 'installation', 'type' => 'string', 'optional' => false, 'promoted' => true, 'variadic' => false],
+    ],
+    'App\\Jobs\\Telemetry\\SendTelemetryReportJob' => [
+    ],
+    'App\\Jobs\\Webhooks\\DeliverWebhookJob' => [
+        ['name' => 'delivery', 'type' => 'App\\Models\\WebhookDelivery', 'optional' => false, 'promoted' => true, 'variadic' => false],
     ],
 ];

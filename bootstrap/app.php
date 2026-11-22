@@ -6,7 +6,9 @@ use App\Http\Middleware\EnforceAdminPermissions;
 use App\Http\Middleware\EnforceGuestAccess;
 use App\Http\Middleware\EnforceTokenAbilities;
 use App\Http\Middleware\EnforceTokenNetworkRestrictions;
+use App\Http\Middleware\HandleIdempotencyKeys;
 use App\Http\Middleware\RecordSessionActivity;
+use App\Http\Middleware\StatelessTokenRequests;
 use App\Http\Middleware\ValidateCsrfToken;
 use App\Support\Api\AccountTokenAbilities;
 use Illuminate\Foundation\Application;
@@ -35,8 +37,10 @@ return Application::configure(basePath: dirname(__DIR__))
                 // never ability-scoped; a bearer request resolves to a PersonalAccessToken and is.
                 Route::middleware([
                     'auth:web,sanctum',
+                    'throttle:api-tokens',
                     EnforceGuestAccess::class,
                     EnforceTokenAbilities::class.':'.AccountTokenAbilities::class,
+                    HandleIdempotencyKeys::class,
                 ])->prefix('/api/client')
                     ->as('client.')
                     ->scopeBindings()
@@ -64,10 +68,17 @@ return Application::configure(basePath: dirname(__DIR__))
                     'auth:sanctum',
                     AdminAuthenticate::class,
                     EnforceTokenNetworkRestrictions::class,
+                    // After the allowlist: a token with one is not limited (see
+                    // AppServiceProvider::bootRateLimits), so only an allowed address may count
+                    // on that.
+                    'throttle:api-tokens',
                     // Both gates apply: the token's abilities scope the credential, the actor's
                     // role scopes the account. A request needs to satisfy each.
                     EnforceAdminPermissions::class,
                     EnforceTokenAbilities::class,
+                    // Last, so a replay is only ever served to a request that would have been
+                    // let through to do the work in the first place.
+                    HandleIdempotencyKeys::class,
                 ])
                     ->prefix('/api/application')
                     ->as('application.')
@@ -77,6 +88,10 @@ return Application::configure(basePath: dirname(__DIR__))
                 Route::prefix('/api/anchor')
                     ->as('anchor.')
                     ->group(base_path('routes/api-anchor.php'));
+
+                Route::prefix('/api/provisioning')
+                    ->as('provisioning.')
+                    ->group(base_path('routes/api-provisioning.php'));
             });
         }
     )
@@ -92,6 +107,10 @@ return Application::configure(basePath: dirname(__DIR__))
         // Track active web sessions (for the account "active sessions" list). Appended to the web
         // group so it runs after the session + auth are resolved; it self-skips token/anon requests.
         $middleware->web(append: RecordSessionActivity::class);
+
+        // Outermost in the web group: it has to swap the session driver before StartSession
+        // runs, and strip cookies after everything else has added them.
+        $middleware->web(prepend: StatelessTokenRequests::class);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         // Surface a stable, machine-readable `code` for exceptions that opt in

@@ -1,4 +1,8 @@
 import type { ApiKey } from '@/features/account/api-keys/api.ts'
+import {
+    describeTokenExpiry,
+    isTokenExpired,
+} from '@/features/tokens/expiry.ts'
 import CredentialCard from '@/features/users/components/Security/CredentialCard.tsx'
 import CredentialRow from '@/features/users/components/Security/CredentialRow.tsx'
 import {
@@ -7,6 +11,7 @@ import {
     userCredentialQueries,
 } from '@/features/users/credentials/api.ts'
 import useCredentialRevocation from '@/features/users/hooks/use-credential-revocation.ts'
+import { cn } from '@/utils'
 import { IconKey } from '@tabler/icons-react'
 import { formatDistanceToNow } from 'date-fns'
 
@@ -70,6 +75,16 @@ const UserApiKeysCard = ({ userId }: Props) => {
                                 {key.lastUsedAt
                                     ? `Used ${formatDistanceToNow(key.lastUsedAt, { addSuffix: true })}`
                                     : 'Never used'}
+                            </span>
+                            <span
+                                className={cn(
+                                    'text-xs whitespace-nowrap',
+                                    isTokenExpired(key.expiresAt)
+                                        ? 'text-destructive'
+                                        : 'text-muted-foreground'
+                                )}
+                            >
+                                {describeTokenExpiry(key.expiresAt)}
                             </span>
                         </>
                     }

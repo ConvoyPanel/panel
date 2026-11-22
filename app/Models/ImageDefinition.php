@@ -2,9 +2,13 @@
 
 namespace App\Models;
 
+use App\Data\Provisioner\ProvisionerFieldData;
 use App\Services\Images\OsProfiles;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 use Ramsey\Uuid\Uuid;
 
 /**
@@ -29,6 +33,7 @@ use Ramsey\Uuid\Uuid;
  * @property ?int $minimum_cores
  * @property ?int $minimum_memory
  * @property ImageGroup $group
+ * @property EloquentCollection<int, Provisioner> $provisioners
  */
 class ImageDefinition extends Model
 {
@@ -88,6 +93,48 @@ class ImageDefinition extends Model
     public function versions(): HasMany
     {
         return $this->hasMany(ImageVersion::class);
+    }
+
+    /**
+     * The scripts a server built from this image runs on first boot, in the
+     * order they run.
+     *
+     * @return BelongsToMany<Provisioner, $this>
+     */
+    public function provisioners(): BelongsToMany
+    {
+        return $this->belongsToMany(Provisioner::class, 'image_definition_provisioner')
+            ->withPivot('position')
+            ->orderByPivot('position');
+    }
+
+    /**
+     * What whoever deploys this image is asked for, one entry per key.
+     *
+     * Two provisioners may ask for the same key -- a web server and a mail
+     * server both wanting `domain` -- and that is one question, not two. The
+     * first provisioner to declare a key names it, and the key is required if
+     * any of them requires it.
+     *
+     * @return Collection<int, ProvisionerFieldData>
+     */
+    public function provisionerFields(): Collection
+    {
+        $fields = [];
+
+        foreach ($this->provisioners as $provisioner) {
+            foreach ($provisioner->fieldDefinitions() as $field) {
+                if (isset($fields[$field->key])) {
+                    $fields[$field->key]->required = $fields[$field->key]->required || $field->required;
+
+                    continue;
+                }
+
+                $fields[$field->key] = clone $field;
+            }
+        }
+
+        return collect(array_values($fields));
     }
 
     /**

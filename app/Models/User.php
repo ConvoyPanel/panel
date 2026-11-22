@@ -5,10 +5,13 @@ namespace App\Models;
 use App\Enums\Admin\AdminPermission;
 use App\Enums\Api\ApiKeyType;
 use App\Enums\User\UserType;
+use App\Notifications\PasswordResetRequested;
 use Eloquent;
 use Illuminate\Auth\Authenticatable;
+use Illuminate\Auth\Passwords\CanResetPassword;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
+use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,6 +20,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Sanctum\HasApiTokens;
@@ -33,12 +37,13 @@ use Spatie\LaravelPasskeys\Models\Concerns\HasPasskeys;
  * @property ?int $admin_role_id
  * @property ?AdminRole $adminRole
  * @property bool $root_admin
+ * @property Carbon|null $last_active_at
  *
  * @mixin Eloquent
  */
-class User extends Model implements AuthenticatableContract, AuthorizableContract, HasPasskeys
+class User extends Model implements AuthenticatableContract, AuthorizableContract, CanResetPasswordContract, HasPasskeys
 {
-    use Authenticatable, Authorizable, HasApiTokens, HasFactory, Notifiable, TwoFactorAuthenticatable;
+    use Authenticatable, Authorizable, CanResetPassword, HasApiTokens, HasFactory, Notifiable, TwoFactorAuthenticatable;
 
     /**
      * The attributes that are mass assignable.
@@ -51,6 +56,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         'password',
         'type',
         'admin_role_id',
+        'external_id',
         // Not a column. See the root_admin attribute below: it reads and writes the Superadmin
         // role, so `create(['root_admin' => true])` still means what it always meant.
         'root_admin',
@@ -62,6 +68,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     public static array $validationRules = [
         'email' => 'required|email|between:1,191|unique:users,email',
         'name' => 'required|string|between:1,191',
+        'external_id' => 'sometimes|nullable|string|max:191|unique:users,external_id',
         'password' => ['sometimes', 'min:8', 'max:191', 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/u', 'string'],
         'type' => 'sometimes|string|in:standard,guest',
         'admin_role_id' => 'sometimes|nullable|integer|exists:admin_roles,id',
@@ -109,6 +116,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'type' => UserType::class,
+            'last_active_at' => 'datetime',
         ];
     }
 
@@ -309,6 +317,15 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     public function getPassKeyDisplayName(): string
     {
         return $this->name;
+    }
+
+    /**
+     * The panel's own reset email instead of the framework's. Laravel's version renders through
+     * its markdown theme and links to a `password.reset` route this panel does not have.
+     */
+    public function sendPasswordResetNotification(#[\SensitiveParameter] $token): void
+    {
+        $this->notify(new PasswordResetRequested($token));
     }
 
     /**

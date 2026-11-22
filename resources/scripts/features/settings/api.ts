@@ -8,6 +8,7 @@ import AnchorSettingsController from '@/wayfinder/actions/App/Http/Controllers/A
 import BandwidthSettingsController from '@/wayfinder/actions/App/Http/Controllers/Admin/Settings/BandwidthSettingsController'
 import MailSettingsController from '@/wayfinder/actions/App/Http/Controllers/Admin/Settings/MailSettingsController'
 import PermissionSettingsController from '@/wayfinder/actions/App/Http/Controllers/Admin/Settings/PermissionSettingsController'
+import TelemetrySettingsController from '@/wayfinder/actions/App/Http/Controllers/Admin/Settings/TelemetrySettingsController'
 import { queryOptions, useQuery } from '@tanstack/react-query'
 import { z } from 'zod'
 
@@ -120,15 +121,18 @@ const accountUpdateRoute =
     AccountSettingsController.update['/api/admin/settings/account']
 
 /**
- * What a non-admin may change about their own account. Four plain booleans
- * rather than a per-account policy: the panel has one role bit and no groups,
- * so there is nothing below the install to scope them to.
+ * What a non-admin may change about their own account, and which account
+ * emails the panel sends. Plain booleans rather than a per-account policy: the
+ * panel has one role bit and no groups, so there is nothing below the install
+ * to scope them to.
  */
 export const accountSettingsSchema = z.object({
     allowNameChange: z.boolean(),
     allowEmailChange: z.boolean(),
     allowPasswordChange: z.boolean(),
     allowAvatarChange: z.boolean(),
+    allowPasswordReset: z.boolean(),
+    sendServerReadyEmail: z.boolean(),
 })
 
 const getAccountSettings = async (): Promise<AccountSettings> =>
@@ -152,6 +156,8 @@ export const updateAccountSettings = async (
                 allow_email_change: payload.allowEmailChange,
                 allow_password_change: payload.allowPasswordChange,
                 allow_avatar_change: payload.allowAvatarChange,
+                allow_password_reset: payload.allowPasswordReset,
+                send_server_ready_email: payload.sendServerReadyEmail,
             },
         })
     ).data
@@ -307,3 +313,59 @@ export const updatePermissionSettings = async (
             { body: { allow_guest_accounts: payload.allowGuestAccounts } }
         )
     ).data
+
+// --- Telemetry --------------------------------------------------------------
+
+export type TelemetrySettings = App.Data.Admin.Settings.TelemetrySettingsData
+
+/** The report as JSON. Its shape is the console's contract (docs/telemetry.md), not a panel type. */
+export type TelemetryReport = Record<string, unknown>
+
+const telemetryShowRoute =
+    TelemetrySettingsController.show['/api/admin/settings/telemetry']
+const telemetryUpdateRoute =
+    TelemetrySettingsController.update['/api/admin/settings/telemetry']
+const telemetryReportRoute =
+    TelemetrySettingsController.report['/api/admin/settings/telemetry/report']
+
+export const telemetrySettingsSchema = z.object({
+    enabled: z.boolean(),
+})
+
+const getTelemetrySettings = async (): Promise<TelemetrySettings> =>
+    (await apiFetch<DataResponse<TelemetrySettings>>(telemetryShowRoute())).data
+
+export const telemetrySettingsQuery = () =>
+    queryOptions({
+        queryKey: [...settingsQueries.all(), 'telemetry'] as const,
+        queryFn: getTelemetrySettings,
+    })
+
+export const useTelemetrySettings = () => useQuery(telemetrySettingsQuery())
+
+export const updateTelemetrySettings = async (
+    payload: z.infer<typeof telemetrySettingsSchema>
+): Promise<TelemetrySettings> =>
+    (
+        await apiFetch<DataResponse<TelemetrySettings>>(
+            telemetryUpdateRoute(),
+            {
+                body: { enabled: payload.enabled },
+            }
+        )
+    ).data
+
+const getTelemetryReport = async (): Promise<TelemetryReport> =>
+    (await apiFetch<DataResponse<TelemetryReport>>(telemetryReportRoute())).data
+
+/** Built fresh on every open, so it always matches what would be sent at that moment. */
+export const telemetryReportQuery = () =>
+    queryOptions({
+        queryKey: [...settingsQueries.all(), 'telemetry', 'report'] as const,
+        queryFn: getTelemetryReport,
+        staleTime: 0,
+        gcTime: 0,
+    })
+
+export const useTelemetryReport = (enabled: boolean) =>
+    useQuery({ ...telemetryReportQuery(), enabled })

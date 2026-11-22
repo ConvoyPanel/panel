@@ -13,13 +13,14 @@ It comes after 5.x, the transitional release of the 4.x panel.
 ### Upgrading
 
 Upgrading is a one-time cutover with a maintenance window, not an in-place update. Customers' virtual machines keep
-running throughout. Only the panel is offline. 5.x moves an install onto PostgreSQL and this container setup first,
-which leaves less to do here.
+running throughout. Only the panel is offline.
 
-- **Be on PostgreSQL 17.** MySQL is no longer supported. 5.x makes the move. Coming straight from 4.x,
-  [`database/cutover/RUNBOOK.md`](database/cutover/RUNBOOK.md) copies the data across and runs the renaming migrations.
+- **Upgrade from 5.x.** 5.x moves an install onto PostgreSQL 17 and this container setup. A 4.x install goes through
+  5.x first with `convoy import-v4`. Upgrading a 4.x database straight to this release stops before changing anything.
 - **Add an image for every OS you offer.** Templates are gone and are not migrated. A template row is only a VMID,
   while an image needs the disks and their hardware profile.
+- **Snapshots are gone.** Proxmox keeps existing snapshots, but the panel no longer takes or rolls them back. A server
+  in the middle of a snapshot rollback comes back as ready.
 - **Enroll each Proxmox host with Anchor.** Coterm is gone. Nodes carried over from 4.x or 5.x work for everything
   except the console until their host is enrolled.
 - **Update your billing module and other API clients** for the changes in the table below.
@@ -92,6 +93,15 @@ which leaves less to do here.
 - **Multiple disks.** Add extra disks at creation (`limits.disks[]`) or later from the admin Disks tab, then grow or
   remove them. Capacity is checked per storage across all of a server's disks.
 - **Build presets.** Save a server's build as a preset and apply it in one pick when creating the next.
+- **Provisioner scripts.** Scripts that run once inside a server on its first boot, for one-click installs or a
+  monitoring agent on every server ([#188](https://github.com/ConvoyPanel/panel/issues/188)).
+  - Admins write them under Provisioners and attach them to images, in order. Linux images only.
+  - A provisioner can ask for fields, such as a domain. The admin create form, the reinstall form and the API
+    (`provisioner_fields`) ask for them.
+  - Scripts get the server's details and each field as `CONVOY_*` environment variables, never pasted into the script.
+  - Anchor writes the scripts to the node as cloud-init vendor data and deletes them once they report back, or after
+    `PROVISIONER_TIMEOUT_MINUTES`. The node needs an Anchor that reports `provisioning.snippets` and a storage with
+    the Snippets content type.
 - **Resource usage graphs.** CPU, memory, disk and network on one time axis, with live CPU and memory trends on the
   overview.
 - **Firewall tab.**
@@ -152,7 +162,14 @@ which leaves less to do here.
 #### Administration
 
 - **Invites.** A user created without a password gets a link to set their own. It's emailed when mail is set up and
-  always shown to copy. A new link voids the old one.
+  always shown to copy. A new link voids the old one. The link can also register a passkey instead of a password, and
+  shows the account's recovery codes once. ([#55](https://github.com/ConvoyPanel/panel/issues/55))
+- **Password reset.** Adds "Forgot password?" to the sign-in page, which emails a link that expires after 60 minutes.
+  Resetting a password signs out every session. Off by default; turn it on under Settings → Accounts. It needs mail to
+  be set up, and users who can't change their password can't reset it.
+  ([#55](https://github.com/ConvoyPanel/panel/issues/55))
+- **Server ready email.** When a new server finishes installing, its owner gets an email with its addresses and a link
+  to it. On by default; turn it off under Settings → Accounts. ([#55](https://github.com/ConvoyPanel/panel/issues/55))
 - **Credential review.** See and revoke an account's passkeys, SSH keys, API tokens, sign-in providers and two-factor.
   Administrators can't add credentials for another user.
 - **Settings screen.** Bandwidth defaults, mail, updates, and the account policy that sets what users may change about
@@ -165,6 +182,27 @@ which leaves less to do here.
   or `*`. Write includes read.
 - **Token network restrictions.** An application token can be limited to the networks it may be used from.
 - **Personal access tokens** for the client API. They can't reach account settings.
+- **API reference.** Generated from the code and served at `/api/docs` and `/api/docs/client`. See
+  [`docs/api.md`](docs/api.md).
+- **Server operations for application tokens.** Rebuilds, backups, firewall, credentials, hardware, consoles,
+  sub-users and install progress are under `/api/application/servers/{server}/...`, on the same paths as the client
+  API. Tokens skip identity confirmation, which only a browser session can complete.
+- **Webhooks.** The panel POSTs signed events to a URL: any audit event, plus finished and failed installs,
+  migrations and backups. Failed deliveries are retried and can be sent again. Manage them under Admin → Webhooks.
+- **Idempotency keys.** A write sent again with the same `Idempotency-Key` returns the first response instead of
+  running twice.
+- **Rate limits.** 240 requests a minute for each token (`API_RATE_LIMIT`). Application tokens restricted to an IP
+  allowlist aren't limited.
+- **Token expiry** for application and personal tokens.
+- **Token names in the audit log.** Changes made over the API show the token's name next to the actor, so two
+  integrations that both act as System can be told apart. The name stays after the token is revoked, and the admin
+  audit log API can be filtered by `api_token_id`.
+- **`tokens:create`.** Creates an application token on the command line, so a new install can be set up without a
+  browser.
+- **External IDs** on servers and users, unique, and usable as a list filter.
+- **Placement on create.** A server can be created with a `location_id` and the panel picks the node, storage and
+  bridge. With a `node_id` alone it picks the storage and bridge. `server_preset_uuid` fills in a saved preset.
+- **SSH keys on create and rebuild,** in place of a password.
 - **Safe config writes.** Writes carry Proxmox's config digest, so a change made on the node in between gets a 409
   instead of being overwritten.
 
@@ -250,7 +288,7 @@ which leaves less to do here.
 
 ### Removed
 
-- **Templates, Coterm, and adding nodes by hand.** See [Upgrading](#upgrading).
+- **Templates, snapshots, Coterm, and adding nodes by hand.** See [Upgrading](#upgrading).
 
 ### Fixed
 
@@ -263,8 +301,15 @@ which leaves less to do here.
   Convoy now waits for the Proxmox task and retries one that timed out.
 - **A killed worker could leave a server's jobs stuck forever.** Job locks now expire, and a job that finds one held
   waits and retries.
+- **Setting SSH keys on a server failed with a 500** after the keys had been written, so the change went unaudited.
+- **Application tokens saw the audit log and server lists the way a customer does**, with staff names, IP addresses
+  and placement flags hidden.
+- **Token requests to the client API started a session**, which stored a session row and set cookies on every call.
+- **A personal access token scoped to `servers` couldn't call `GET /api/client/user`.**
 - **Personal access tokens could only read.** Every other client API request made with one failed with 419 "CSRF token
   mismatch". The panel's CSRF check, which lets a valid token through, was never applied to those routes.
+- **Progress bars drew the square of their value.** A 50% meter filled a quarter of its track, so storage, memory,
+  bandwidth and capacity meters all read low. The bar was sized to the value and then shifted left by the remainder.
 
 ### Security
 
@@ -281,6 +326,8 @@ which leaves less to do here.
 - **Profile pictures** are decoded, cropped, scaled to at most 512 px and re-encoded as WebP, so uploaded bytes are
   never served. Images over 50 megapixels are refused.
 - **Invite tokens** are stored only as a hash. An unknown, used or expired link gets the same answer.
+- **Password reset requests** get the same answer whether or not the address has an account. Each account gets at most
+  one link a minute, and each client at most five requests a minute.
 
 ## v4.6.1
 

@@ -11,8 +11,10 @@ use App\Exceptions\Proxmox\RequestException;
 use App\Jobs\Server\ConfigureVmJob;
 use App\Jobs\Server\FetchImageJob;
 use App\Jobs\Server\ImportVmJob;
+use App\Jobs\Server\PrepareProvisionersJob;
 use App\Jobs\Server\SendPowerCommandJob;
 use App\Jobs\Server\UpdatePasswordJob;
+use App\Jobs\Server\UpdateSshKeysJob;
 use App\Models\Deployment;
 use App\Traits\Actions\ManagesDeploymentLifecycle;
 use Illuminate\Http\Client\ConnectionException;
@@ -24,14 +26,21 @@ class BuildServerAction
     use ManagesDeploymentLifecycle;
 
     /**
+     * @param  array<string, string|null>  $provisionerFields  by field key
+     * @param  ?string  $sshKeys  Newline-separated public keys, the shape cloud-init's `sshkeys` takes.
+     *
      * @throws RequestException
      * @throws ConnectionException
      */
-    public function execute(Deployment $deployment, ?string $accountPassword): void
-    {
+    public function execute(
+        Deployment $deployment,
+        ?string $accountPassword,
+        array $provisionerFields = [],
+        ?string $sshKeys = null,
+    ): void {
         $jobs = Arr::flatten([
             $this->onStart($deployment),
-            $this->getJobs($deployment, $accountPassword),
+            $this->getJobs($deployment, $accountPassword, $provisionerFields, $sshKeys),
             $this->onComplete($deployment),
         ]);
 
@@ -43,18 +52,27 @@ class BuildServerAction
     }
 
     /**
+     * @param  array<string, string|null>  $provisionerFields  by field key
+     * @param  ?string  $sshKeys  Newline-separated public keys, the shape cloud-init's `sshkeys` takes.
+     *
      * @throws RequestException
      * @throws ConnectionException
      */
-    public function getJobs(Deployment $deployment, ?string $accountPassword): array
-    {
-        if ($deployment->type === DeploymentType::INSTALL || $deployment->type === DeploymentType::REINSTALL) {
+    public function getJobs(
+        Deployment $deployment,
+        ?string $accountPassword,
+        array $provisionerFields = [],
+        ?string $sshKeys = null,
+    ): array {
+        $installs = $deployment->type === DeploymentType::INSTALL || $deployment->type === DeploymentType::REINSTALL;
+
+        if ($installs) {
             $jobs = $this->createInstallStepsAndJobs($deployment);
         } else {
             $jobs = $this->createConfigureStepsAndJobs($deployment);
         }
 
-        return $this->appendOptionalJobs($deployment, $accountPassword, $jobs);
+        return $this->appendOptionalJobs($deployment, $accountPassword, $sshKeys, $jobs, $installs ? $provisionerFields : null);
     }
 
     /**
@@ -112,10 +130,18 @@ class BuildServerAction
         ];
     }
 
+    /**
+     * `$provisionerFields` is null when the deployment installs no OS, so there
+     * is no first boot to run provisioner scripts on.
+     *
+     * @param  array<string, string|null>|null  $provisionerFields  by field key
+     */
     private function appendOptionalJobs(
         Deployment $deployment,
         ?string $accountPassword,
+        ?string $sshKeys,
         array $jobs,
+        ?array $provisionerFields,
     ): array {
         if (filled($accountPassword)) {
             $step = $deployment->addSteps([
@@ -126,6 +152,31 @@ class BuildServerAction
                 ],
             ])[0];
             $jobs[] = new UpdatePasswordJob($step, $accountPassword);
+        }
+
+        if (filled($sshKeys)) {
+            $step = $deployment->addSteps([
+                [
+                    'name' => 'update-ssh-keys',
+                    'status' => DeploymentStatus::PENDING,
+                    'progress_mode' => ProgressMode::INDETERMINATE,
+                ],
+            ])[0];
+            $jobs[] = new UpdateSshKeysJob($step, $sshKeys);
+        }
+
+        // After everything else that writes cloud-init, and before the first
+        // boot: the scripts have to be on the node when Proxmox builds the
+        // guest's cloud-init drive, which it does as the guest starts.
+        if ($provisionerFields !== null && $deployment->imageDefinition?->provisioners()->exists()) {
+            $step = $deployment->addSteps([
+                [
+                    'name' => 'prepare-provisioners',
+                    'status' => DeploymentStatus::PENDING,
+                    'progress_mode' => ProgressMode::INDETERMINATE,
+                ],
+            ])[0];
+            $jobs[] = new PrepareProvisionersJob($step, $provisionerFields);
         }
 
         if ($deployment->start_on_completion) {

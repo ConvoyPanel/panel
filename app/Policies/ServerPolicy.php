@@ -13,7 +13,7 @@ use App\Models\User;
  * Who may do what on one server, in the client area.
  *
  * Four kinds of caller reach this: the owner, an operator with `servers.manage`, an application
- * token on the admin power endpoint, and a sub-user. The first three are answered by
+ * token on the admin server endpoints, and a sub-user. The first three are answered by
  * {@see before()}; everything else falls through to the sub-user's stored grant.
  *
  * Ability names stay the camelCase ones the request classes already use, and
@@ -26,9 +26,10 @@ class ServerPolicy
 {
     public function before(User|SystemActor $user, string $ability, Server $server): ?bool
     {
-        // The admin power endpoint is the only admin route that asks this policy.
+        // An application token only ever reaches this through /api/application, whose
+        // EnforceTokenAbilities has already held the request to the token's `servers:*` scope.
         if ($user instanceof SystemActor) {
-            return $ability === 'sendPowerCommand';
+            return true;
         }
 
         if ($user->id === $server->user_id) {

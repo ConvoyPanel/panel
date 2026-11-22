@@ -32,8 +32,8 @@ class UpdatePasswordRequest extends BaseApiRequest
      * credentials are owned elsewhere (an OIDC directory, say) and a local password change would
      * change nothing that actually logs the person in.
      *
-     * There is no password-reset flow to gate alongside it: Fortify's `resetPasswords` feature is
-     * not enabled, so this endpoint is the only way an account changes its own password.
+     * The forgot-password flow is held to the same answer; see
+     * {@see AccountPolicyResolver::canResetPassword()}.
      */
     public function authorize(): bool
     {

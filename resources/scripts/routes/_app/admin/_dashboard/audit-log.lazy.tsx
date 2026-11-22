@@ -28,6 +28,7 @@ const AREAS = [
     { value: 'admin.node', label: 'Admin: nodes' },
     { value: 'admin.user', label: 'Admin: users' },
     { value: 'admin.token', label: 'Admin: tokens' },
+    { value: 'admin.webhook', label: 'Admin: webhooks' },
     { value: 'admin.address', label: 'Admin: addressing' },
     { value: 'admin.image', label: 'Admin: definitions' },
     { value: 'admin.settings', label: 'Admin: settings' },

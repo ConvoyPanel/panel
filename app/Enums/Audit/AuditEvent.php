@@ -32,6 +32,8 @@ enum AuditEvent: string
     case AUTH_LOGIN_FAILED = 'auth.login.failed';
     case AUTH_LOGOUT = 'auth.logout';
     case AUTH_INVITE_ACCEPTED = 'auth.invite.accepted';
+    case AUTH_PASSWORD_RESET_REQUESTED = 'auth.password-reset.requested';
+    case AUTH_PASSWORD_RESET_COMPLETED = 'auth.password-reset.completed';
 
     // -----------------------------------------------------------------------------------------
     // Account and credential management. Subject is the User.
@@ -191,15 +193,20 @@ enum AuditEvent: string
     case ADMIN_TOKEN_CREATED = 'admin.token.created';
     case ADMIN_TOKEN_UPDATED = 'admin.token.updated';
     case ADMIN_TOKEN_DELETED = 'admin.token.deleted';
+    case ADMIN_WEBHOOK_CREATED = 'admin.webhook.created';
+    case ADMIN_WEBHOOK_UPDATED = 'admin.webhook.updated';
+    case ADMIN_WEBHOOK_DELETED = 'admin.webhook.deleted';
+    case ADMIN_WEBHOOK_TESTED = 'admin.webhook.tested';
     case ADMIN_SETTINGS_ACCOUNT_UPDATED = 'admin.settings.account-updated';
     case ADMIN_SETTINGS_ANCHOR_UPDATED = 'admin.settings.anchor-updated';
     case ADMIN_SETTINGS_BANDWIDTH_UPDATED = 'admin.settings.bandwidth-updated';
     case ADMIN_SETTINGS_MAIL_UPDATED = 'admin.settings.mail-updated';
     case ADMIN_SETTINGS_MAIL_TESTED = 'admin.settings.mail-tested';
     case ADMIN_SETTINGS_PERMISSIONS_UPDATED = 'admin.settings.permissions-updated';
+    case ADMIN_SETTINGS_TELEMETRY_UPDATED = 'admin.settings.telemetry-updated';
 
     // -----------------------------------------------------------------------------------------
-    // Presets and templates. Subject is the preset, group, or template.
+    // Presets, templates and provisioners. Subject is the preset, group, template or provisioner.
     // -----------------------------------------------------------------------------------------
     case ADMIN_SERVER_PRESET_CREATED = 'admin.server-preset.created';
     case ADMIN_SERVER_PRESET_UPDATED = 'admin.server-preset.updated';
@@ -215,6 +222,9 @@ enum AuditEvent: string
     case ADMIN_IMAGE_VERSION_DELETED = 'admin.image-version.deleted';
     case ADMIN_IMAGE_UPLOADED = 'admin.image.uploaded';
     case ADMIN_IMAGE_IMPORTED = 'admin.image.imported';
+    case ADMIN_PROVISIONER_CREATED = 'admin.provisioner.created';
+    case ADMIN_PROVISIONER_UPDATED = 'admin.provisioner.updated';
+    case ADMIN_PROVISIONER_DELETED = 'admin.provisioner.deleted';
 
     /**
      * How long entries for this event survive. Defaults to the configured prune window; the listed
@@ -227,6 +237,8 @@ enum AuditEvent: string
             self::AUTH_LOGIN_SUCCEEDED,
             self::AUTH_LOGIN_FAILED,
             self::AUTH_LOGOUT,
+            self::AUTH_PASSWORD_RESET_REQUESTED,
+            self::AUTH_PASSWORD_RESET_COMPLETED,
             self::ACCOUNT_PROFILE_UPDATED,
             self::ACCOUNT_PASSWORD_UPDATED,
             self::ACCOUNT_TWO_FACTOR_ENABLED,
@@ -254,6 +266,11 @@ enum AuditEvent: string
             self::ADMIN_TOKEN_CREATED,
             self::ADMIN_TOKEN_UPDATED,
             self::ADMIN_TOKEN_DELETED,
+            // Where the panel sends its audit trail is as much a security fact as who holds a
+            // token.
+            self::ADMIN_WEBHOOK_CREATED,
+            self::ADMIN_WEBHOOK_UPDATED,
+            self::ADMIN_WEBHOOK_DELETED,
             self::ADMIN_SERVER_DELETED,
             self::ADMIN_NODE_DELETED,
             self::ADMIN_ANCHOR_ENROLLMENT_KEY_CREATED,

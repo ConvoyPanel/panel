@@ -86,4 +86,45 @@ return [
     'updates' => [
         'repository' => env('UPDATE_CHECK_REPOSITORY', 'ConvoyPanel/panel'),
     ],
+
+    /*
+    | How long a server's provisioner scripts have to report back once it has
+    | been started, in minutes. After that the panel stops waiting: it removes
+    | `cicustom` from the guest and has Anchor delete the snippet. A report that
+    | arrives later is still recorded.
+    */
+    'provisioners' => [
+        'timeout_minutes' => env('PROVISIONER_TIMEOUT_MINUTES', 60),
+    ],
+
+    /*
+    | The anonymous daily usage report (docs/telemetry.md lists every field).
+    | An empty URL turns it off for an install that cannot reach the internet;
+    | `enabled` turns it off without one. Either way the admin Settings switch
+    | shows it as off and cannot turn it back on.
+    */
+    'telemetry' => [
+        'enabled' => (bool) env('CONVOY_TELEMETRY_ENABLED', true),
+        'url' => env('CONVOY_TELEMETRY_URL', 'https://convoypanel.com/api/v1/telemetry'),
+    ],
+
+    /*
+    | The token APIs: /api/application and token requests to /api/client.
+    |
+    | `rate_limit` is requests per minute for each token, counted separately per
+    | token. An application token restricted to an IP allowlist is not limited, and
+    | neither is the panel's own browser session. 0 turns the limit off.
+    |
+    | `idempotency_ttl_hours` is how long a write sent with an Idempotency-Key is
+    | remembered, so a retry within that window replays the first answer instead of
+    | doing the work twice.
+    |
+    | `docs_public` serves the API reference at /api/docs without signing in. Off,
+    | any signed-in account can read it.
+    */
+    'api' => [
+        'rate_limit' => (int) env('API_RATE_LIMIT', 240),
+        'idempotency_ttl_hours' => (int) env('API_IDEMPOTENCY_TTL_HOURS', 24),
+        'docs_public' => (bool) env('API_DOCS_PUBLIC', false),
+    ],
 ];

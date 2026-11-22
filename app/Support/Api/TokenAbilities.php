@@ -32,12 +32,14 @@ final class TokenAbilities extends ScopedTokenAbilities
         'address-block-groups',
         'images',
         'image-groups',
+        'provisioners',
         'isos',
         'users',
         'admin-roles',
         'anchors',
         'relays',
         'settings',
+        'webhooks',
     ];
 
     protected const PATH_PREFIX = 'api/application/';

@@ -1,6 +1,10 @@
+import { useImageDefinitions } from '@/features/images/definitions/api.ts'
+import ProvisionerFieldInputs from '@/features/provisioners/components/ProvisionerFieldInputs.tsx'
 import ImageGroupPicker from '@/features/servers/components/admin/Create/pickers/ImageGroupPicker'
 import ImagePicker from '@/features/servers/components/admin/Create/pickers/ImagePicker'
-import { useWatch } from 'react-hook-form'
+import { IconTerminal2 } from '@tabler/icons-react'
+import { useEffect } from 'react'
+import { useFormContext, useWatch } from 'react-hook-form'
 
 import {
     Card,
@@ -9,7 +13,45 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/Card'
-import { CheckboxForm, FieldFold, InputForm } from '@/components/ui/Forms'
+import {
+    CheckboxForm,
+    FieldFold,
+    GroupHeader,
+    InputForm,
+} from '@/components/ui/Forms'
+
+/**
+ * The values the chosen image's provisioners ask for. Cleared when the image
+ * changes, so a key one image asked for is never sent with another.
+ */
+const ProvisionerFields = ({
+    imageGroupId,
+    imageUuid,
+}: {
+    imageGroupId: string | null
+    imageUuid: string | null
+}) => {
+    const { setValue } = useFormContext()
+    const { data: images } = useImageDefinitions(imageGroupId, {})
+    const fields =
+        images?.find(image => image.uuid === imageUuid)?.provisionerFields ?? []
+
+    useEffect(() => {
+        setValue('provisionerFields', {})
+    }, [imageUuid, setValue])
+
+    if (fields.length === 0) return null
+
+    return (
+        <div className={'space-y-2'}>
+            <GroupHeader
+                icon={<IconTerminal2 className={'size-4'} />}
+                title={'Provisioner fields'}
+            />
+            <ProvisionerFieldInputs fields={fields} />
+        </div>
+    )
+}
 
 /**
  * What gets installed.
@@ -29,6 +71,7 @@ const OperatingSystemSection = () => {
     const shouldCreateVm = useWatch({ name: 'shouldCreateVm' })
     const startOnCompletion = useWatch({ name: 'startOnCompletion' })
     const imageGroupId = useWatch({ name: 'imageGroupId' })
+    const imageUuid = useWatch({ name: 'imageUuid' })
 
     const summary = deferredOsSelection
         ? 'The owner picks the OS · nothing is installed now'
@@ -110,6 +153,11 @@ const OperatingSystemSection = () => {
                             type={'password'}
                             autoComplete={'new-password'}
                             description={'Set on the guest at install.'}
+                        />
+
+                        <ProvisionerFields
+                            imageGroupId={imageGroupId || null}
+                            imageUuid={imageUuid || null}
                         />
                     </>
                 )}
