@@ -6,6 +6,7 @@ import {
     apiKeyScopes,
     createApiKey,
 } from '@/features/account/api-keys/api.ts'
+import { tokenExpiryOptions } from '@/features/tokens/expiry.ts'
 import useClipboard from '@/hooks/use-clipboard.ts'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
 import { handleFormErrors } from '@/utils/http.ts'
@@ -32,7 +33,11 @@ import {
 } from '@/components/ui/ResponsiveDialog'
 import { toast } from '@/components/ui/Toast'
 
-const defaultValues: ApiKeyCreateInput = { name: '', scope: 'servers:*' }
+const defaultValues: ApiKeyCreateInput = {
+    name: '',
+    scope: 'servers:*',
+    expiresIn: 'never',
+}
 
 interface Props {
     open: boolean
@@ -155,6 +160,11 @@ const ApiKeyCreateDialog = ({ open, onOpenChange }: Props) => {
                                             value: scope.value,
                                             label: scope.label,
                                         }))}
+                                    />
+                                    <SelectForm
+                                        name={'expiresIn'}
+                                        label={'Expiration'}
+                                        items={[...tokenExpiryOptions]}
                                     />
                                 </ResponsiveDialogBody>
                                 <ResponsiveDialogFooter className={'mt-4'}>

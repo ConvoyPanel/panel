@@ -63,11 +63,13 @@ const payload = ({
     email,
     type,
     adminRoleId,
+    externalId,
     password,
 }: UserInput) => ({
     name,
     email,
     type,
+    external_id: externalId === '' ? null : externalId,
     // `''` is the select's "no admin access", which the API takes as null. The old `root_admin`
     // boolean is still accepted by the endpoint for external callers; the panel has moved on.
     admin_role_id: adminRoleId === '' ? null : Number(adminRoleId),

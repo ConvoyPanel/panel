@@ -39,6 +39,7 @@ final class TokenAbilities extends ScopedTokenAbilities
         'anchors',
         'relays',
         'settings',
+        'webhooks',
     ];
 
     protected const PATH_PREFIX = 'api/application/';

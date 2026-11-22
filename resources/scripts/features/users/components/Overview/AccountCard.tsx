@@ -9,6 +9,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/Card'
+import CopyValue from '@/components/ui/CopyValue.tsx'
 import Skeleton from '@/components/ui/Skeleton.tsx'
 
 interface Props {
@@ -34,7 +35,9 @@ const AccountCard = ({ user }: Props) => (
     <Card>
         <CardHeader>
             <CardTitle>Account</CardTitle>
-            <CardDescription>Who this is, and how they sign in.</CardDescription>
+            <CardDescription>
+                Who this is, and how they sign in.
+            </CardDescription>
         </CardHeader>
         <CardContent className={'flex-1'}>
             {!user ? (
@@ -42,6 +45,14 @@ const AccountCard = ({ user }: Props) => (
             ) : (
                 <dl className={'flex flex-col gap-2'}>
                     <Row label={'User ID'}>{user.id}</Row>
+                    {user.externalId && (
+                        <Row label={'External ID'}>
+                            <CopyValue
+                                label={'external ID'}
+                                value={user.externalId}
+                            />
+                        </Row>
+                    )}
                     <Row label={'Account'}>
                         {user.type === 'guest' ? 'Guest' : 'Customer'}
                     </Row>
@@ -56,9 +67,12 @@ const AccountCard = ({ user }: Props) => (
                     <Row label={'Last sign-in'}>
                         {user.lastLoginAt ? (
                             <>
-                                {formatDistanceToNow(new Date(user.lastLoginAt), {
-                                    addSuffix: true,
-                                })}
+                                {formatDistanceToNow(
+                                    new Date(user.lastLoginAt),
+                                    {
+                                        addSuffix: true,
+                                    }
+                                )}
                                 {user.lastLoginIp && (
                                     <span className={'text-muted-foreground'}>
                                         {' '}

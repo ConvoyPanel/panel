@@ -6,6 +6,7 @@ use App\Enums\Api\ApiKeyType;
 use App\Models\PersonalAccessToken;
 use App\Models\SystemActor;
 use App\Models\User;
+use Carbon\CarbonInterface;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\NewAccessToken;
 
@@ -13,16 +14,18 @@ class CreateApplicationTokenService
 {
     /**
      * Mint a panel-wide (application) token owned by the system actor — not the creating admin — so
-     * it survives that admin's deletion. The minting admin is recorded in `created_by` for audit.
+     * it survives that admin's deletion. The minting admin is recorded in `created_by` for audit;
+     * null when the token was minted from the command line, where there is no admin.
      *
      * @param  list<string>  $abilities
      * @param  list<string>  $allowedNetworks
      */
     public function handle(
-        User $creator,
+        ?User $creator,
         string $name,
         array $abilities = ['*'],
         array $allowedNetworks = [],
+        ?CarbonInterface $expiresAt = null,
     ): NewAccessToken {
         $token = new PersonalAccessToken([
             'type' => ApiKeyType::APPLICATION,
@@ -30,7 +33,8 @@ class CreateApplicationTokenService
             'token' => hash('sha256', $plainTextToken = Str::random(40)),
             'abilities' => $abilities,
             'allowed_networks' => $allowedNetworks,
-            'created_by' => $creator->getKey(),
+            'expires_at' => $expiresAt,
+            'created_by' => $creator?->getKey(),
         ]);
 
         $token->tokenable()->associate(SystemActor::instance());

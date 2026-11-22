@@ -3,6 +3,8 @@
 use App\Enums\Admin\AdminPermission;
 use App\Enums\Server\ServerPermission;
 use App\Models\AdminRole;
+use App\Models\ImageDefinition;
+use App\Models\ImageGroup;
 use App\Models\Location;
 use App\Models\Node;
 use App\Models\Passkey;
@@ -293,4 +295,33 @@ function fakeMigrationPreflight(array $data = []): void
         '*/qemu/*/migrate*' => Http::response(migratePreconditions($data), 200),
         '*' => Http::response(['data' => 'dummy-upid'], 200),
     ]);
+}
+
+/**
+ * An image definition with one active version, for creates and rebuilds that install an OS.
+ */
+function installableImage(): ImageDefinition
+{
+    $group = ImageGroup::create(['uuid' => (string) Str::uuid(), 'name' => 'Linux']);
+    $definition = ImageDefinition::create([
+        'image_group_id' => $group->id,
+        'name' => 'Debian 13',
+        'ostype' => 'l26',
+    ]);
+    $definition->versions()->create([
+        'version' => '1.0.0',
+        'is_active' => true,
+        'disks' => [[
+            'slot' => 'scsi0',
+            'role' => 'system',
+            'url' => 'https://example.invalid/disk.qcow2',
+            'path' => null,
+            'sha256' => str_repeat('a', 64),
+            'size' => 1024,
+            'virtual_size' => 2048,
+            'format' => 'qcow2',
+        ]],
+    ]);
+
+    return $definition;
 }

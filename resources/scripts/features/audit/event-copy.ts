@@ -434,6 +434,10 @@ export const AUDIT_EVENT_COPY: Record<AuditEvent, AuditEventCopy> = {
     'admin.token.created': { verb: 'created an application token' },
     'admin.token.updated': { verb: 'updated an application token' },
     'admin.token.deleted': { verb: 'revoked an application token' },
+    'admin.webhook.created': { verb: 'created a webhook' },
+    'admin.webhook.updated': { verb: 'updated a webhook' },
+    'admin.webhook.deleted': { verb: 'deleted a webhook' },
+    'admin.webhook.tested': { verb: 'sent a test event to a webhook' },
     'admin.settings.account-updated': {
         verb: 'changed the account settings',
         detail: () => null,

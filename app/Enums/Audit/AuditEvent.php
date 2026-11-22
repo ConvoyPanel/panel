@@ -193,6 +193,10 @@ enum AuditEvent: string
     case ADMIN_TOKEN_CREATED = 'admin.token.created';
     case ADMIN_TOKEN_UPDATED = 'admin.token.updated';
     case ADMIN_TOKEN_DELETED = 'admin.token.deleted';
+    case ADMIN_WEBHOOK_CREATED = 'admin.webhook.created';
+    case ADMIN_WEBHOOK_UPDATED = 'admin.webhook.updated';
+    case ADMIN_WEBHOOK_DELETED = 'admin.webhook.deleted';
+    case ADMIN_WEBHOOK_TESTED = 'admin.webhook.tested';
     case ADMIN_SETTINGS_ACCOUNT_UPDATED = 'admin.settings.account-updated';
     case ADMIN_SETTINGS_ANCHOR_UPDATED = 'admin.settings.anchor-updated';
     case ADMIN_SETTINGS_BANDWIDTH_UPDATED = 'admin.settings.bandwidth-updated';
@@ -262,6 +266,11 @@ enum AuditEvent: string
             self::ADMIN_TOKEN_CREATED,
             self::ADMIN_TOKEN_UPDATED,
             self::ADMIN_TOKEN_DELETED,
+            // Where the panel sends its audit trail is as much a security fact as who holds a
+            // token.
+            self::ADMIN_WEBHOOK_CREATED,
+            self::ADMIN_WEBHOOK_UPDATED,
+            self::ADMIN_WEBHOOK_DELETED,
             self::ADMIN_SERVER_DELETED,
             self::ADMIN_NODE_DELETED,
             self::ADMIN_ANCHOR_ENROLLMENT_KEY_CREATED,

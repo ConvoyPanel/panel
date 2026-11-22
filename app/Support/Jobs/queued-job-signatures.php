@@ -119,6 +119,10 @@ return [
         ['name' => 'step', 'type' => 'App\\Models\\DeploymentStep', 'optional' => false, 'promoted' => true, 'variadic' => false],
         ['name' => 'password', 'type' => 'string', 'optional' => false, 'promoted' => true, 'variadic' => false],
     ],
+    'App\\Jobs\\Server\\UpdateSshKeysJob' => [
+        ['name' => 'step', 'type' => 'App\\Models\\DeploymentStep', 'optional' => false, 'promoted' => true, 'variadic' => false],
+        ['name' => 'keys', 'type' => 'string', 'optional' => false, 'promoted' => true, 'variadic' => false],
+    ],
     'App\\Jobs\\Server\\VerifyMigratedGuestJob' => [
         ['name' => 'step', 'type' => 'App\\Models\\DeploymentStep', 'optional' => false, 'promoted' => true, 'variadic' => false],
         ['name' => 'transferId', 'type' => 'int', 'optional' => false, 'promoted' => true, 'variadic' => false],
@@ -127,5 +131,8 @@ return [
         ['name' => 'installation', 'type' => 'string', 'optional' => false, 'promoted' => true, 'variadic' => false],
     ],
     'App\\Jobs\\Telemetry\\SendTelemetryReportJob' => [
+    ],
+    'App\\Jobs\\Webhooks\\DeliverWebhookJob' => [
+        ['name' => 'delivery', 'type' => 'App\\Models\\WebhookDelivery', 'optional' => false, 'promoted' => true, 'variadic' => false],
     ],
 ];

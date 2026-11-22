@@ -32,6 +32,14 @@ abstract class ScopedTokenAbilities
     protected const PATH_PREFIX = '';
 
     /**
+     * Top-level segments any token of this vocabulary may read, whatever it is scoped to. Only
+     * for reads that describe the token's own identity, never anything it could act on.
+     *
+     * @var list<string>
+     */
+    public const UNSCOPED_READS = [];
+
+    /**
      * Every valid ability string, for validating token creation. Includes `*`, `{resource}:*`, and
      * `{resource}:{read|write}`.
      *
@@ -52,14 +60,18 @@ abstract class ScopedTokenAbilities
     }
 
     /**
-     * The ability a request requires. Unknown resources require `*`, so a scoped token can never
-     * reach an endpoint that isn't explicitly in the vocabulary.
+     * The ability a request requires, or null for one that needs none. Unknown resources require
+     * `*`, so a scoped token can never reach an endpoint that isn't explicitly in the vocabulary.
      */
-    public static function requiredFor(Request $request): string
+    public static function requiredFor(Request $request): ?string
     {
         $path = Str::of($request->path())->after(static::PATH_PREFIX)->trim('/');
         $resource = $path->before('/')->toString();
         $action = in_array($request->method(), ['GET', 'HEAD'], true) ? 'read' : 'write';
+
+        if ($action === 'read' && $path->toString() === $resource && in_array($resource, static::UNSCOPED_READS, true)) {
+            return null;
+        }
 
         if (! in_array($resource, static::RESOURCES, true)) {
             return '*';

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Admin\AdminPermission;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 use Illuminate\Foundation\Auth\Access\Authorizable;
 use Laravel\Sanctum\HasApiTokens;
@@ -30,5 +31,22 @@ class SystemActor extends Model implements AuthorizableContract
     public static function instance(): self
     {
         return static::query()->firstOrCreate([], ['name' => 'System']);
+    }
+
+    /**
+     * The panel acting on itself. Code shared with the client area asks the caller whether it is
+     * an admin to decide what it may see (admin-only images, hidden ISOs, admin-only audit
+     * events), and an application token sees what an administrator sees. What the token may
+     * *do* is still bounded by its own abilities.
+     */
+    public function isAdmin(): bool
+    {
+        return true;
+    }
+
+    /** See {@see isAdmin()}: a role check has no role to consult, the token's abilities do. */
+    public function hasAdminPermission(AdminPermission $permission): bool
+    {
+        return true;
     }
 }

@@ -17,4 +17,7 @@ final class AccountTokenAbilities extends ScopedTokenAbilities
     ];
 
     protected const PATH_PREFIX = 'api/client/';
+
+    /** `GET /api/client/user`: who the token belongs to, which a CLI asks before anything else. */
+    public const UNSCOPED_READS = ['user'];
 }

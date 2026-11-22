@@ -23,6 +23,7 @@ class PersonalAccessToken extends SanctumPersonalAccessToken
         'token',
         'abilities',
         'allowed_networks',
+        'expires_at',
         'created_by',
     ];
 
@@ -44,6 +45,7 @@ class PersonalAccessToken extends SanctumPersonalAccessToken
             'abilities' => 'json',
             'allowed_networks' => 'array',
             'last_used_at' => 'datetime',
+            'expires_at' => 'datetime',
         ];
     }
 }

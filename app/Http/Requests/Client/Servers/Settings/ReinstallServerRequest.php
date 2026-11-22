@@ -10,6 +10,7 @@ use App\Models\Server;
 use App\Rules\ImageFitsStorage;
 use App\Rules\ImageIsAvailable;
 use App\Rules\ProvisionersCanRunOn;
+use App\Rules\SshPublicKey;
 use App\Support\Provisioners\ProvisionerFieldRules;
 use Illuminate\Validation\Validator;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -38,7 +39,7 @@ class ReinstallServerRequest extends BaseApiRequest
         // trusting a live cookie alone. The gate is on the rebuild branch only: a server in
         // DEFERRED_OS_SELECTION has nothing to erase, and gating its first install would
         // stop a brand-new account from reaching a usable server at all.
-        if ($server->isReady() && ! IdentityConfirmation::isConfirmed($this->session())) {
+        if ($server->isReady() && ! IdentityConfirmation::satisfiedBy($this)) {
             throw new AccessDeniedHttpException('Your identity must be confirmed to rebuild a server.');
         }
 
@@ -61,9 +62,12 @@ class ReinstallServerRequest extends BaseApiRequest
                 new ImageFitsStorage,
                 new ProvisionersCanRunOn,
             ],
-            'account_password' => ['required', 'string', 'min:8', 'max:191'],
+            // Either a password or SSH keys gets the rebuilt server a way in.
+            'account_password' => ['required_without:ssh_keys', 'nullable', 'string', 'min:8', 'max:191'],
             'start_on_completion' => 'present|boolean',
             ...ProvisionerFieldRules::for($this->image()),
+            'ssh_keys' => ['sometimes', 'nullable', 'array', 'max:50'],
+            'ssh_keys.*' => ['required', 'string', 'max:16384', new SshPublicKey],
         ];
     }
 

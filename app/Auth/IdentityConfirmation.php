@@ -2,7 +2,9 @@
 
 namespace App\Auth;
 
+use App\Models\PersonalAccessToken;
 use Illuminate\Contracts\Session\Session;
+use Illuminate\Http\Request;
 
 /**
  * The one definition of "identity is confirmed", shared by the middleware that
@@ -29,6 +31,24 @@ class IdentityConfirmation
     public static function isConfirmed(Session $session): bool
     {
         return self::expiresIn($session) > 0;
+    }
+
+    /**
+     * Whether a request clears the gate on an irreversible act (a rebuild, a root password).
+     *
+     * The gate exists so that a live cookie alone, from an unattended browser or a stolen
+     * session, cannot do these things. An API token is not that: minting one already took a
+     * confirmed identity, and it is a credential somebody chose to hand to a program. A program
+     * has no way to answer a password prompt, so asking it to would make the endpoint
+     * unreachable rather than safer. What the token may touch is bounded by its abilities.
+     */
+    public static function satisfiedBy(Request $request): bool
+    {
+        if ($request->user()?->currentAccessToken() instanceof PersonalAccessToken) {
+            return true;
+        }
+
+        return $request->hasSession() && self::isConfirmed($request->session());
     }
 
     /** Seconds left on the current confirmation; 0 when there is none. */

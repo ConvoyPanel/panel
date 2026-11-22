@@ -2,6 +2,11 @@ import { deleteToken, tokenQueries, useTokens } from '@/features/tokens/api.ts'
 import CreateTokenModal from '@/features/tokens/components/CreateTokenModal.tsx'
 import EditTokenNetworksModal from '@/features/tokens/components/EditTokenNetworksModal.tsx'
 import {
+    describeTokenExpiry,
+    formatTokenExpiry,
+    isTokenExpired,
+} from '@/features/tokens/expiry.ts'
+import {
     type ApiKey,
     type PaginatedApiKeys,
     summarizeAbilities,
@@ -9,10 +14,11 @@ import {
 } from '@/features/tokens/types.ts'
 import useDataTable from '@/hooks/use-data-table.ts'
 import useQueryMutator from '@/hooks/use-query-mutator.ts'
+import { cn } from '@/utils'
 import { useMutation } from '@tanstack/react-query'
 import { createLazyFileRoute } from '@tanstack/react-router'
 import { ColumnDef } from '@tanstack/react-table'
-import { formatDistanceToNow } from 'date-fns'
+import { format, formatDistanceToNow } from 'date-fns'
 import { useState } from 'react'
 
 import useConfirmationStore from '@/components/ui/AlertDialog/use-confirmation-store.ts'
@@ -30,14 +36,28 @@ import Actions, { actionsColumn } from '@/components/ui/Table/Actions.tsx'
 import { toast } from '@/components/ui/Toast'
 import { Heading } from '@/components/ui/Typography'
 
-export const Route = createLazyFileRoute('/_app/admin/_dashboard/tokens')({
-    component: TokensIndex,
-})
-
 const formatLastUsed = (value: string | null) =>
     value ? formatDistanceToNow(new Date(value), { addSuffix: true }) : 'Never'
 
-function TokensIndex() {
+const TokenExpiry = ({ value }: { value: string | null }) => {
+    if (value === null) {
+        return <span className={'text-muted-foreground'}>Never</span>
+    }
+
+    return (
+        <span
+            className={cn(
+                'whitespace-nowrap',
+                isTokenExpired(value) && 'text-destructive'
+            )}
+            title={format(new Date(value), 'PPp')}
+        >
+            {formatTokenExpiry(value)}
+        </span>
+    )
+}
+
+const TokensIndex = () => {
     const [editingToken, setEditingToken] = useState<ApiKey | null>(null)
     const confirm = useConfirmationStore(state => state.confirm)
     const { queryParams, tableProps } = useDataTable()
@@ -137,6 +157,14 @@ function TokensIndex() {
                 )
             },
         },
+        {
+            header: 'Expires',
+            accessorKey: 'expiresAt',
+            meta: { skeletonWidth: '6rem' },
+            cell: ({ cell }) => (
+                <TokenExpiry value={cell.getValue<string | null>()} />
+            ),
+        },
         actionsColumn<ApiKey>(({ row }) => renderActions(row.original)),
     ]
 
@@ -178,6 +206,15 @@ function TokensIndex() {
                                             ? `Last used ${formatLastUsed(token.lastUsedAt)}`
                                             : 'Never used'}
                                     </span>
+                                    <span
+                                        className={
+                                            isTokenExpired(token.expiresAt)
+                                                ? 'text-destructive text-xs'
+                                                : 'text-muted-foreground text-xs'
+                                        }
+                                    >
+                                        {describeTokenExpiry(token.expiresAt)}
+                                    </span>
                                 </div>
                                 <ItemDescription className={'truncate'}>
                                     {token.createdBy?.email
@@ -202,3 +239,7 @@ function TokensIndex() {
         </>
     )
 }
+
+export const Route = createLazyFileRoute('/_app/admin/_dashboard/tokens')({
+    component: TokensIndex,
+})

@@ -24,6 +24,7 @@ use Illuminate\Support\Collection;
  * @property ?string $actor_type
  * @property ?string $actor_label
  * @property ?int $api_token_id
+ * @property ?string $api_token_name
  * @property ?int $subject_id
  * @property ?string $subject_type
  * @property ?string $ip
