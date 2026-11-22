@@ -154,7 +154,14 @@ running throughout. Only the panel is offline.
 #### Administration
 
 - **Invites.** A user created without a password gets a link to set their own. It's emailed when mail is set up and
-  always shown to copy. A new link voids the old one.
+  always shown to copy. A new link voids the old one. The link can also register a passkey instead of a password, and
+  shows the account's recovery codes once. ([#55](https://github.com/ConvoyPanel/panel/issues/55))
+- **Password reset.** Adds "Forgot password?" to the sign-in page, which emails a link that expires after 60 minutes.
+  Resetting a password signs out every session. Off by default; turn it on under Settings → Accounts. It needs mail to
+  be set up, and users who can't change their password can't reset it.
+  ([#55](https://github.com/ConvoyPanel/panel/issues/55))
+- **Server ready email.** When a new server finishes installing, its owner gets an email with its addresses and a link
+  to it. On by default; turn it off under Settings → Accounts. ([#55](https://github.com/ConvoyPanel/panel/issues/55))
 - **Credential review.** See and revoke an account's passkeys, SSH keys, API tokens, sign-in providers and two-factor.
   Administrators can't add credentials for another user.
 - **Settings screen.** Bandwidth defaults, mail, updates, and the account policy that sets what users may change about
@@ -285,6 +292,8 @@ running throughout. Only the panel is offline.
 - **Profile pictures** are decoded, cropped, scaled to at most 512 px and re-encoded as WebP, so uploaded bytes are
   never served. Images over 50 megapixels are refused.
 - **Invite tokens** are stored only as a hash. An unknown, used or expired link gets the same answer.
+- **Password reset requests** get the same answer whether or not the address has an account. Each account gets at most
+  one link a minute, and each client at most five requests a minute.
 
 ## v4.6.1
 

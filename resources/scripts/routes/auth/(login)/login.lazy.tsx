@@ -6,8 +6,9 @@ import {
     PASSKEY_AUTOFILL_AUTOCOMPLETE,
     usePasskeyAutofill,
 } from '@/features/auth/passkeys.ts'
+import { passwordResetsEnabled } from '@/features/auth/password-reset.ts'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { createLazyFileRoute } from '@tanstack/react-router'
+import { Link, createLazyFileRoute } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -128,6 +129,18 @@ const Login = () => {
                             label={'Password'}
                             type={'password'}
                             autoComplete={'current-password'}
+                            labelAction={
+                                passwordResetsEnabled() && (
+                                    <Link
+                                        to={'/auth/forgot-password'}
+                                        className={
+                                            'text-muted-foreground hover:text-foreground text-xs underline-offset-4 hover:underline'
+                                        }
+                                    >
+                                        Forgot password?
+                                    </Link>
+                                )
+                            }
                         />
                     </CardContent>
                     {/* The action band the rest of the app uses. It holds two

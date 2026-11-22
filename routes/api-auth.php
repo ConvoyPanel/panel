@@ -34,6 +34,8 @@ Route::get('/oauth/{provider}/callback', [Auth\OAuthController::class, 'callback
 Route::middleware('throttle:'.config('fortify.limiters.login'))->group(function () {
     Route::get('/invite/{token}', [Auth\InviteController::class, 'show']);
     Route::post('/invite/{token}', [Auth\InviteController::class, 'store']);
+    Route::get('/invite/{token}/passkey-options', [Auth\InviteController::class, 'passkeyOptions']);
+    Route::post('/invite/{token}/passkey', [Auth\InviteController::class, 'storePasskey']);
 });
 
 Route::middleware('guest')->group(function () {
@@ -47,6 +49,19 @@ Route::middleware('guest')->group(function () {
     $loginLimiter = config('fortify.limiters.login');
     Route::post('/login', [AuthenticatedSessionController::class, 'store'])
         ->middleware('throttle:'.$loginLimiter);
+
+    /*
+     | Forgot password. Every one of these answers 404 unless an operator has turned resets on
+     | and the panel has a relay to send them with. Asking for a link gets its own, tighter
+     | limiter: each request can send an email, and the login limiter is keyed per address, so
+     | it would let one client mail a different address every request.
+     */
+    Route::post('/password-reset', [Auth\PasswordResetController::class, 'store'])
+        ->middleware('throttle:password-reset');
+    Route::middleware('throttle:'.$loginLimiter)->group(function () {
+        Route::get('/password-reset/{token}', [Auth\PasswordResetController::class, 'show']);
+        Route::post('/password-reset/{token}', [Auth\PasswordResetController::class, 'update']);
+    });
 
     Route::get('/passkeys/authentication-options', [Auth\PasskeyLoginController::class, 'create']);
     Route::post('/passkeys/verify-authentication', [Auth\PasskeyLoginController::class, 'store']);

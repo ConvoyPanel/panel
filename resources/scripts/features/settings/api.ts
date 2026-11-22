@@ -121,15 +121,18 @@ const accountUpdateRoute =
     AccountSettingsController.update['/api/admin/settings/account']
 
 /**
- * What a non-admin may change about their own account. Four plain booleans
- * rather than a per-account policy: the panel has one role bit and no groups,
- * so there is nothing below the install to scope them to.
+ * What a non-admin may change about their own account, and which account
+ * emails the panel sends. Plain booleans rather than a per-account policy: the
+ * panel has one role bit and no groups, so there is nothing below the install
+ * to scope them to.
  */
 export const accountSettingsSchema = z.object({
     allowNameChange: z.boolean(),
     allowEmailChange: z.boolean(),
     allowPasswordChange: z.boolean(),
     allowAvatarChange: z.boolean(),
+    allowPasswordReset: z.boolean(),
+    sendServerReadyEmail: z.boolean(),
 })
 
 const getAccountSettings = async (): Promise<AccountSettings> =>
@@ -153,6 +156,8 @@ export const updateAccountSettings = async (
                 allow_email_change: payload.allowEmailChange,
                 allow_password_change: payload.allowPasswordChange,
                 allow_avatar_change: payload.allowAvatarChange,
+                allow_password_reset: payload.allowPasswordReset,
+                send_server_ready_email: payload.sendServerReadyEmail,
             },
         })
     ).data

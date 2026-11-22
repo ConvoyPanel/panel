@@ -22,8 +22,14 @@ use Spatie\LaravelSettings\Settings;
  * already in the signature and adding one later touches the resolver rather
  * than every call site.
  *
- * All four default to true: the self-service surface shipped before these
- * settings did, and an upgrade must not quietly take it away.
+ * The four `allow_*_change` switches default to true: the self-service surface
+ * shipped before these settings did, and an upgrade must not quietly take it
+ * away.
+ *
+ * The two email switches sit here because they are about the same accounts:
+ * whether someone can recover one by email, and whether its owner hears about
+ * a new server. Password reset is off until an operator turns it on, since it
+ * makes the mailbox a way into the account.
  */
 class AccountSettings extends Settings
 {
@@ -38,6 +44,17 @@ class AccountSettings extends Settings
 
     /** Whether a non-admin may upload or remove their own profile picture. */
     public bool $allow_avatar_change = true;
+
+    /**
+     * Whether the sign-in page offers a reset link by email.
+     *
+     * Bounded by {@see $allow_password_change} for non-admins: an account that may not change
+     * its password may not reset it either, or the reset would be the way around the policy.
+     */
+    public bool $allow_password_reset = false;
+
+    /** Whether a server's owner gets an email when its first install finishes. */
+    public bool $send_server_ready_email = true;
 
     public static function group(): string
     {

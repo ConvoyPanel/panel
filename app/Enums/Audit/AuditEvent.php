@@ -32,6 +32,8 @@ enum AuditEvent: string
     case AUTH_LOGIN_FAILED = 'auth.login.failed';
     case AUTH_LOGOUT = 'auth.logout';
     case AUTH_INVITE_ACCEPTED = 'auth.invite.accepted';
+    case AUTH_PASSWORD_RESET_REQUESTED = 'auth.password-reset.requested';
+    case AUTH_PASSWORD_RESET_COMPLETED = 'auth.password-reset.completed';
 
     // -----------------------------------------------------------------------------------------
     // Account and credential management. Subject is the User.
@@ -231,6 +233,8 @@ enum AuditEvent: string
             self::AUTH_LOGIN_SUCCEEDED,
             self::AUTH_LOGIN_FAILED,
             self::AUTH_LOGOUT,
+            self::AUTH_PASSWORD_RESET_REQUESTED,
+            self::AUTH_PASSWORD_RESET_COMPLETED,
             self::ACCOUNT_PROFILE_UPDATED,
             self::ACCOUNT_PASSWORD_UPDATED,
             self::ACCOUNT_TWO_FACTOR_ENABLED,
