@@ -181,7 +181,7 @@ class AddressBlockGroupController
             subject: $addressBlockGroup,
             properties: [
                 'name' => $addressBlockGroup->name,
-                'changed' => array_keys($addressBlockGroup->getChanges()),
+                'changed' => $addressBlockGroup->getChangedAttributeNames(),
             ],
         );
 

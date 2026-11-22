@@ -48,7 +48,7 @@ class ServerPresetController
         Audit::record(
             AuditEvent::ADMIN_SERVER_PRESET_UPDATED,
             subject: $serverPreset,
-            properties: ['name' => $serverPreset->name, 'changed' => array_keys($serverPreset->getChanges())],
+            properties: ['name' => $serverPreset->name, 'changed' => $serverPreset->getChangedAttributeNames()],
         );
 
         return ServerPresetData::from($serverPreset);

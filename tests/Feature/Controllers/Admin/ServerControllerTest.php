@@ -1,6 +1,8 @@
 <?php
 
+use App\Enums\Audit\AuditEvent;
 use App\Enums\Server\PowerState;
+use App\Models\AuditLog;
 use App\Models\User;
 use App\Services\Nodes\GuestStateCache;
 use Illuminate\Support\Facades\Cache;
@@ -196,4 +198,46 @@ it('hides the flag reason from the owning client', function () {
         ->getJson("/api/admin/servers/{$server->uuid}")
         ->assertOk()
         ->assertJsonPath('data.flagReason', 'Guest moved to node "pve9".');
+});
+
+it('records only the fields a server update changed', function () {
+    [$_owner, $_, $_, $server] = createServerModel();
+
+    $this->travel(5)->seconds();
+
+    $this->actingAs(admin())
+        ->patchJson("/api/admin/servers/{$server->uuid}", ['name' => 'Renamed'])
+        ->assertOk();
+
+    expect(AuditLog::query()->forEvent(AuditEvent::ADMIN_SERVER_UPDATED)->sole()->properties['changed'])
+        ->toBe(['name']);
+});
+
+it('records only the limits a build update changed', function () {
+    fakeProxmox([
+        '*/firewall/ipset' => Http::response(['data' => []], 200),
+    ]);
+
+    [$_owner, $_, $_, $server] = createServerModel();
+    $server->refresh();
+
+    $this->travel(5)->seconds();
+
+    $this->actingAs(admin())->patchJson(
+        "/api/admin/servers/{$server->uuid}/settings/build",
+        [
+            'cpu' => $server->cpu,
+            'memory' => $server->memory,
+            'disk' => $server->disk,
+            'backup_count_limit' => $server->backup_count_limit + 1,
+            'backup_size_limit' => $server->backup_size_limit,
+            'bandwidth_limit' => $server->bandwidth_limit,
+            'bandwidth_usage' => $server->bandwidth_usage,
+            'speed_limit' => $server->speed_limit,
+            'overage_penalty' => null,
+        ],
+    )->assertOk();
+
+    expect(AuditLog::query()->forEvent(AuditEvent::ADMIN_SERVER_BUILD_UPDATED)->sole()->properties['changed'])
+        ->toBe(['backup_count_limit']);
 });

@@ -76,7 +76,7 @@ class WebhookController
             AuditEvent::ADMIN_WEBHOOK_UPDATED,
             subject: $webhook,
             properties: array_filter([
-                'changed' => array_values(array_diff(array_keys($webhook->getChanges()), ['updated_at', 'secret'])),
+                'changed' => array_values(array_diff($webhook->getChangedAttributeNames(), ['secret'])),
                 'secret_rotated' => $rotated ?: null,
             ], fn ($value) => $value !== null),
         );

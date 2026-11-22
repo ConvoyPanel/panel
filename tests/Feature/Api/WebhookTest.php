@@ -7,6 +7,7 @@ use App\Enums\Server\DeploymentType;
 use App\Enums\Webhook\WebhookDeliveryStatus;
 use App\Facades\Audit;
 use App\Jobs\Webhooks\DeliverWebhookJob;
+use App\Models\AuditLog;
 use App\Models\Backup;
 use App\Models\Location;
 use App\Models\User;
@@ -191,6 +192,24 @@ describe('the admin api', function () {
 
         expect($response->json('data.secret'))->not->toBe($old)
             ->and($hook->fresh()->secret)->toBe($response->json('data.secret'));
+    });
+
+    it('records only the fields an update changed, and never the secret', function () {
+        $hook = webhook();
+
+        $this->travel(5)->seconds();
+
+        $this->withToken($this->token)
+            ->putJson("/api/application/webhooks/{$hook->uuid}", [
+                'description' => 'Billing',
+                'rotate_secret' => true,
+            ])
+            ->assertOk();
+
+        $log = AuditLog::query()->forEvent(AuditEvent::ADMIN_WEBHOOK_UPDATED)->sole();
+
+        expect($log->properties['changed'])->toBe(['description'])
+            ->and($log->properties['secret_rotated'])->toBeTrue();
     });
 
     it('sends a test event to one webhook', function () {

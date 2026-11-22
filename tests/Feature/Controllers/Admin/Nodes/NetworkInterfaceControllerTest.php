@@ -1,7 +1,9 @@
 <?php
 
+use App\Enums\Audit\AuditEvent;
 use App\Models\AddressBlockGroup;
 use App\Models\AddressBlockGroupToInterface;
+use App\Models\AuditLog;
 use App\Models\Location;
 use App\Models\NetworkInterface;
 use App\Models\Node;
@@ -158,4 +160,16 @@ it('keeps the count on the update response', function () {
     );
 
     $response->assertOk()->assertJsonPath('data.serversCount', 3);
+});
+
+it('records only the fields an interface update changed', function () {
+    $this->travel(5)->seconds();
+
+    $this->actingAs($this->user)->putJson(
+        "/api/admin/nodes/{$this->node->id}/network-interfaces/{$this->interface->id}",
+        ['name' => 'vmbr0', 'description' => 'Primary bridge'],
+    )->assertOk();
+
+    expect(AuditLog::query()->forEvent(AuditEvent::ADMIN_NODE_INTERFACE_UPDATED)->sole()->properties['changed'])
+        ->toBe(['description']);
 });

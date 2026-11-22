@@ -63,7 +63,7 @@ class ImageDefinitionController
             properties: [
                 'name' => $imageDefinition->name,
                 'changed' => [
-                    ...array_keys($imageDefinition->getChanges()),
+                    ...$imageDefinition->getChangedAttributeNames(),
                     ...($provisionersChanged ? ['provisioners'] : []),
                 ],
             ],

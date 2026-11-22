@@ -73,7 +73,7 @@ class ISOController
         Audit::record(
             AuditEvent::ADMIN_ISO_UPDATED,
             subject: $iso,
-            properties: ['name' => $iso->name, 'changed' => array_keys($iso->getChanges())],
+            properties: ['name' => $iso->name, 'changed' => $iso->getChangedAttributeNames()],
         );
 
         return ISOEloquentData::from($iso);

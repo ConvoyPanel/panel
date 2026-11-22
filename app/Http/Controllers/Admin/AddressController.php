@@ -163,7 +163,7 @@ class AddressController
                 subject: $address,
                 properties: [
                     'address' => $address->ip,
-                    'changed' => array_keys($address->getChanges()),
+                    'changed' => $address->getChangedAttributeNames(),
                 ],
             );
         });

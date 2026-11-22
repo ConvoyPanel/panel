@@ -53,7 +53,7 @@ class ProvisionerController
         Audit::record(
             AuditEvent::ADMIN_PROVISIONER_UPDATED,
             subject: $provisioner,
-            properties: ['name' => $provisioner->name, 'changed' => array_keys($provisioner->getChanges())],
+            properties: ['name' => $provisioner->name, 'changed' => $provisioner->getChangedAttributeNames()],
         );
 
         return ProvisionerData::from($provisioner->loadCount('images'));

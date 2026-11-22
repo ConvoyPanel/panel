@@ -128,7 +128,7 @@ class StorageController extends Controller
             Audit::record(
                 AuditEvent::ADMIN_NODE_STORAGE_UPDATED,
                 subject: $node,
-                properties: ['name' => $storage->name, 'changed' => array_keys($storage->getChanges())],
+                properties: ['name' => $storage->name, 'changed' => $storage->getChangedAttributeNames()],
             );
         });
 

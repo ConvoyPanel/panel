@@ -1,6 +1,8 @@
 <?php
 
+use App\Enums\Audit\AuditEvent;
 use App\Enums\Server\OveragePenaltyAction;
+use App\Models\AuditLog;
 use App\Models\Location;
 use App\Models\Node;
 use App\Models\Server;
@@ -330,4 +332,21 @@ it("can't delete a node with servers", function () {
     $response = $this->actingAs($this->user)->deleteJson("/api/admin/nodes/{$this->node->id}");
 
     $response->assertForbidden();
+});
+
+it('records only the fields a node update changed', function () {
+    $this->actingAs($this->user)
+        ->putJson("/api/admin/nodes/{$this->node->id}", nodePayload())
+        ->assertOk();
+
+    $this->travel(5)->seconds();
+
+    $this->actingAs($this->user)
+        ->putJson("/api/admin/nodes/{$this->node->id}", nodePayload(['display_name' => 'Renamed Node']))
+        ->assertOk();
+
+    $entries = AuditLog::query()->forEvent(AuditEvent::ADMIN_NODE_UPDATED)->orderBy('id')->get();
+
+    expect($entries)->toHaveCount(2)
+        ->and($entries[1]->properties['changed'])->toBe(['display_name']);
 });

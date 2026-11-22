@@ -58,7 +58,7 @@ class RelayController
         Audit::record(
             AuditEvent::ADMIN_RELAY_UPDATED,
             subject: $relay,
-            properties: ['name' => $relay->name, 'changed' => array_keys($relay->getChanges())],
+            properties: ['name' => $relay->name, 'changed' => $relay->getChangedAttributeNames()],
         );
 
         return RelayData::from($relay->loadCount('nodes'));

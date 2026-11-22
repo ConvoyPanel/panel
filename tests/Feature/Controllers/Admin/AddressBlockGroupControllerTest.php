@@ -1,7 +1,9 @@
 <?php
 
+use App\Enums\Audit\AuditEvent;
 use App\Models\AddressBlockGroup;
 use App\Models\AddressBlockGroupToInterface;
+use App\Models\AuditLog;
 use App\Models\Location;
 use App\Models\NetworkInterface;
 use App\Models\Node;
@@ -45,4 +47,18 @@ it('can filter address block groups by node', function () {
         ->assertJsonPath('items.0.id', $matchingGroup->id)
         ->assertJsonMissing(['id' => $otherGroup->id])
         ->assertJsonMissing(['id' => $unattachedGroup->id]);
+});
+
+it('records only the fields a pool update changed', function () {
+    $group = AddressBlockGroup::factory()->create(['name' => 'Before', 'description' => null]);
+
+    $this->travel(5)->seconds();
+
+    $this->actingAs(admin())->putJson("/api/admin/address-block-groups/{$group->id}", [
+        'name' => 'After',
+        'description' => null,
+    ])->assertOk();
+
+    expect(AuditLog::query()->forEvent(AuditEvent::ADMIN_ADDRESS_BLOCK_GROUP_UPDATED)->sole()->properties['changed'])
+        ->toBe(['name']);
 });

@@ -61,7 +61,7 @@ class NodeController
         Audit::record(
             AuditEvent::ADMIN_NODE_UPDATED,
             subject: $node,
-            properties: ['name' => $node->name, 'changed' => array_keys($node->getChanges())],
+            properties: ['name' => $node->name, 'changed' => $node->getChangedAttributeNames()],
         );
 
         $node->append(['memory_allocated'])
