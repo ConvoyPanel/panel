@@ -2,6 +2,7 @@
 
 namespace Convoy\Services\Servers;
 
+use Convoy\Exceptions\DisplayException;
 use Convoy\Models\Server;
 use Convoy\Repositories\Proxmox\Server\ProxmoxConfigRepository;
 use Convoy\Repositories\Proxmox\Server\ProxmoxGuestAgentRepository;
@@ -13,7 +14,12 @@ class ServerAuthService
     {
     }
 
-    public function updatePassword(Server $server, string $password): void
+    /**
+     * @param bool $requireGuestAgent Throw when the guest agent can't set the password. A build
+     *                                leaves this off: its VM can still be stopped, and cloud-init
+     *                                applies cipassword when it boots.
+     */
+    public function updatePassword(Server $server, string $password, bool $requireGuestAgent = false): void
     {
         // Always store CIPassword first
         $this->configRepository->setServer($server)->update(['cipassword' => $password]);
@@ -31,7 +37,12 @@ class ServerAuthService
                     ->updateGuestAgentPassword($username, $password);
             }
         } catch (\Exception $e) {
-            // Optionally log or handle exceptions
+            if ($requireGuestAgent) {
+                throw new DisplayException(
+                    "Couldn't set the password because the server's QEMU guest agent isn't running. Start the server and try again.",
+                    $e,
+                );
+            }
         }
     }
 

@@ -229,7 +229,7 @@ class SettingsController extends ApiController
         if (AuthenticationType::from($request->type) === AuthenticationType::KEY) {
             $this->authService->updateSSHKeys($server, $request->ssh_keys);
         } else {
-            $this->authService->updatePassword($server, $request->password);
+            $this->authService->updatePassword($server, $request->password, requireGuestAgent: true);
         }
 
         return $this->returnNoContent();
