@@ -12,6 +12,7 @@ use Convoy\Jobs\Server\MonitorStateJob;
 use Convoy\Jobs\Server\SendPowerCommandJob;
 use Convoy\Jobs\Server\SyncBuildJob;
 use Convoy\Jobs\Server\UpdatePasswordJob;
+use Convoy\Jobs\Server\WaitUntilGuestAgentIsReadyJob;
 use Convoy\Jobs\Server\WaitUntilVmIsCreatedJob;
 use Convoy\Jobs\Server\WaitUntilVmIsDeletedJob;
 use Convoy\Models\Server;
@@ -106,6 +107,9 @@ class ServerBuildDispatchService
             ];
 
             if (! empty($deployment->account_password)) {
+                // Running only means powered on. The password is set through
+                // the guest agent, which starts once Windows has booted.
+                $jobs[] = new WaitUntilGuestAgentIsReadyJob($deployment->server->id);
                 $jobs[] = new UpdatePasswordJob($deployment->server->id, $deployment->account_password);
             }
         } else {

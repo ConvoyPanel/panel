@@ -5,6 +5,14 @@ This file is a running track of new features and fixes to each version of the pa
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 follows [Semantic Versioning](https://semver.org) guidelines.
 
+## Unreleased
+
+### Fixed
+
+- A Windows server built or reinstalled with a password now gets that password. The password was set as soon as
+  the server powered on, before its QEMU guest agent was running, so it was dropped without an error. The build now
+  waits up to 15 minutes for the agent before setting it.
+
 ## v4.7.1
 
 ### Security
