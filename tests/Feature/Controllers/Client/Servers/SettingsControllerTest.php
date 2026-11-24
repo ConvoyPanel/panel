@@ -94,6 +94,36 @@ it('can change server passwords', function () {
     $response->assertNoContent();
 });
 
+it('says when the guest agent cannot set a new password', function () {
+    Http::fake([
+        '*/config' => Http::response(
+            file_get_contents(
+                base_path('tests/Fixtures/Repositories/Server/GetServerConfigData.json'),
+            ), 200,
+        ),
+        '*/agent/get-osinfo' => Http::response([
+            'data' => null,
+            'message' => "QEMU guest agent is not running\n",
+        ], 500),
+    ]);
+
+    [$user, $_, $_, $server] = createServerModel();
+
+    $response = $this->actingAs($user)->putJson(
+        "/api/client/servers/{$server->uuid}/settings/auth", [
+        'type' => 'password',
+        'password' => 'Advinservers is king!123',
+    ],
+    );
+
+    $response->assertBadRequest()
+             ->assertJsonPath('message', "Couldn't set the password because the server's QEMU guest agent isn't running. Start the server and try again.");
+    // cipassword is still saved, so cloud-init can apply it on the next boot.
+    Http::assertSent(fn ($request) => $request->method() === 'POST'
+        && str_ends_with($request->url(), '/config')
+        && $request['cipassword'] === 'Advinservers is king!123');
+});
+
 it('can fetch available ISOs', function () {
     Http::fake([
         '*/config' => Http::response(

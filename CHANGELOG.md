@@ -5,6 +5,13 @@ This file is a running track of new features and fixes to each version of the pa
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 follows [Semantic Versioning](https://semver.org) guidelines.
 
+## Unreleased
+
+### Fixed
+
+- Changing a server's password in Settings shows an error when the server's QEMU guest agent isn't running. It used
+  to report success while the running server kept its old password.
+
 ## v4.7.1
 
 ### Security
